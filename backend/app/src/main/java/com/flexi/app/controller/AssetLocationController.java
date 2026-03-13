@@ -3,6 +3,7 @@ package com.flexi.app.controller;
 import com.flexi.app.entity.AssetLocation;
 import com.flexi.app.entity.AssetLocationTree;
 import com.flexi.app.service.AssetLocationService;
+import io.github.zmxckj.flexiadmin.common.R;
 import io.github.zmxckj.flexiadmin.security.RequirePermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,34 +19,37 @@ public class AssetLocationController {
 
     @RequirePermission("asset:location:list")
     @GetMapping("/tree")
-    public List<AssetLocationTree> tree() {
-        return assetLocationService.tree();
+    public R<List<AssetLocationTree>> tree() {
+        return R.success(assetLocationService.tree());
     }
 
     @RequirePermission("asset:location:list")
     @GetMapping
-    public List<AssetLocation> list() {
-        return assetLocationService.list();
+    public R<List<AssetLocation>> list() {
+        return R.success(assetLocationService.list());
     }
 
     @RequirePermission("asset:location:add")
     @PostMapping
-    public boolean add(@RequestBody AssetLocation assetLocation) {
+    public R<?> add(@RequestBody AssetLocation assetLocation) {
         assetLocation.setCreateTime(System.currentTimeMillis());
         assetLocation.setUpdateTime(System.currentTimeMillis());
-        return assetLocationService.save(assetLocation);
+        assetLocationService.save(assetLocation);
+        return R.success();
     }
 
     @RequirePermission("asset:location:edit")
     @PutMapping
-    public boolean edit(@RequestBody AssetLocation assetLocation) {
+    public R<?> edit(@RequestBody AssetLocation assetLocation) {
         assetLocation.setUpdateTime(System.currentTimeMillis());
-        return assetLocationService.updateById(assetLocation);
+        assetLocationService.updateById(assetLocation);
+        return R.success();
     }
 
     @RequirePermission("asset:location:delete")
     @DeleteMapping("/{id}")
-    public boolean delete(@PathVariable Long id) {
-        return assetLocationService.removeById(id);
+    public R<?> delete(@PathVariable Long id) {
+        assetLocationService.removeById(id);
+        return R.success();
     }
 }

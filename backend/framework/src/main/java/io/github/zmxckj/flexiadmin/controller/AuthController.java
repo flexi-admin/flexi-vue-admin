@@ -3,6 +3,8 @@ package io.github.zmxckj.flexiadmin.controller;
 import io.github.zmxckj.flexiadmin.entity.Menu;
 import io.github.zmxckj.flexiadmin.entity.User;
 import io.github.zmxckj.flexiadmin.entity.LoginLog;
+import io.github.zmxckj.flexiadmin.common.R;
+import io.github.zmxckj.flexiadmin.dto.LoginDTO;
 import io.github.zmxckj.flexiadmin.service.MenuService;
 import io.github.zmxckj.flexiadmin.service.UserService;
 import io.github.zmxckj.flexiadmin.service.LoginLogService;
@@ -47,28 +49,22 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginForm, HttpServletRequest request) {
-        String username = loginForm.get("username");
-        String password = loginForm.get("password");
+    public R<Map<String, Object>> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
+        String username = loginDTO.getUsername();
+        String password = loginDTO.getPassword();
         String ip = getClientIp(request);
 
         User user = userService.findByUsername(username);
         if (user == null) {
             // 记录登录失败日志
             recordLoginLog(username, ip, false, "用户名或密码错误");
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 401);
-            response.put("message", "用户名或密码错误");
-            return ResponseEntity.status(401).body(response);
+            return R.error(401, "用户名或密码错误");
         }
         
         if (!passwordEncoder.matches(password, user.getPassword())) {
             // 记录登录失败日志
             recordLoginLog(username, ip, false, "用户名或密码错误");
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 401);
-            response.put("message", "用户名或密码错误");
-            return ResponseEntity.status(401).body(response);
+            return R.error(401, "用户名或密码错误");
         }
 
         String token = jwtUtils.generateToken(username);
@@ -98,11 +94,9 @@ public class AuthController {
         recordLoginLog(username, ip, true, "登录成功");
 
         Map<String, Object> response = new HashMap<>();
-        response.put("code", 200);
-        response.put("message", "登录成功");
         response.put("token", token);
         response.put("user", userInfo);
-        return ResponseEntity.ok(response);
+        return R.success(response);
     }
     
     /**
@@ -142,14 +136,11 @@ public class AuthController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<Map<String, Object>> getUserInfo(HttpServletRequest request) {
+    public R<Map<String, Object>> getUserInfo(HttpServletRequest request) {
         // 从请求头中获取Authorization token
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 401);
-            response.put("message", "未授权，请先登录");
-            return ResponseEntity.status(401).body(response);
+            return R.error(401, "未授权，请先登录");
         }
         
         // 提取token
@@ -158,29 +149,22 @@ public class AuthController {
         String username = jwtUtils.getUsernameFromToken(token);
         
         if (username == null) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 401);
-            response.put("message", "无效的token");
-            return ResponseEntity.status(401).body(response);
+            return R.error(401, "无效的token");
         }
         
         // 检查 Redis 中是否有用户信息缓存
         Object cachedUserInfo = redisUtils.getUserInfo(username);
         if (cachedUserInfo != null) {
             Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
             response.put("user", cachedUserInfo);
-            return ResponseEntity.ok(response);
+            return R.success(response);
         }
         
         // 缓存中没有用户信息，从数据库中获取
         User user = userService.findByUsername(username);
         
         if (user == null) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 404);
-            response.put("message", "用户不存在");
-            return ResponseEntity.status(404).body(response);
+            return R.error(404, "用户不存在");
         }
 
         // 构建不包含敏感信息的用户信息
@@ -195,20 +179,16 @@ public class AuthController {
         redisUtils.cacheUserInfo(username, userInfo, expiration / 1000);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("code", 200);
         response.put("user", userInfo);
-        return ResponseEntity.ok(response);
+        return R.success(response);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request) {
+    public R<?> logout(HttpServletRequest request) {
         // 从请求头中获取Authorization token
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 401);
-            response.put("message", "未授权，请先登录");
-            return ResponseEntity.status(401).body(response);
+            return R.error(401, "未授权，请先登录");
         }
         
         // 提取token
@@ -217,28 +197,18 @@ public class AuthController {
         try {
             // 登出，将 token 加入黑名单
             jwtUtils.logout(token);
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("message", "退出登录成功");
-            return ResponseEntity.ok(response);
+            return R.success();
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 401);
-            response.put("message", "无效的 token");
-            return ResponseEntity.status(401).body(response);
+            return R.error(401, "无效的 token");
         }
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<Map<String, Object>> refreshToken(HttpServletRequest request) {
+    public R<Map<String, Object>> refreshToken(HttpServletRequest request) {
         // 从请求头中获取Authorization token
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 401);
-            response.put("message", "未授权，请先登录");
-            return ResponseEntity.status(401).body(response);
+            return R.error(401, "未授权，请先登录");
         }
         
         // 提取token
@@ -249,15 +219,10 @@ public class AuthController {
             String newToken = jwtUtils.refreshToken(token);
             
             Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("message", "Token 刷新成功");
             response.put("token", newToken);
-            return ResponseEntity.ok(response);
+            return R.success(response);
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 401);
-            response.put("message", "无效的 token");
-            return ResponseEntity.status(401).body(response);
+            return R.error(401, "无效的 token");
         }
     }
     

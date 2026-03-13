@@ -251,9 +251,11 @@ const handlePermissionCheck = (data: any, checked: boolean, indeterminate: boole
 const handleSavePermission = async () => {
   if (!currentRole.value) return
   try {
+    // 获取最新的选中权限
+    const checkedKeys = treeRef.value ? treeRef.value.getCheckedKeys() : []
     await api.post('/role-permission', {
       roleId: currentRole.value.id,
-      permissionIds: checkedPermissionIds.value
+      permissionIds: checkedKeys
     })
     // 提示保存成功
     ElMessage.success('权限保存成功')

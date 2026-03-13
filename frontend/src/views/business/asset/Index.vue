@@ -18,7 +18,7 @@
         <el-table-column prop="locationName" label="资产位置" />
         <el-table-column prop="specification" label="规格" />
         <el-table-column prop="model" label="型号" />
-        <el-table-column prop="status" label="状态" />
+        <el-table-column prop="statusName" label="状态" />
         <el-table-column label="操作" width="180">
           <template #default="{ row }">
             <el-button size="small" @click="openEditDialog(row)">
@@ -45,33 +45,31 @@
               <el-input v-model="form.name" placeholder="请输入资产名称" />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="8" v-if="form.id">
             <el-form-item label="资产编码">
-              <el-input v-model="form.code" placeholder="请输入资产编码" />
+              <el-input v-model="form.code" placeholder="请输入资产编码" disabled />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="资产类型">
-              <el-select v-model="form.typeId" placeholder="请选择资产类型">
-                <el-option
-                  v-for="type in assetTypes"
-                  :key="type.id"
-                  :label="type.name"
-                  :value="type.id"
-                />
-              </el-select>
+              <el-cascader
+                v-model="form.typeId"
+                :options="assetTypeTree"
+                :props="assetTypeProps"
+                placeholder="请选择资产类型"
+                clearable
+              />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="资产位置">
-              <el-select v-model="form.locationId" placeholder="请选择资产位置">
-                <el-option
-                  v-for="location in assetLocations"
-                  :key="location.id"
-                  :label="location.name"
-                  :value="location.id"
-                />
-              </el-select>
+              <el-cascader
+                v-model="form.locationId"
+                :options="assetLocationTree"
+                :props="assetLocationProps"
+                placeholder="请选择资产位置"
+                clearable
+              />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -118,9 +116,12 @@
           <el-col :span="8">
             <el-form-item label="状态">
               <el-select v-model="form.status" placeholder="请选择状态">
-                <el-option label="正常" value="正常" />
-                <el-option label="维修中" value="维修中" />
-                <el-option label="已报废" value="已报废" />
+                <el-option 
+                  v-for="option in assetStatusOptions" 
+                  :key="option.value" 
+                  :label="option.label" 
+                  :value="option.value" 
+                />
               </el-select>
             </el-form-item>
           </el-col>
@@ -209,15 +210,40 @@ import api from '@/api'
 
 const assetList = ref([])
 const assetTypes = ref([])
+const assetTypeTree = ref([])
+const assetTypeProps = {
+  value: 'id',
+  label: 'name',
+  children: 'children',
+  checkStrictly: true,
+  emitPath: false,
+  checkStrategy: 'leaf',
+  filterOption: (node) => {
+    return node.isLeaf
+  }
+}
 const assetLocations = ref([])
+const assetLocationTree = ref([])
+const assetLocationProps = {
+  value: 'id',
+  label: 'name',
+  children: 'children',
+  checkStrictly: true,
+  emitPath: false,
+  checkStrategy: 'leaf',
+  filterOption: (node) => {
+    return node.isLeaf
+  }
+}
+const assetStatusOptions = ref([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增资产')
 const form = ref({
   id: '',
   name: '',
   code: '',
-  typeId: '',
-  locationId: '',
+  typeId: [],
+  locationId: [],
   specification: '',
   model: '',
   manufacturer: '',
@@ -243,18 +269,21 @@ const loadAssetList = async () => {
   try {
     const assets = await api.get('/asset')
     
-    // 加载资产类型和位置信息，用于显示名称
+    // 加载资产类型、位置和状态信息
     await loadAssetTypes()
     await loadAssetLocations()
+    await loadAssetStatus()
     
-    // 为每个资产添加类型和位置名称
+    // 为每个资产添加类型、位置和状态名称
     assetList.value = assets.map(asset => {
       const type = assetTypes.value.find(t => t.id === asset.typeId)
       const location = assetLocations.value.find(l => l.id === asset.locationId)
+      const statusOption = assetStatusOptions.value.find(option => option.value === asset.status)
       return {
         ...asset,
         typeName: type ? type.name : '',
-        locationName: location ? location.name : ''
+        locationName: location ? location.name : '',
+        statusName: statusOption ? statusOption.label : asset.status
       }
     })
   } catch (error) {
@@ -266,6 +295,22 @@ const loadAssetList = async () => {
 // 加载资产类型列表
 const loadAssetTypes = async () => {
   try {
+    // 获取树形结构数据
+    const treeData = await api.get('/asset-type/tree')
+    // 处理树形数据，添加isLeaf字段
+    const processTree = (nodes) => {
+      return nodes.map(node => {
+        const processedNode = { ...node }
+        processedNode.isLeaf = !processedNode.children || processedNode.children.length === 0
+        if (processedNode.children) {
+          processedNode.children = processTree(processedNode.children)
+        }
+        return processedNode
+      })
+    }
+    assetTypeTree.value = processTree(treeData)
+    
+    // 同时获取扁平化列表用于其他操作
     assetTypes.value = await api.get('/asset-type')
   } catch (error) {
     console.error('加载资产类型失败:', error)
@@ -275,9 +320,46 @@ const loadAssetTypes = async () => {
 // 加载资产位置列表
 const loadAssetLocations = async () => {
   try {
+    // 获取树形结构数据
+    const treeData = await api.get('/asset-location/tree')
+    // 处理树形数据，添加isLeaf字段
+    const processTree = (nodes) => {
+      return nodes.map(node => {
+        const processedNode = { ...node }
+        processedNode.isLeaf = !processedNode.children || processedNode.children.length === 0
+        if (processedNode.children) {
+          processedNode.children = processTree(processedNode.children)
+        }
+        return processedNode
+      })
+    }
+    assetLocationTree.value = processTree(treeData)
+    
+    // 同时获取扁平化列表用于其他操作
     assetLocations.value = await api.get('/asset-location')
   } catch (error) {
     console.error('加载资产位置失败:', error)
+  }
+}
+
+// 加载资产状态字典数据
+const loadAssetStatus = async () => {
+  try {
+    const response = await api.get('/dict/list', {
+      params: {
+        page: 1,
+        pageSize: 100
+      }
+    })
+    // 过滤出资产状态类型的字典
+    assetStatusOptions.value = response.list
+      .filter(item => item.type === 'asset_status')
+      .map(item => ({
+        label: item.value,
+        value: item.code
+      }))
+  } catch (error) {
+    console.error('加载资产状态失败:', error)
   }
 }
 
@@ -287,9 +369,8 @@ const openAddDialog = () => {
   form.value = {
     id: '',
     name: '',
-    code: '',
-    typeId: '',
-    locationId: '',
+    typeId: [],
+    locationId: [],
     specification: '',
     model: '',
     manufacturer: '',
@@ -315,20 +396,40 @@ const openAddDialog = () => {
 // 打开编辑对话框
 const openEditDialog = (row) => {
   dialogTitle.value = '编辑资产'
-  form.value = { ...row }
+  const formData = { ...row }
+  // 将typeId转换为数组格式，以适应el-cascader
+  formData.typeId = row.typeId ? [row.typeId] : []
+  // 将locationId转换为数组格式，以适应el-cascader
+  formData.locationId = row.locationId ? [row.locationId] : []
+  form.value = formData
   dialogVisible.value = true
 }
 
 // 提交表单
 const submitForm = async () => {
   try {
+    // 处理表单数据，将typeId和locationId从数组转换为单个值
+    const formData = { ...form.value }
+    // 如果typeId是数组且有值，取第一个元素作为typeId
+    if (Array.isArray(formData.typeId) && formData.typeId.length > 0) {
+      formData.typeId = formData.typeId[0]
+    } else {
+      formData.typeId = null
+    }
+    // 如果locationId是数组且有值，取第一个元素作为locationId
+    if (Array.isArray(formData.locationId) && formData.locationId.length > 0) {
+      formData.locationId = formData.locationId[0]
+    } else {
+      formData.locationId = null
+    }
+    
     if (form.value.id) {
       // 编辑
-      await api.put('/asset', form.value)
+      await api.put('/asset', formData)
       ElMessage.success('编辑成功')
     } else {
       // 新增
-      await api.post('/asset', form.value)
+      await api.post('/asset', formData)
       ElMessage.success('新增成功')
     }
     dialogVisible.value = false

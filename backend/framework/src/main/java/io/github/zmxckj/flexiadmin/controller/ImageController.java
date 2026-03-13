@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.github.zmxckj.flexiadmin.entity.Config;
 import io.github.zmxckj.flexiadmin.entity.Image;
+import io.github.zmxckj.flexiadmin.common.R;
 import io.github.zmxckj.flexiadmin.service.ConfigService;
 import io.github.zmxckj.flexiadmin.service.ImageService;
 import io.github.zmxckj.flexiadmin.security.RequirePermission;
@@ -38,36 +39,36 @@ public class ImageController {
 
     @PostMapping("/upload")
     @RequirePermission("image:upload")
-    public ResponseEntity<Image> uploadImage(@RequestParam("file") MultipartFile file) {
+    public R<Image> uploadImage(@RequestParam("file") MultipartFile file) {
         if (!isImageModuleEnabled()) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+            return R.error(503, "图片模块未启用");
         }
         try {
             Image image = imageService.uploadImage(file);
-            return ResponseEntity.ok(image);
+            return R.success(image);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return R.error(500, "上传失败");
         }
     }
 
     @GetMapping("/list")
     @RequirePermission("image:list")
-    public ResponseEntity<IPage<Image>> getImageList(
+    public R<IPage<Image>> getImageList(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
         if (!isImageModuleEnabled()) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+            return R.error(503, "图片模块未启用");
         }
         Page<Image> pageInfo = new Page<>(page, size);
         IPage<Image> result = imageService.page(pageInfo);
-        return ResponseEntity.ok(result);
+        return R.success(result);
     }
 
     @DeleteMapping("/{id}")
     @RequirePermission("image:delete")
-    public ResponseEntity<Void> deleteImage(@PathVariable Long id) {
+    public R<?> deleteImage(@PathVariable Long id) {
         if (!isImageModuleEnabled()) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+            return R.error(503, "图片模块未启用");
         }
         Image image = imageService.getById(id);
         if (image != null) {
@@ -78,8 +79,8 @@ public class ImageController {
             }
             // 删除数据库记录
             imageService.removeById(id);
-            return ResponseEntity.ok().build();
+            return R.success();
         }
-        return ResponseEntity.notFound().build();
+        return R.error(404, "图片不存在");
     }
 }

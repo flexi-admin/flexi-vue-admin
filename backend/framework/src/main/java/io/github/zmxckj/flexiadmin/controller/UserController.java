@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.github.zmxckj.flexiadmin.entity.User;
 import io.github.zmxckj.flexiadmin.entity.UserRole;
 import io.github.zmxckj.flexiadmin.entity.UserDept;
+import io.github.zmxckj.flexiadmin.dto.AssignRoleDTO;
+import io.github.zmxckj.flexiadmin.dto.AssignDeptDTO;
+import io.github.zmxckj.flexiadmin.common.R;
 import io.github.zmxckj.flexiadmin.service.UserService;
 import io.github.zmxckj.flexiadmin.service.UserRoleService;
 import io.github.zmxckj.flexiadmin.service.UserDeptService;
@@ -35,7 +38,7 @@ public class UserController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping("/list")
-    public ResponseEntity<Map<String, Object>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer pageSize) {
+    public R<Map<String, Object>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer pageSize) {
         Page<User> userPage = userService.page(new Page<>(page, pageSize));
         List<User> users = userPage.getRecords();
         
@@ -65,51 +68,44 @@ public class UserController {
         Map<String, Object> response = new HashMap<>();
         response.put("list", userListWithDetails);
         response.put("total", userPage.getTotal());
-        return ResponseEntity.ok(response);
+        return R.success(response);
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> add(@RequestBody User user) {
+    public R<User> add(@RequestBody User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userService.save(user);
-        Map<String, Object> response = new HashMap<>();
-        response.put("code", 200);
-        response.put("message", "添加成功");
-        return ResponseEntity.ok(response);
+        return R.success(user);
     }
 
     @PutMapping
-    public ResponseEntity<Map<String, Object>> update(@RequestBody User user) {
+    public R<?> update(@RequestBody User user) {
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         userService.updateById(user);
-        Map<String, Object> response = new HashMap<>();
-        response.put("code", 200);
-        response.put("message", "更新成功");
-        return ResponseEntity.ok(response);
+        return R.success();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> delete(@PathVariable Long id) {
+    public R<?> delete(@PathVariable Long id) {
         userService.removeById(id);
-        Map<String, Object> response = new HashMap<>();
-        response.put("code", 200);
-        response.put("message", "删除成功");
-        return ResponseEntity.ok(response);
+        return R.success();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getById(@PathVariable Long id) {
+    public R<User> getById(@PathVariable Long id) {
         User user = userService.getById(id);
-        return ResponseEntity.ok(user);
+        return R.success(user);
     }
 
     /**
      * 为用户分配角色
      */
     @PostMapping("/assignRole")
-    public ResponseEntity<Map<String, Object>> assignRole(@RequestParam Long userId, @RequestParam List<Long> roleIds) {
+    public R<?> assignRole(@RequestBody AssignRoleDTO assignRoleDTO) {
+        Long userId = assignRoleDTO.getUserId();
+        List<Long> roleIds = assignRoleDTO.getRoleIds();
         // 先删除用户之前的角色关联
         userRoleService.remove(new QueryWrapper<UserRole>().eq("user_id", userId));
         // 新增用户与角色的关联
@@ -119,27 +115,26 @@ public class UserController {
             userRole.setRoleId(roleId);
             userRoleService.save(userRole);
         }
-        Map<String, Object> response = new HashMap<>();
-        response.put("code", 200);
-        response.put("message", "分配角色成功");
-        return ResponseEntity.ok(response);
+        return R.success();
     }
 
     /**
      * 获取用户的角色列表
      */
     @GetMapping("/roles/{userId}")
-    public ResponseEntity<List<Long>> getUserRoles(@PathVariable Long userId) {
+    public R<List<Long>> getUserRoles(@PathVariable Long userId) {
         List<UserRole> userRoles = userRoleService.list(new QueryWrapper<UserRole>().eq("user_id", userId));
         List<Long> roleIds = userRoles.stream().map(UserRole::getRoleId).collect(java.util.stream.Collectors.toList());
-        return ResponseEntity.ok(roleIds);
+        return R.success(roleIds);
     }
 
     /**
      * 为用户分配部门
      */
     @PostMapping("/assignDept")
-    public ResponseEntity<Map<String, Object>> assignDept(@RequestParam Long userId, @RequestParam List<Long> deptIds) {
+    public R<?> assignDept(@RequestBody AssignDeptDTO assignDeptDTO) {
+        Long userId = assignDeptDTO.getUserId();
+        List<Long> deptIds = assignDeptDTO.getDeptIds();
         // 先删除用户之前的部门关联
         userDeptService.remove(new QueryWrapper<UserDept>().eq("user_id", userId));
         // 新增用户与部门的关联
@@ -149,19 +144,16 @@ public class UserController {
             userDept.setDeptId(deptId);
             userDeptService.save(userDept);
         }
-        Map<String, Object> response = new HashMap<>();
-        response.put("code", 200);
-        response.put("message", "分配部门成功");
-        return ResponseEntity.ok(response);
+        return R.success();
     }
 
     /**
      * 获取用户的部门列表
      */
     @GetMapping("/depts/{userId}")
-    public ResponseEntity<List<Long>> getUserDepts(@PathVariable Long userId) {
+    public R<List<Long>> getUserDepts(@PathVariable Long userId) {
         List<UserDept> userDepts = userDeptService.list(new QueryWrapper<UserDept>().eq("user_id", userId));
         List<Long> deptIds = userDepts.stream().map(UserDept::getDeptId).collect(java.util.stream.Collectors.toList());
-        return ResponseEntity.ok(deptIds);
+        return R.success(deptIds);
     }
 }

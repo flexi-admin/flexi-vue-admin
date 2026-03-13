@@ -137,3 +137,10 @@ INSERT INTO asset_type (id, name, parent_id, path, level, remark, status, create
 INSERT INTO asset_location (id, name, parent_id, path, level, remark, status, create_time, update_time) VALUES
 (1, '办公室', 0, '1', 1, '办公区域', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
 (2, '会议室', 0, '2', 1, '会议区域', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+
+-- 插入资产状态字典数据
+INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VALUES
+('asset_status', 'idle', '闲置', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('asset_status', 'in_use', '使用中', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('asset_status', 'repairing', '维修中', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('asset_status', 'scrapped', '已报废', 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

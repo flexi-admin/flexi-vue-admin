@@ -1,6 +1,8 @@
 package io.github.zmxckj.flexiadmin.controller;
 
 import io.github.zmxckj.flexiadmin.entity.Menu;
+import io.github.zmxckj.flexiadmin.common.R;
+import io.github.zmxckj.flexiadmin.dto.SaveRolePermissionDTO;
 import io.github.zmxckj.flexiadmin.service.MenuService;
 import io.github.zmxckj.flexiadmin.service.RoleMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +24,16 @@ public class RoleMenuController {
 
     // 获取角色的菜单权限
     @GetMapping("/role/{roleId}")
-    public ResponseEntity<List<Long>> getRolePermissions(@PathVariable Long roleId) {
+    public R<List<Long>> getRolePermissions(@PathVariable Long roleId) {
         List<Long> menuIds = roleMenuService.getMenuIdsByRoleId(roleId);
-        return ResponseEntity.ok(menuIds);
+        return R.success(menuIds);
     }
 
     // 保存角色的菜单权限
     @PostMapping
-    public ResponseEntity<Map<String, Object>> saveRolePermissions(@RequestBody Map<String, Object> request) {
-        Long roleId = Long.valueOf(request.get("roleId").toString());
-        List<Long> permissionIds = (List<Long>) request.get("permissionIds");
+    public R<?> saveRolePermissions(@RequestBody SaveRolePermissionDTO saveRolePermissionDTO) {
+        Long roleId = saveRolePermissionDTO.getRoleId();
+        List<Long> permissionIds = saveRolePermissionDTO.getPermissionIds();
         
         // 先删除原有的权限关联
         roleMenuService.removeByRoleId(roleId);
@@ -41,13 +43,13 @@ public class RoleMenuController {
             roleMenuService.saveRoleMenu(roleId, menuId);
         }
         
-        return ResponseEntity.ok(Map.of("code", 200, "message", "权限保存成功"));
+        return R.success();
     }
 
     // 获取菜单权限树
     @GetMapping("/tree")
-    public ResponseEntity<List<Menu>> getPermissionTree() {
+    public R<List<Menu>> getPermissionTree() {
         List<Menu> menuTree = menuService.getMenuTree();
-        return ResponseEntity.ok(menuTree);
+        return R.success(menuTree);
     }
 }

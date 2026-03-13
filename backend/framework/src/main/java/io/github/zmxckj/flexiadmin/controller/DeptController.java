@@ -1,6 +1,7 @@
 package io.github.zmxckj.flexiadmin.controller;
 
 import io.github.zmxckj.flexiadmin.entity.Dept;
+import io.github.zmxckj.flexiadmin.common.R;
 import io.github.zmxckj.flexiadmin.service.DeptService;
 import io.github.zmxckj.flexiadmin.service.UserDeptService;
 import io.github.zmxckj.flexiadmin.entity.UserDept;
@@ -32,48 +33,51 @@ public class DeptController {
      * 部门列表
      */
     @GetMapping("/list")
-    public List<Dept> list() {
-        return deptService.list();
+    public R<List<Dept>> list() {
+        return R.success(deptService.list());
     }
 
     /**
      * 部门分页列表
      */
     @GetMapping("/page")
-    public Page<Dept> page(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer size) {
-        return deptService.page(new Page<>(page, size));
+    public R<Page<Dept>> page(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer size) {
+        return R.success(deptService.page(new Page<>(page, size)));
     }
 
     /**
      * 根据ID获取部门
      */
     @GetMapping("/{id}")
-    public Dept getById(@PathVariable Long id) {
-        return deptService.getById(id);
+    public R<Dept> getById(@PathVariable Long id) {
+        return R.success(deptService.getById(id));
     }
 
     /**
      * 新增部门
      */
     @PostMapping
-    public boolean save(@RequestBody Dept dept) {
-        return deptService.save(dept);
+    public R<?> save(@RequestBody Dept dept) {
+        deptService.save(dept);
+        return R.success();
     }
 
     /**
      * 修改部门
      */
     @PutMapping
-    public boolean update(@RequestBody Dept dept) {
-        return deptService.updateById(dept);
+    public R<?> update(@RequestBody Dept dept) {
+        deptService.updateById(dept);
+        return R.success();
     }
 
     /**
      * 删除部门
      */
     @DeleteMapping("/{id}")
-    public boolean delete(@PathVariable Long id) {
-        return deptService.removeById(id);
+    public R<?> delete(@PathVariable Long id) {
+        deptService.removeById(id);
+        return R.success();
     }
 
 

@@ -3,6 +3,7 @@ package com.flexi.app.controller;
 import com.flexi.app.entity.AssetType;
 import com.flexi.app.entity.AssetTypeTree;
 import com.flexi.app.service.AssetTypeService;
+import io.github.zmxckj.flexiadmin.common.R;
 import io.github.zmxckj.flexiadmin.security.RequirePermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,34 +19,37 @@ public class AssetTypeController {
 
     @RequirePermission("asset:type:list")
     @GetMapping("/tree")
-    public List<AssetTypeTree> tree() {
-        return assetTypeService.tree();
+    public R<List<AssetTypeTree>> tree() {
+        return R.success(assetTypeService.tree());
     }
 
     @RequirePermission("asset:type:list")
     @GetMapping
-    public List<AssetType> list() {
-        return assetTypeService.list();
+    public R<List<AssetType>> list() {
+        return R.success(assetTypeService.list());
     }
 
     @RequirePermission("asset:type:add")
     @PostMapping
-    public boolean add(@RequestBody AssetType assetType) {
+    public R<?> add(@RequestBody AssetType assetType) {
         assetType.setCreateTime(System.currentTimeMillis());
         assetType.setUpdateTime(System.currentTimeMillis());
-        return assetTypeService.save(assetType);
+        assetTypeService.save(assetType);
+        return R.success();
     }
 
     @RequirePermission("asset:type:edit")
     @PutMapping
-    public boolean edit(@RequestBody AssetType assetType) {
+    public R<?> edit(@RequestBody AssetType assetType) {
         assetType.setUpdateTime(System.currentTimeMillis());
-        return assetTypeService.updateById(assetType);
+        assetTypeService.updateById(assetType);
+        return R.success();
     }
 
     @RequirePermission("asset:type:delete")
     @DeleteMapping("/{id}")
-    public boolean delete(@PathVariable Long id) {
-        return assetTypeService.removeById(id);
+    public R<?> delete(@PathVariable Long id) {
+        assetTypeService.removeById(id);
+        return R.success();
     }
 }
