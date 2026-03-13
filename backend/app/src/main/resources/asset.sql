@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `asset` (
   `specification` VARCHAR(500) COMMENT '规格',
   `model` VARCHAR(255) COMMENT '型号',
   `manufacturer` VARCHAR(255) COMMENT '制造商',
-  `supplier` VARCHAR(255) COMMENT '供应商',
+  `supplier_id` BIGINT COMMENT '供应商ID',
   `purchase_date` VARCHAR(20) COMMENT '购买日期',
   `price` DECIMAL(10,2) COMMENT '价格',
   `status` VARCHAR(50) COMMENT '状态',

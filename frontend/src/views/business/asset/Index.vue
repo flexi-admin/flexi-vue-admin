@@ -18,6 +18,7 @@
         <el-table-column prop="locationName" label="资产位置" />
         <el-table-column prop="specification" label="规格" />
         <el-table-column prop="model" label="型号" />
+        <el-table-column prop="supplierName" label="供应商" />
         <el-table-column prop="statusName" label="状态" />
         <el-table-column label="操作" width="180">
           <template #default="{ row }">
@@ -89,7 +90,21 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="供应商">
-              <el-input v-model="form.supplier" placeholder="请输入供应商" />
+              <el-select 
+                v-model="form.supplierId" 
+                placeholder="请选择供应商"
+                filterable
+                remote
+                :remote-method="searchSuppliers"
+                :loading="supplierLoading"
+              >
+                <el-option 
+                  v-for="supplier in suppliers" 
+                  :key="supplier.id" 
+                  :label="supplier.name" 
+                  :value="supplier.id" 
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -236,6 +251,8 @@ const assetLocationProps = {
   }
 }
 const assetStatusOptions = ref([])
+const suppliers = ref([])
+const supplierLoading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增资产')
 const form = ref({
@@ -247,7 +264,7 @@ const form = ref({
   specification: '',
   model: '',
   manufacturer: '',
-  supplier: '',
+  supplierId: '',
   purchaseDate: '',
   price: '',
   status: '',
@@ -269,21 +286,24 @@ const loadAssetList = async () => {
   try {
     const assets = await api.get('/asset')
     
-    // 加载资产类型、位置和状态信息
+    // 加载资产类型、位置、状态和供应商信息
     await loadAssetTypes()
     await loadAssetLocations()
     await loadAssetStatus()
+    await loadSuppliers()
     
-    // 为每个资产添加类型、位置和状态名称
+    // 为每个资产添加类型、位置、状态和供应商名称
     assetList.value = assets.map(asset => {
       const type = assetTypes.value.find(t => t.id === asset.typeId)
       const location = assetLocations.value.find(l => l.id === asset.locationId)
       const statusOption = assetStatusOptions.value.find(option => option.value === asset.status)
+      const supplier = suppliers.value.find(s => s.id === asset.supplierId)
       return {
         ...asset,
         typeName: type ? type.name : '',
         locationName: location ? location.name : '',
-        statusName: statusOption ? statusOption.label : asset.status
+        statusName: statusOption ? statusOption.label : asset.status,
+        supplierName: supplier ? supplier.name : ''
       }
     })
   } catch (error) {
@@ -363,6 +383,40 @@ const loadAssetStatus = async () => {
   }
 }
 
+// 加载供应商列表
+const loadSuppliers = async () => {
+  try {
+    const response = await api.get('/asset-supplier')
+    suppliers.value = response
+  } catch (error) {
+    console.error('加载供应商失败:', error)
+  }
+}
+
+// 搜索供应商
+const searchSuppliers = async (query) => {
+  if (query) {
+    supplierLoading.value = true
+    try {
+      // 这里简化处理，直接在前端过滤
+      // 实际项目中应该调用后端接口进行搜索
+      const response = await api.get('/asset-supplier')
+      suppliers.value = response.filter(supplier => 
+        supplier.name.toLowerCase().includes(query.toLowerCase()) ||
+        supplier.contactPerson.toLowerCase().includes(query.toLowerCase()) ||
+        supplier.contactPhone.includes(query)
+      )
+    } catch (error) {
+      console.error('搜索供应商失败:', error)
+    } finally {
+      supplierLoading.value = false
+    }
+  } else {
+    // 如果查询为空，加载所有供应商
+    await loadSuppliers()
+  }
+}
+
 // 打开新增对话框
 const openAddDialog = () => {
   dialogTitle.value = '新增资产'
@@ -374,7 +428,7 @@ const openAddDialog = () => {
     specification: '',
     model: '',
     manufacturer: '',
-    supplier: '',
+    supplierId: '',
     purchaseDate: '',
     price: '',
     status: '',
@@ -421,6 +475,10 @@ const submitForm = async () => {
       formData.locationId = formData.locationId[0]
     } else {
       formData.locationId = null
+    }
+    // 如果supplierId为空，设置为null
+    if (!formData.supplierId) {
+      formData.supplierId = null
     }
     
     if (form.value.id) {

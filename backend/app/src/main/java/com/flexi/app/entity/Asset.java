@@ -17,7 +17,7 @@ public class Asset {
     private String specification;
     private String model;
     private String manufacturer;
-    private String supplier;
+    private Long supplierId;
     private String purchaseDate;
     private Double price;
     private String status;
