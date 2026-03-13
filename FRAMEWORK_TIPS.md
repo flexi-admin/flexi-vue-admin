@@ -1,0 +1,2 @@
+- 自动配置文件的变更 ：在 Spring Boot 2.7+ 版本中，自动配置文件的位置确实从 META-INF/spring.factories 改为了 META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports 。这是 Spring Boot 官方推荐的新方式，用于简化自动配置的声明。
+- framework会被其他项目依赖，所以在更新代码之后不要忘记重新执行 mvn install

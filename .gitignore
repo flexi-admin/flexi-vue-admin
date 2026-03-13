@@ -1,0 +1,59 @@
+# 依赖目录
+node_modules/
+
+# 构建目录
+target/
+build/
+dist/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE 文件
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 日志文件
+logs/
+*.log
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# 测试覆盖报告
+coverage/
+
+# 临时文件
+tmp/
+temp/
+
+# 包文件
+*.jar
+*.war
+*.zip
+*.tar.gz
+*.rar
+
+# 操作系统临时文件
+*.tmp
+*.temp
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 编辑器文件
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

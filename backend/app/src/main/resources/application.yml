@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/flexi_admin?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      enabled: false
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    database: 0
+
+
+mybatis-plus:
+  type-aliases-package: com.flexi.app.entity
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+server:
+  port: 8080
+
+flexi:
+  jwt:
+    secret: flexi_admin_secret_key
+    expiration: 3600000
+  upload:
+    dir: ${java.io.tmpdir}/flexi-upload/images
+    max-size: 10485760

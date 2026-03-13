@@ -1,0 +1,10 @@
+- 不要为我启动项目/重启项目，我需要手动管理服务
+- 如果更新数据库的数据，需要同步更新sql文件
+- 如果更新sql文件，也需要同步更新数据库数据
+- 总是用mybatis-plus提供的方法来操作数据库，而不是编写xml文件
+- 如果你想了解项目的整体需求，请查看该文档 /START.md
+- 如果你想了解前端动态菜单的实现细节，请查看该文档 /DYNAMIC_MENU_IMPLEMENTATION.md
+- 如果你想了解前端双列侧边栏的实现细节，请查看该文档 /SIDEBAR_LAYOUT_IMPLEMENTATION.md
+- 如果你想了解登录的实现细节，请查看该文档 /LOGIN_IMPLEMENTATION.md
+- 如果你想了解权限系统的实现细节，请查看文档 /PERMISSION_IMPLEMENTATION.md
+- 如果你想了解项目的数据库设计，请查看 /backend/framework/src/main/resources/db.sql
