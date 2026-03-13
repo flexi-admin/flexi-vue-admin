@@ -1,7 +1,7 @@
 <template>
   <div class="home-container">
     <el-container>
-      <el-aside :width="currentFirstLevelMenu?.children && currentFirstLevelMenu.children.length > 0 ? '200px' : '100px'" style="border-right: 1px solid #eaeaea; display: flex;">
+      <el-aside :width="currentFirstLevelMenu?.children && currentFirstLevelMenu.children.length > 0 ? '250px' : '100px'" style="border-right: 1px solid #eaeaea; display: flex;">
         <!-- 左侧一级菜单 -->
         <div class="menu-left" style="width: 100px; border-right: 1px solid #eaeaea;">
           <div class="logo">
@@ -25,7 +25,7 @@
         </div>
         
         <!-- 右侧二级菜单 -->
-        <div v-if="currentFirstLevelMenu?.children && currentFirstLevelMenu.children.length > 0" class="menu-right" style="width: 100px; overflow-y: auto;">
+        <div v-if="currentFirstLevelMenu?.children && currentFirstLevelMenu.children.length > 0" class="menu-right" style="width: 150px; overflow-y: auto;">
           <div class="menu-right-header">
             <h3>{{ currentFirstLevelMenu.label }}</h3>
           </div>

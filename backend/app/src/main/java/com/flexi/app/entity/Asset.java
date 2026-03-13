@@ -25,4 +25,16 @@ public class Asset {
     private Integer isDeleted;
     private Long createTime;
     private Long updateTime;
+    private String image;
+    private String labelType;
+    private String labelCode;
+    private Long adminUserId;
+    private Long userId;
+    private Long deptId;
+    private String sn;
+    private String source;
+    private Double currentValue;
+    private String unit;
+    private Long creatorId;
+    private Long updaterId;
 }

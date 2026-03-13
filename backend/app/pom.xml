@@ -17,8 +17,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.flexiadmin</groupId>
-            <artifactId>flexi-framework</artifactId>
+            <groupId>io.github.zmxckj</groupId>
+            <artifactId>flexi-admin</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>

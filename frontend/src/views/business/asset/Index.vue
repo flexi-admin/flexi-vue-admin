@@ -36,73 +36,160 @@
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="600px"
+      width="70%"
     >
       <el-form :model="form" label-width="100px">
-        <el-form-item label="资产名称">
-          <el-input v-model="form.name" placeholder="请输入资产名称" />
-        </el-form-item>
-        <el-form-item label="资产编码">
-          <el-input v-model="form.code" placeholder="请输入资产编码" />
-        </el-form-item>
-        <el-form-item label="资产类型">
-          <el-select v-model="form.typeId" placeholder="请选择资产类型">
-            <el-option
-              v-for="type in assetTypes"
-              :key="type.id"
-              :label="type.name"
-              :value="type.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="资产位置">
-          <el-select v-model="form.locationId" placeholder="请选择资产位置">
-            <el-option
-              v-for="location in assetLocations"
-              :key="location.id"
-              :label="location.name"
-              :value="location.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="规格">
-          <el-input v-model="form.specification" placeholder="请输入规格" />
-        </el-form-item>
-        <el-form-item label="型号">
-          <el-input v-model="form.model" placeholder="请输入型号" />
-        </el-form-item>
-        <el-form-item label="制造商">
-          <el-input v-model="form.manufacturer" placeholder="请输入制造商" />
-        </el-form-item>
-        <el-form-item label="供应商">
-          <el-input v-model="form.supplier" placeholder="请输入供应商" />
-        </el-form-item>
-        <el-form-item label="购买日期">
-          <el-date-picker
-            v-model="form.purchaseDate"
-            type="date"
-            placeholder="请选择购买日期"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-          />
-        </el-form-item>
-        <el-form-item label="价格">
-          <el-input v-model="form.price" type="number" placeholder="请输入价格" />
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="form.status" placeholder="请选择状态">
-            <el-option label="正常" value="正常" />
-            <el-option label="维修中" value="维修中" />
-            <el-option label="已报废" value="已报废" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="备注">
-          <el-input
-            v-model="form.remark"
-            type="textarea"
-            placeholder="请输入备注信息"
-          />
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="资产名称">
+              <el-input v-model="form.name" placeholder="请输入资产名称" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="资产编码">
+              <el-input v-model="form.code" placeholder="请输入资产编码" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="资产类型">
+              <el-select v-model="form.typeId" placeholder="请选择资产类型">
+                <el-option
+                  v-for="type in assetTypes"
+                  :key="type.id"
+                  :label="type.name"
+                  :value="type.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="资产位置">
+              <el-select v-model="form.locationId" placeholder="请选择资产位置">
+                <el-option
+                  v-for="location in assetLocations"
+                  :key="location.id"
+                  :label="location.name"
+                  :value="location.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="规格">
+              <el-input v-model="form.specification" placeholder="请输入规格" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="型号">
+              <el-input v-model="form.model" placeholder="请输入型号" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="制造商">
+              <el-input v-model="form.manufacturer" placeholder="请输入制造商" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="供应商">
+              <el-input v-model="form.supplier" placeholder="请输入供应商" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="购买日期">
+              <el-date-picker
+                v-model="form.purchaseDate"
+                type="date"
+                placeholder="请选择购买日期"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="价格">
+              <el-input v-model="form.price" type="number" placeholder="请输入价格" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="当前价值">
+              <el-input v-model="form.currentValue" type="number" placeholder="请输入当前价值" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="状态">
+              <el-select v-model="form.status" placeholder="请选择状态">
+                <el-option label="正常" value="正常" />
+                <el-option label="维修中" value="维修中" />
+                <el-option label="已报废" value="已报废" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="图片">
+              <el-input v-model="form.image" placeholder="请输入图片路径" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="标签类型">
+              <el-select v-model="form.labelType" placeholder="请选择标签类型">
+                <el-option label="普通标签" value="普通标签" />
+                <el-option label="RFID标签" value="RFID标签" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="标签编码">
+              <el-input v-model="form.labelCode" placeholder="请输入标签编码" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="管理员">
+              <el-input v-model="form.adminUserId" type="number" placeholder="请输入管理员用户ID" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="使用人">
+              <el-input v-model="form.userId" type="number" placeholder="请输入使用人用户ID" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="部门">
+              <el-input v-model="form.deptId" type="number" placeholder="请输入部门ID" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="SN码">
+              <el-input v-model="form.sn" placeholder="请输入SN码" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="资产来源">
+              <el-select v-model="form.source" placeholder="请选择资产来源">
+                <el-option label="自产" value="自产" />
+                <el-option label="采购" value="采购" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="计量单位">
+              <el-select v-model="form.unit" placeholder="请选择计量单位">
+                <el-option label="台" value="台" />
+                <el-option label="张" value="张" />
+                <el-option label="个" value="个" />
+                <el-option label="套" value="套" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="备注">
+              <el-input
+                v-model="form.remark"
+                type="textarea"
+                placeholder="请输入备注信息"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -138,7 +225,17 @@ const form = ref({
   purchaseDate: '',
   price: '',
   status: '',
-  remark: ''
+  remark: '',
+  image: '',
+  labelType: '',
+  labelCode: '',
+  adminUserId: '',
+  userId: '',
+  deptId: '',
+  sn: '',
+  source: '',
+  currentValue: '',
+  unit: ''
 })
 
 // 加载资产列表
@@ -200,7 +297,17 @@ const openAddDialog = () => {
     purchaseDate: '',
     price: '',
     status: '',
-    remark: ''
+    remark: '',
+    image: '',
+    labelType: '',
+    labelCode: '',
+    adminUserId: '',
+    userId: '',
+    deptId: '',
+    sn: '',
+    source: '',
+    currentValue: '',
+    unit: ''
   }
   dialogVisible.value = true
 }

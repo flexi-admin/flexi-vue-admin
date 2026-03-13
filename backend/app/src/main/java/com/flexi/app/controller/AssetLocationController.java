@@ -3,7 +3,7 @@ package com.flexi.app.controller;
 import com.flexi.app.entity.AssetLocation;
 import com.flexi.app.entity.AssetLocationTree;
 import com.flexi.app.service.AssetLocationService;
-import io.github.flexiadmin.framework.security.RequirePermission;
+import io.github.zmxckj.flexiadmin.security.RequirePermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
