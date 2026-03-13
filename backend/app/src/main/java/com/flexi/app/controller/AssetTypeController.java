@@ -3,7 +3,7 @@ package com.flexi.app.controller;
 import com.flexi.app.entity.AssetType;
 import com.flexi.app.entity.AssetTypeTree;
 import com.flexi.app.service.AssetTypeService;
-import com.flexi.framework.security.RequirePermission;
+import io.github.flexiadmin.framework.security.RequirePermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

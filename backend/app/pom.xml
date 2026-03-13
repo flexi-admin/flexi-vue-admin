@@ -17,7 +17,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.flexi</groupId>
+            <groupId>io.github.flexiadmin</groupId>
             <artifactId>flexi-framework</artifactId>
             <version>1.0.0</version>
         </dependency>

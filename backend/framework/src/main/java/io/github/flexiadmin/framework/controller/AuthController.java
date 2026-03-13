@@ -1,0 +1,265 @@
+package io.github.flexiadmin.framework.controller;
+
+import io.github.flexiadmin.framework.entity.Menu;
+import io.github.flexiadmin.framework.entity.User;
+import io.github.flexiadmin.framework.entity.LoginLog;
+import io.github.flexiadmin.framework.service.MenuService;
+import io.github.flexiadmin.framework.service.UserService;
+import io.github.flexiadmin.framework.service.LoginLogService;
+import io.github.flexiadmin.framework.utils.JwtUtils;
+import io.github.flexiadmin.framework.utils.RedisUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
+
+    private final UserService userService;
+    private final MenuService menuService;
+    private final LoginLogService loginLogService;
+    private final JwtUtils jwtUtils;
+    private final PasswordEncoder passwordEncoder;
+    private final RedisUtils redisUtils;
+
+    @Value("${flexi.jwt.expiration}")
+    private long expiration;
+
+    public AuthController(UserService userService, MenuService menuService, LoginLogService loginLogService, JwtUtils jwtUtils, PasswordEncoder passwordEncoder, RedisUtils redisUtils) {
+        this.userService = userService;
+        this.menuService = menuService;
+        this.loginLogService = loginLogService;
+        this.jwtUtils = jwtUtils;
+        this.passwordEncoder = passwordEncoder;
+        this.redisUtils = redisUtils;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginForm, HttpServletRequest request) {
+        String username = loginForm.get("username");
+        String password = loginForm.get("password");
+        String ip = getClientIp(request);
+
+        User user = userService.findByUsername(username);
+        if (user == null) {
+            // 记录登录失败日志
+            recordLoginLog(username, ip, false, "用户名或密码错误");
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 401);
+            response.put("message", "用户名或密码错误");
+            return ResponseEntity.status(401).body(response);
+        }
+        
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            // 记录登录失败日志
+            recordLoginLog(username, ip, false, "用户名或密码错误");
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 401);
+            response.put("message", "用户名或密码错误");
+            return ResponseEntity.status(401).body(response);
+        }
+
+        String token = jwtUtils.generateToken(username);
+        
+        // 构建不包含敏感信息的用户信息
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("id", user.getId());
+        userInfo.put("username", user.getUsername());
+        userInfo.put("status", user.getStatus());
+        userInfo.put("createTime", user.getCreateTime());
+        userInfo.put("updateTime", user.getUpdateTime());
+        
+        // 获取用户操作权限并添加到用户信息中
+        List<Menu> operations = menuService.getOperationsByUserId(user.getId());
+        List<String> operationCodes = new ArrayList<>();
+        for (Menu operation : operations) {
+            if (operation.getCode() != null) {
+                operationCodes.add(operation.getCode());
+            }
+        }
+        userInfo.put("permissions", operationCodes);
+        
+        // 缓存用户信息（包含权限）到 Redis
+        redisUtils.cacheUserInfo(username, userInfo, expiration / 1000);
+
+        // 记录登录成功日志
+        recordLoginLog(username, ip, true, "登录成功");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", 200);
+        response.put("message", "登录成功");
+        response.put("token", token);
+        response.put("user", userInfo);
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * 获取客户端IP地址
+     */
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_CLIENT_IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
+    }
+    
+    /**
+     * 记录登录日志
+     */
+    private void recordLoginLog(String username, String ip, boolean status, String message) {
+        LoginLog loginLog = new LoginLog();
+        loginLog.setUsername(username);
+        loginLog.setIp(ip);
+        loginLog.setStatus(status);
+        loginLog.setMessage(message);
+        loginLog.setCreateTime(java.time.LocalDateTime.now());
+        loginLogService.save(loginLog);
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<Map<String, Object>> getUserInfo(HttpServletRequest request) {
+        // 从请求头中获取Authorization token
+        String authorization = request.getHeader("Authorization");
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 401);
+            response.put("message", "未授权，请先登录");
+            return ResponseEntity.status(401).body(response);
+        }
+        
+        // 提取token
+        String token = authorization.substring(7);
+        // 从token中解析用户名
+        String username = jwtUtils.getUsernameFromToken(token);
+        
+        if (username == null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 401);
+            response.put("message", "无效的token");
+            return ResponseEntity.status(401).body(response);
+        }
+        
+        // 检查 Redis 中是否有用户信息缓存
+        Object cachedUserInfo = redisUtils.getUserInfo(username);
+        if (cachedUserInfo != null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 200);
+            response.put("user", cachedUserInfo);
+            return ResponseEntity.ok(response);
+        }
+        
+        // 缓存中没有用户信息，从数据库中获取
+        User user = userService.findByUsername(username);
+        
+        if (user == null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 404);
+            response.put("message", "用户不存在");
+            return ResponseEntity.status(404).body(response);
+        }
+
+        // 构建不包含敏感信息的用户信息
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("id", user.getId());
+        userInfo.put("username", user.getUsername());
+        userInfo.put("status", user.getStatus());
+        userInfo.put("createTime", user.getCreateTime());
+        userInfo.put("updateTime", user.getUpdateTime());
+
+        // 缓存用户信息到 Redis
+        redisUtils.cacheUserInfo(username, userInfo, expiration / 1000);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", 200);
+        response.put("user", userInfo);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request) {
+        // 从请求头中获取Authorization token
+        String authorization = request.getHeader("Authorization");
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 401);
+            response.put("message", "未授权，请先登录");
+            return ResponseEntity.status(401).body(response);
+        }
+        
+        // 提取token
+        String token = authorization.substring(7);
+        
+        try {
+            // 登出，将 token 加入黑名单
+            jwtUtils.logout(token);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 200);
+            response.put("message", "退出登录成功");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 401);
+            response.put("message", "无效的 token");
+            return ResponseEntity.status(401).body(response);
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, Object>> refreshToken(HttpServletRequest request) {
+        // 从请求头中获取Authorization token
+        String authorization = request.getHeader("Authorization");
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 401);
+            response.put("message", "未授权，请先登录");
+            return ResponseEntity.status(401).body(response);
+        }
+        
+        // 提取token
+        String token = authorization.substring(7);
+        
+        try {
+            // 刷新 token
+            String newToken = jwtUtils.refreshToken(token);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 200);
+            response.put("message", "Token 刷新成功");
+            response.put("token", newToken);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("code", 401);
+            response.put("message", "无效的 token");
+            return ResponseEntity.status(401).body(response);
+        }
+    }
+    
+
+}
