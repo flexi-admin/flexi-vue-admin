@@ -144,3 +144,33 @@ INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VA
 ('asset_status', 'in_use', '使用中', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('asset_status', 'repairing', '维修中', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('asset_status', 'scrapped', '已报废', 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 供应商表
+CREATE TABLE IF NOT EXISTS `asset_supplier` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `name` VARCHAR(255) NOT NULL COMMENT '名称',
+  `contact_person` VARCHAR(100) COMMENT '联系人',
+  `contact_phone` VARCHAR(50) COMMENT '联系电话',
+  `contact_address` VARCHAR(500) COMMENT '联系地址',
+  `remark` VARCHAR(500) COMMENT '备注',
+  `is_deleted` INT NOT NULL DEFAULT 0 COMMENT '是否删除',
+  `create_time` BIGINT NOT NULL COMMENT '创建时间',
+  `update_time` BIGINT NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='供应商表';
+
+-- 插入供应商管理菜单和权限
+-- 供应商管理
+INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, status, order_num) VALUES
+(51, '供应商管理', '/asset/supplier', 'business/asset-supplier/Index', 35, 'UserFilled', NULL, 'menu', true, 19);
+
+-- 供应商操作权限
+INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, status, order_num) VALUES
+(52, '供应商列表', NULL, NULL, 51, NULL, 'asset:supplier:list', 'operation', true, 31),
+(53, '供应商添加', NULL, NULL, 51, NULL, 'asset:supplier:add', 'operation', true, 32),
+(54, '供应商编辑', NULL, NULL, 51, NULL, 'asset:supplier:edit', 'operation', true, 33),
+(55, '供应商删除', NULL, NULL, 51, NULL, 'asset:supplier:delete', 'operation', true, 34);
+
+-- 为admin角色分配供应商管理权限
+INSERT INTO sys_role_menu (role_id, menu_id) VALUES
+(1, 51), (1, 52), (1, 53), (1, 54), (1, 55);
