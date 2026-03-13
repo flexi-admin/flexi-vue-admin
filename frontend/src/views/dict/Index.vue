@@ -3,7 +3,22 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>字典管理</span>
+          <div class="header-left">
+            <span>字典管理</span>
+            <el-input
+              v-model="searchType"
+              placeholder="请输入字典类型"
+              style="width: 200px; margin-left: 20px;"
+              clearable
+              @keyup.enter="handleSearch"
+            >
+              <template #append>
+                <el-button @click="handleSearch">
+                  <el-icon><Search /></el-icon>
+                </el-button>
+              </template>
+            </el-input>
+          </div>
           <el-button type="primary" @click="handleAdd">添加字典</el-button>
         </div>
       </template>
@@ -63,11 +78,13 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import api from '@/api'
+import { Search } from '@element-plus/icons-vue'
 
 const dialogVisible = ref(false)
 const dialogTitle = ref('添加字典')
 const formRef = ref()
 const dicts = ref([])
+const searchType = ref('')
 const pagination = reactive({
   page: 1,
   pageSize: 10,
@@ -109,7 +126,8 @@ const fetchDicts = async () => {
     const response = await api.get('/dict/list', {
       params: {
         page: pagination.page,
-        pageSize: pagination.pageSize
+        pageSize: pagination.pageSize,
+        type: searchType.value
       }
     })
     dicts.value = response.list
@@ -117,6 +135,11 @@ const fetchDicts = async () => {
   } catch (error) {
     console.error('获取字典列表失败:', error)
   }
+}
+
+const handleSearch = () => {
+  pagination.page = 1
+  fetchDicts()
 }
 
 const handleAdd = () => {
@@ -191,6 +214,11 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
 }
 
 .pagination-container {

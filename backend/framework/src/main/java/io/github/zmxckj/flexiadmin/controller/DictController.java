@@ -19,8 +19,10 @@ public class DictController {
     private DictService dictService;
 
     @GetMapping("/list")
-    public R<Map<String, Object>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page<Dict> dictPage = dictService.page(new Page<>(page, pageSize));
+    public R<Map<String, Object>> list(@RequestParam(defaultValue = "1") Integer page, 
+                                       @RequestParam(defaultValue = "10") Integer pageSize, 
+                                       @RequestParam(required = false) String type) {
+        Page<Dict> dictPage = dictService.page(new Page<>(page, pageSize), type);
         Map<String, Object> response = new HashMap<>();
         response.put("list", dictPage.getRecords());
         response.put("total", dictPage.getTotal());
