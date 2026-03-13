@@ -348,6 +348,29 @@ watch(() => route.path, (newPath) => {
     console.log('Found menu for path:', menu)
     activeMenu.value = menu.key
     addTab(menu)
+    
+    // 查找并设置一级菜单
+    const findFirstLevelMenu = (items: any[], targetMenu: any) => {
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        if (item.key === targetMenu.key) {
+          return item
+        }
+        if (item.children && item.children.length > 0) {
+          const found = findFirstLevelMenu(item.children, targetMenu)
+          if (found) {
+            return item
+          }
+        }
+      }
+      return null
+    }
+    
+    const firstLevelMenu = findFirstLevelMenu(menuOptions.value, menu)
+    if (firstLevelMenu) {
+      activeFirstLevelMenu.value = firstLevelMenu.key
+      currentFirstLevelMenu.value = firstLevelMenu
+    }
   } else {
     console.log('No menu found for path:', newPath)
   }
