@@ -1,6 +1,7 @@
 package com.flexi.app.controller;
 
 import com.flexi.app.entity.Asset;
+import com.flexi.app.entity.AssetDTO;
 import com.flexi.app.service.AssetService;
 import com.flexi.app.utils.SnowflakeIdGenerator;
 import io.github.zmxckj.flexiadmin.common.R;
@@ -19,17 +20,19 @@ public class AssetController {
 
     @RequirePermission("asset:list")
     @GetMapping
-    public R<List<Asset>> list() {
-        return R.success(assetService.list());
+    public R<List<AssetDTO>> list() {
+        return R.success(assetService.listWithDetails());
     }
 
     @RequirePermission("asset:add")
     @PostMapping
     public boolean add(@RequestBody Asset asset) {
         // 生成资产编码（使用雪花算法生成全局唯一ID）
-        long snowflakeId = SnowflakeIdGenerator.getInstance().nextId();
-        String assetCode = "ASSET" + snowflakeId;
+        String uuid = cn.hutool.core.util.IdUtil.simpleUUID();
+        String assetCode = "ZC" + uuid;
         asset.setCode(assetCode);
+        // 用资产编码的值赋值给标签编码
+        asset.setLabelCode(assetCode);
         
         asset.setCreateTime(System.currentTimeMillis());
         asset.setUpdateTime(System.currentTimeMillis());

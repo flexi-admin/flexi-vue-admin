@@ -19,11 +19,19 @@
         <el-table-column prop="specification" label="规格" />
         <el-table-column prop="model" label="型号" />
         <el-table-column prop="supplierName" label="供应商" />
+        <el-table-column prop="sourceName" label="资产来源" />
+        <el-table-column prop="unitName" label="计量单位" />
+        <el-table-column prop="adminUserName" label="管理员" />
+        <el-table-column prop="userName" label="使用人" />
+        <el-table-column prop="deptName" label="部门" />
         <el-table-column prop="statusName" label="状态" />
-        <el-table-column label="操作" width="180">
+        <el-table-column label="操作" width="240">
           <template #default="{ row }">
             <el-button size="small" @click="openEditDialog(row)">
               编辑
+            </el-button>
+            <el-button size="small" type="primary" @click="copyAsset(row)">
+              复制
             </el-button>
             <el-button size="small" type="danger" @click="deleteAsset(row.id)">
               删除
@@ -154,23 +162,37 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="标签编码">
-              <el-input v-model="form.labelCode" placeholder="请输入标签编码" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="管理员">
-              <el-input v-model="form.adminUserId" type="number" placeholder="请输入管理员用户ID" />
+              <el-select v-model="form.adminUserId" placeholder="请选择管理员">
+                <el-option 
+                  v-for="user in users" 
+                  :key="user.value" 
+                  :label="user.label" 
+                  :value="user.value" 
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="使用人">
-              <el-input v-model="form.userId" type="number" placeholder="请输入使用人用户ID" />
+              <el-select v-model="form.userId" placeholder="请选择使用人">
+                <el-option 
+                  v-for="user in users" 
+                  :key="user.value" 
+                  :label="user.label" 
+                  :value="user.value" 
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="部门">
-              <el-input v-model="form.deptId" type="number" placeholder="请输入部门ID" />
+              <el-cascader
+                v-model="form.deptId"
+                :options="deptTree"
+                :props="deptProps"
+                placeholder="请选择部门"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -181,18 +203,24 @@
           <el-col :span="8">
             <el-form-item label="资产来源">
               <el-select v-model="form.source" placeholder="请选择资产来源">
-                <el-option label="自产" value="自产" />
-                <el-option label="采购" value="采购" />
+                <el-option 
+                  v-for="option in assetSourceOptions" 
+                  :key="option.value" 
+                  :label="option.label" 
+                  :value="option.value" 
+                />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="计量单位">
               <el-select v-model="form.unit" placeholder="请选择计量单位">
-                <el-option label="台" value="台" />
-                <el-option label="张" value="张" />
-                <el-option label="个" value="个" />
-                <el-option label="套" value="套" />
+                <el-option 
+                  v-for="option in assetUnitOptions" 
+                  :key="option.value" 
+                  :label="option.label" 
+                  :value="option.value" 
+                />
               </el-select>
             </el-form-item>
           </el-col>
@@ -251,7 +279,23 @@ const assetLocationProps = {
   }
 }
 const assetStatusOptions = ref([])
+const assetSourceOptions = ref([])
+const assetUnitOptions = ref([])
 const suppliers = ref([])
+const users = ref([])
+const depts = ref([])
+const deptTree = ref([])
+const deptProps = {
+  value: 'id',
+  label: 'name',
+  children: 'children',
+  checkStrictly: true,
+  emitPath: false,
+  checkStrategy: 'leaf',
+  filterOption: (node) => {
+    return node.isLeaf
+  }
+}
 const supplierLoading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增资产')
@@ -284,28 +328,9 @@ const form = ref({
 // 加载资产列表
 const loadAssetList = async () => {
   try {
+    // 直接使用后端返回的带有关联数据的资产列表
     const assets = await api.get('/asset')
-    
-    // 加载资产类型、位置、状态和供应商信息
-    await loadAssetTypes()
-    await loadAssetLocations()
-    await loadAssetStatus()
-    await loadSuppliers()
-    
-    // 为每个资产添加类型、位置、状态和供应商名称
-    assetList.value = assets.map(asset => {
-      const type = assetTypes.value.find(t => t.id === asset.typeId)
-      const location = assetLocations.value.find(l => l.id === asset.locationId)
-      const statusOption = assetStatusOptions.value.find(option => option.value === asset.status)
-      const supplier = suppliers.value.find(s => s.id === asset.supplierId)
-      return {
-        ...asset,
-        typeName: type ? type.name : '',
-        locationName: location ? location.name : '',
-        statusName: statusOption ? statusOption.label : asset.status,
-        supplierName: supplier ? supplier.name : ''
-      }
-    })
+    assetList.value = assets
   } catch (error) {
     ElMessage.error('加载资产列表失败')
     console.error('加载资产列表失败:', error)
@@ -329,9 +354,6 @@ const loadAssetTypes = async () => {
       })
     }
     assetTypeTree.value = processTree(treeData)
-    
-    // 同时获取扁平化列表用于其他操作
-    assetTypes.value = await api.get('/asset-type')
   } catch (error) {
     console.error('加载资产类型失败:', error)
   }
@@ -354,32 +376,40 @@ const loadAssetLocations = async () => {
       })
     }
     assetLocationTree.value = processTree(treeData)
-    
-    // 同时获取扁平化列表用于其他操作
-    assetLocations.value = await api.get('/asset-location')
   } catch (error) {
     console.error('加载资产位置失败:', error)
   }
 }
 
-// 加载资产状态字典数据
-const loadAssetStatus = async () => {
+// 加载资产相关字典数据
+const loadAssetDicts = async () => {
   try {
-    const response = await api.get('/dict/list', {
-      params: {
-        page: 1,
-        pageSize: 100
-      }
-    })
-    // 过滤出资产状态类型的字典
-    assetStatusOptions.value = response.list
+    // 一次性请求所有需要的字典类型
+    const response = await api.get('/dict/list-by-type')
+    
+    // 处理资产状态类型的字典
+    assetStatusOptions.value = response
       .filter(item => item.type === 'asset_status')
       .map(item => ({
         label: item.value,
         value: item.code
       }))
+    // 处理资产来源类型的字典
+    assetSourceOptions.value = response
+      .filter(item => item.type === 'asset_source')
+      .map(item => ({
+        label: item.value,
+        value: item.code
+      }))
+    // 处理计量单位类型的字典
+    assetUnitOptions.value = response
+      .filter(item => item.type === 'asset_unit')
+      .map(item => ({
+        label: item.value,
+        value: item.code
+      }))
   } catch (error) {
-    console.error('加载资产状态失败:', error)
+    console.error('加载资产字典数据失败:', error)
   }
 }
 
@@ -417,9 +447,69 @@ const searchSuppliers = async (query) => {
   }
 }
 
+// 加载用户列表
+const loadUsers = async () => {
+  try {
+    const response = await api.get('/user/list', {
+      params: {
+        page: 1,
+        pageSize: 100
+      }
+    })
+    users.value = response.list.map(user => ({
+      label: user.username,
+      value: user.id
+    }))
+  } catch (error) {
+    console.error('加载用户失败:', error)
+  }
+}
+
+// 加载部门列表
+const loadDepts = async () => {
+  try {
+    // 获取树形结构数据
+    const treeData = await api.get('/dept/tree')
+    // 处理树形数据，添加isLeaf字段
+    const processTree = (nodes) => {
+      return nodes.map(node => {
+        const processedNode = { ...node }
+        processedNode.isLeaf = !processedNode.children || processedNode.children.length === 0
+        if (processedNode.children) {
+          processedNode.children = processTree(processedNode.children)
+        }
+        return processedNode
+      })
+    }
+    deptTree.value = processTree(treeData)
+  } catch (error) {
+    console.error('加载部门失败:', error)
+  }
+}
+
 // 打开新增对话框
-const openAddDialog = () => {
+const openAddDialog = async () => {
   dialogTitle.value = '新增资产'
+  
+  // 确保资产类型和位置的树形数据已经加载
+  if (assetTypeTree.value.length === 0) {
+    await loadAssetTypes()
+  }
+  if (assetLocationTree.value.length === 0) {
+    await loadAssetLocations()
+  }
+  // 确保字典数据已经加载
+  if (assetStatusOptions.value.length === 0) {
+    await loadAssetDicts()
+  }
+  // 确保用户和部门数据已经加载
+  if (users.value.length === 0) {
+    await loadUsers()
+  }
+  if (depts.value.length === 0) {
+    await loadDepts()
+  }
+  
   form.value = {
     id: '',
     name: '',
@@ -448,8 +538,28 @@ const openAddDialog = () => {
 }
 
 // 打开编辑对话框
-const openEditDialog = (row) => {
+const openEditDialog = async (row) => {
   dialogTitle.value = '编辑资产'
+  
+  // 确保资产类型和位置的树形数据已经加载
+  if (assetTypeTree.value.length === 0) {
+    await loadAssetTypes()
+  }
+  if (assetLocationTree.value.length === 0) {
+    await loadAssetLocations()
+  }
+  // 确保字典数据已经加载
+  if (assetStatusOptions.value.length === 0) {
+    await loadAssetDicts()
+  }
+  // 确保用户和部门数据已经加载
+  if (users.value.length === 0) {
+    await loadUsers()
+  }
+  if (depts.value.length === 0) {
+    await loadDepts()
+  }
+  
   const formData = { ...row }
   // 将typeId转换为数组格式，以适应el-cascader
   formData.typeId = row.typeId ? [row.typeId] : []
@@ -459,26 +569,85 @@ const openEditDialog = (row) => {
   dialogVisible.value = true
 }
 
+// 复制资产
+const copyAsset = async (row) => {
+  dialogTitle.value = '新增资产（复制）'
+  
+  // 确保资产类型和位置的树形数据已经加载
+  if (assetTypeTree.value.length === 0) {
+    await loadAssetTypes()
+  }
+  if (assetLocationTree.value.length === 0) {
+    await loadAssetLocations()
+  }
+  // 确保字典数据已经加载
+  if (assetStatusOptions.value.length === 0) {
+    await loadAssetDicts()
+  }
+  // 确保用户和部门数据已经加载
+  if (users.value.length === 0) {
+    await loadUsers()
+  }
+  if (depts.value.length === 0) {
+    await loadDepts()
+  }
+  
+  // 复制资产数据，清除ID、编码和标签编码
+  const formData = { ...row }
+  formData.id = ''
+  formData.code = ''
+  formData.labelCode = ''
+  // 由于el-cascader的emitPath设置为false，直接使用数字值
+  formData.typeId = row.typeId || ''
+  formData.locationId = row.locationId || ''
+  form.value = formData
+  dialogVisible.value = true
+}
+
 // 提交表单
 const submitForm = async () => {
   try {
     // 处理表单数据，将typeId和locationId从数组转换为单个值
     const formData = { ...form.value }
-    // 如果typeId是数组且有值，取第一个元素作为typeId
+    // 处理typeId：如果是数组且有值，取第一个元素；如果是数字，直接使用；否则设置为null
     if (Array.isArray(formData.typeId) && formData.typeId.length > 0) {
       formData.typeId = formData.typeId[0]
+    } else if (typeof formData.typeId === 'number') {
+      // 已经是数字，直接使用
     } else {
       formData.typeId = null
     }
-    // 如果locationId是数组且有值，取第一个元素作为locationId
+    // 处理locationId：如果是数组且有值，取第一个元素；如果是数字，直接使用；否则设置为null
     if (Array.isArray(formData.locationId) && formData.locationId.length > 0) {
       formData.locationId = formData.locationId[0]
+    } else if (typeof formData.locationId === 'number') {
+      // 已经是数字，直接使用
     } else {
       formData.locationId = null
+    }
+    // 处理deptId：如果是数组且有值，取第一个元素；如果是数字，直接使用；否则设置为null
+    if (Array.isArray(formData.deptId) && formData.deptId.length > 0) {
+      formData.deptId = formData.deptId[0]
+    } else if (typeof formData.deptId === 'number') {
+      // 已经是数字，直接使用
+    } else {
+      formData.deptId = null
     }
     // 如果supplierId为空，设置为null
     if (!formData.supplierId) {
       formData.supplierId = null
+    }
+    // 如果adminUserId为空，设置为null
+    if (!formData.adminUserId) {
+      formData.adminUserId = null
+    }
+    // 如果userId为空，设置为null
+    if (!formData.userId) {
+      formData.userId = null
+    }
+    // 如果deptId为空，设置为null
+    if (!formData.deptId) {
+      formData.deptId = null
     }
     
     if (form.value.id) {

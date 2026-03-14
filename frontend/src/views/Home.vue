@@ -155,11 +155,13 @@ const processMenuItems = (items: any[]) => {
   })
 }
 
-// 从后端获取菜单数据
+// 从configStore获取菜单数据
 const fetchMenuOptions = async () => {
   try {
-    const response = await api.get('/menu/tree')
-    console.log('Menu data from backend:', response)
+    // 从configStore获取菜单数据
+    await configStore.loadMenuData()
+    const response = configStore.menuData
+    console.log('Menu data from configStore:', response)
     if (response && response.length > 0) {
       // 转换后端数据结构为前端期望的结构，递归处理所有级别菜单
       menuOptions.value = processMenuItems(response)

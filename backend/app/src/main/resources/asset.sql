@@ -59,6 +59,8 @@ CREATE TABLE IF NOT EXISTS `asset` (
   `creator_id` BIGINT COMMENT '创建人',
   `updater_id` BIGINT COMMENT '更新人',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_code` (`code`),
+  UNIQUE KEY `uk_label_code` (`label_code`),
   INDEX `idx_type_id` (`type_id`),
   INDEX `idx_location_id` (`location_id`),
   INDEX `idx_admin_user_id` (`admin_user_id`),
@@ -144,6 +146,18 @@ INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VA
 ('asset_status', 'in_use', '使用中', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('asset_status', 'repairing', '维修中', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('asset_status', 'scrapped', '已报废', 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 插入资产来源字典数据
+INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VALUES
+('asset_source', 'self_produced', '自产', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('asset_source', 'purchased', '采购', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 插入计量单位字典数据
+INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VALUES
+('asset_unit', 'unit', '台', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('asset_unit', 'piece', '个', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('asset_unit', 'set', '套', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('asset_unit', 'sheet', '张', 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 供应商表
 CREATE TABLE IF NOT EXISTS `asset_supplier` (

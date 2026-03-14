@@ -119,8 +119,9 @@ router.beforeEach(async (to, _from, next) => {
   if (!dynamicRoutesAdded) {
     // 还没有添加动态路由，获取菜单数据并添加动态路由
     try {
-      const api = (await import('../api')).default
-      const menuData = await api.get('/menu/tree')
+      // 从configStore获取菜单数据
+      await configStore.loadMenuData()
+      const menuData = configStore.menuData
       
       // 转换菜单数据格式
       const menuOptions = menuData.map((item: any) => {

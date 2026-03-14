@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/dict")
@@ -51,5 +52,11 @@ public class DictController {
     public R<Dict> getById(@PathVariable Long id) {
         Dict dict = dictService.getById(id);
         return R.success(dict);
+    }
+
+    @GetMapping("/list-by-type")
+    public R<List<Dict>> listByType(@RequestParam(required = false) String type) {
+        List<Dict> dicts = dictService.listByType(type);
+        return R.success(dicts);
     }
 }

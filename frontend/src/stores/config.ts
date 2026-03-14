@@ -4,8 +4,10 @@ import api from '@/api'
 export const useConfigStore = defineStore('config', {
   state: () => ({
     config: {},
+    menuData: [],
     loading: false,
-    loaded: false
+    loaded: false,
+    menuLoaded: false
   }),
 
   getters: {
@@ -19,6 +21,10 @@ export const useConfigStore = defineStore('config', {
 
     defaultHome: (state) => {
       return state.config['system.default_home'] || '/system/user'
+    },
+
+    menus: (state) => {
+      return state.menuData
     }
   },
 
@@ -38,9 +44,34 @@ export const useConfigStore = defineStore('config', {
       }
     },
 
+    async loadMenuData() {
+      if (this.menuLoaded || this.loading) return
+
+      this.loading = true
+      try {
+        const response = await api.get('/menu/tree')
+        this.menuData = response
+        this.menuLoaded = true
+      } catch (error) {
+        console.error('获取菜单数据失败:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    setMenuData(menuData: any[]) {
+      this.menuData = menuData
+      this.menuLoaded = true
+    },
+
     resetConfig() {
       this.config = {}
       this.loaded = false
+    },
+
+    resetMenuData() {
+      this.menuData = []
+      this.menuLoaded = false
     }
   }
 })

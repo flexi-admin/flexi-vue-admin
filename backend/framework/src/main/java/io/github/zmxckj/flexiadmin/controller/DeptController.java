@@ -80,5 +80,12 @@ public class DeptController {
         return R.success();
     }
 
+    /**
+     * 部门树形结构
+     */
+    @GetMapping("/tree")
+    public R<List<Dept>> tree() {
+        return R.success(deptService.tree());
+    }
 
 }

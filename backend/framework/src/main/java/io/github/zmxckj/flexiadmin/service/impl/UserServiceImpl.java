@@ -51,4 +51,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         return result;
     }
+
+    @Override
+    public String getUserNameById(Long userId) {
+        User user = getById(userId);
+        return user != null ? user.getUsername() : "";
+    }
 }

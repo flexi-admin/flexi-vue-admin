@@ -3,8 +3,10 @@ package io.github.zmxckj.flexiadmin.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -39,6 +41,10 @@ public class Dept implements Serializable {
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;
+
+    // 非数据库字段，用于构建树形结构
+    @TableField(exist = false)
+    private List<Dept> children;
 
     public Long getId() {
         return id;
@@ -120,6 +126,14 @@ public class Dept implements Serializable {
         this.updateTime = updateTime;
     }
 
+    public List<Dept> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<Dept> children) {
+        this.children = children;
+    }
+
     @Override
     public String toString() {
         return "Dept{" +
@@ -133,6 +147,7 @@ public class Dept implements Serializable {
         ", orderNum=" + orderNum +
         ", createTime=" + createTime +
         ", updateTime=" + updateTime +
+        ", children=" + children +
         "}";
     }
 }
