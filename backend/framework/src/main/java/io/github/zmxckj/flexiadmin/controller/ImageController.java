@@ -10,12 +10,14 @@ import io.github.zmxckj.flexiadmin.service.ImageService;
 import io.github.zmxckj.flexiadmin.security.RequirePermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.File;
+import java.nio.file.Files;
 
 @RestController
 @RequestMapping("/image")
@@ -61,7 +63,32 @@ public class ImageController {
         }
         Page<Image> pageInfo = new Page<>(page, size);
         IPage<Image> result = imageService.page(pageInfo);
+        // 处理图片路径，转换为可访问的URL
+        result.getRecords().forEach(image -> {
+            // 这里需要根据实际部署情况修改，这里假设图片访问路径为 /api/image/view/{id}
+            image.setFilePath("/api/image/view/" + image.getId());
+        });
         return R.success(result);
+    }
+    
+    @GetMapping("/view/{id}")
+    public ResponseEntity<byte[]> viewImage(@PathVariable Long id) {
+        if (!isImageModuleEnabled()) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
+        Image image = imageService.getById(id);
+        if (image == null) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            File file = new File(image.getFilePath());
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(image.getFileType()))
+                    .body(bytes);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @DeleteMapping("/{id}")

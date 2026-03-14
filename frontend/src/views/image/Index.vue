@@ -26,8 +26,8 @@
         <el-table-column label="图片预览" width="120">
           <template #default="{ row }">
             <el-image
-              :src="'/api/images/' + row.filename"
-              :preview-src-list="['/api/images/' + row.filename]"
+              :src="imageBaseUrl + row.filename"
+              :preview-src-list="[imageBaseUrl + row.filename]"
               fit="cover"
               style="width: 60px; height: 60px"
             />
@@ -69,11 +69,14 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useUserStore } from '@/stores/user';
+import { useConfigStore } from '@/stores/config';
 import { ElMessage } from 'element-plus';
 import api from '@/api';
 
 const userStore = useUserStore();
+const configStore = useConfigStore();
 const token = computed(() => userStore.token);
+const imageBaseUrl = computed(() => configStore.imageBaseUrl);
 
 const uploadRef = ref(null);
 const imageList = ref([]);
@@ -139,7 +142,10 @@ const formatFileSize = (size) => {
 };
 
 // 页面加载时获取图片列表
-onMounted(() => {
+onMounted(async () => {
+  // 加载配置
+  await configStore.loadConfig();
+  // 获取图片列表
   getImageList();
 });
 </script>

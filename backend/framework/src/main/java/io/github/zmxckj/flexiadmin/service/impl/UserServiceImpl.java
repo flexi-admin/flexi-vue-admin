@@ -1,6 +1,7 @@
 package io.github.zmxckj.flexiadmin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.github.zmxckj.flexiadmin.entity.User;
 import io.github.zmxckj.flexiadmin.mapper.UserMapper;
@@ -56,5 +57,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public String getUserNameById(Long userId) {
         User user = getById(userId);
         return user != null ? user.getUsername() : "";
+    }
+
+    @Override
+    public Page<User> page(Page<User> page, String keyword) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        if (keyword != null && !keyword.isEmpty()) {
+            queryWrapper.like("username", keyword);
+        }
+        return super.page(page, queryWrapper);
     }
 }

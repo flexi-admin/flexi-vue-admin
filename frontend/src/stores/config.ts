@@ -23,6 +23,10 @@ export const useConfigStore = defineStore('config', {
       return state.config['system.default_home'] || '/system/user'
     },
 
+    imageBaseUrl: (state) => {
+      return state.config['system.image_base_url'] || '/api/images/'
+    },
+
     menus: (state) => {
       return state.menuData
     }

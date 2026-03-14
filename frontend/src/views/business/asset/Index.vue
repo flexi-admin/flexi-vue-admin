@@ -150,7 +150,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="图片">
-              <el-input v-model="form.image" placeholder="请输入图片路径" />
+              <ImageSelector v-model="form.image" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -163,7 +163,14 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="管理员">
-              <el-select v-model="form.adminUserId" placeholder="请选择管理员">
+              <el-select 
+                v-model="form.adminUserId" 
+                placeholder="请选择管理员" 
+                filterable
+                remote
+                :remote-method="remoteMethod"
+                :loading="userLoading"
+              >
                 <el-option 
                   v-for="user in users" 
                   :key="user.value" 
@@ -175,7 +182,14 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="使用人">
-              <el-select v-model="form.userId" placeholder="请选择使用人">
+              <el-select 
+                v-model="form.userId" 
+                placeholder="请选择使用人" 
+                filterable
+                remote
+                :remote-method="remoteMethod"
+                :loading="userLoading"
+              >
                 <el-option 
                   v-for="user in users" 
                   :key="user.value" 
@@ -242,14 +256,18 @@
         </span>
       </template>
     </el-dialog>
+
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/api'
+import { useConfigStore } from '@/stores/config'
+import ImageSelector from '@/components/ImageSelector.vue'
 
 const assetList = ref([])
 const assetTypes = ref([])
@@ -297,8 +315,15 @@ const deptProps = {
   }
 }
 const supplierLoading = ref(false)
+const userLoading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增资产')
+
+
+// 配置store
+const configStore = useConfigStore()
+// 图片基础路径
+const imageBaseUrl = computed(() => configStore.imageBaseUrl)
 const form = ref({
   id: '',
   name: '',
@@ -330,7 +355,13 @@ const loadAssetList = async () => {
   try {
     // 直接使用后端返回的带有关联数据的资产列表
     const assets = await api.get('/asset')
-    assetList.value = assets
+    // 处理资产图片路径，确保格式正确
+    assetList.value = assets.map(asset => {
+      if (asset.image) {
+        asset.image = asset.image.startsWith('/') ? imageBaseUrl.value + asset.image : imageBaseUrl.value + '/' + asset.image
+      }
+      return asset
+    })
   } catch (error) {
     ElMessage.error('加载资产列表失败')
     console.error('加载资产列表失败:', error)
@@ -384,8 +415,12 @@ const loadAssetLocations = async () => {
 // 加载资产相关字典数据
 const loadAssetDicts = async () => {
   try {
-    // 一次性请求所有需要的字典类型
-    const response = await api.get('/dict/list-by-type')
+    // 一次性请求资产相关的字典类型
+    const response = await api.get('/dict/list-by-type', {
+      params: {
+        type: 'asset_status,asset_source,asset_unit'
+      }
+    })
     
     // 处理资产状态类型的字典
     assetStatusOptions.value = response
@@ -423,6 +458,8 @@ const loadSuppliers = async () => {
   }
 }
 
+
+
 // 搜索供应商
 const searchSuppliers = async (query) => {
   if (query) {
@@ -448,12 +485,13 @@ const searchSuppliers = async (query) => {
 }
 
 // 加载用户列表
-const loadUsers = async () => {
+const loadUsers = async (keyword = '') => {
   try {
     const response = await api.get('/user/list', {
       params: {
         page: 1,
-        pageSize: 100
+        pageSize: 100,
+        keyword: keyword
       }
     })
     users.value = response.list.map(user => ({
@@ -462,6 +500,17 @@ const loadUsers = async () => {
     }))
   } catch (error) {
     console.error('加载用户失败:', error)
+  }
+}
+
+// 远程搜索用户
+const remoteMethod = async (query) => {
+  if (query !== '') {
+    userLoading.value = true
+    await loadUsers(query)
+    userLoading.value = false
+  } else {
+    users.value = []
   }
 }
 
@@ -680,7 +729,10 @@ const deleteAsset = async (id) => {
 }
 
 // 组件挂载时加载数据
-onMounted(() => {
+onMounted(async () => {
+  // 加载配置
+  await configStore.loadConfig()
+  // 加载资产列表
   loadAssetList()
 })
 </script>
@@ -700,4 +752,6 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
 }
+
+
 </style>

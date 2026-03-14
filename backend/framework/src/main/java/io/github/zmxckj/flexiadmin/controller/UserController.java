@@ -38,8 +38,8 @@ public class UserController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping("/list")
-    public R<Map<String, Object>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page<User> userPage = userService.page(new Page<>(page, pageSize));
+    public R<Map<String, Object>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer pageSize, @RequestParam(required = false) String keyword) {
+        Page<User> userPage = userService.page(new Page<>(page, pageSize), keyword);
         List<User> users = userPage.getRecords();
         
         // 为每个用户添加角色列表和部门列表

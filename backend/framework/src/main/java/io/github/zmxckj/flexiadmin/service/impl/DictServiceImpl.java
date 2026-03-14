@@ -33,7 +33,13 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
     public List<Dict> listByType(String type) {
         QueryWrapper<Dict> queryWrapper = new QueryWrapper<>();
         if (type != null && !type.isEmpty()) {
-            queryWrapper.eq("type", type);
+            // 支持多个类型，用逗号分隔
+            if (type.contains(",")) {
+                String[] types = type.split(",");
+                queryWrapper.in("type", types);
+            } else {
+                queryWrapper.eq("type", type);
+            }
         }
         return list(queryWrapper);
     }
