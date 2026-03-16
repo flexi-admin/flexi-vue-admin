@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import cn.hutool.core.util.IdUtil;
 
 @RestController
 @RequestMapping("/asset/inventory")
@@ -31,6 +32,11 @@ public class AssetInventoryController {
     // 新增
     @PostMapping
     public R<?> save(@RequestBody AssetInventory assetInventory) {
+        // 生成盘点单号：PD+hutool的objectId
+        String inventoryCode = "PD" + IdUtil.objectId();
+        assetInventory.setInventoryCode(inventoryCode);
+        assetInventory.setCreateTime(System.currentTimeMillis());
+        assetInventory.setUpdateTime(System.currentTimeMillis());
         assetInventoryService.save(assetInventory);
         return R.success();
     }
@@ -38,6 +44,7 @@ public class AssetInventoryController {
     // 更新
     @PutMapping
     public R<?> update(@RequestBody AssetInventory assetInventory) {
+        assetInventory.setUpdateTime(System.currentTimeMillis());
         assetInventoryService.updateById(assetInventory);
         return R.success();
     }

@@ -14,6 +14,11 @@
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="inventoryCode" label="盘点单号" />
         <el-table-column prop="inventoryName" label="盘点名称" />
+        <el-table-column prop="inventoryType" label="盘点类型">
+          <template #default="{ row }">
+            {{ getInventoryTypeText(row.inventoryType) }}
+          </template>
+        </el-table-column>
         <el-table-column label="开始时间" width="180">
           <template #default="{ row }">
             {{ formatDate(row.startTime) }}
@@ -69,9 +74,47 @@
               <el-input v-model="form.inventoryName" placeholder="请输入盘点名称" />
             </el-form-item>
           </el-col>
-          <el-col :span="24">
+          <el-col :span="24" v-if="form.id">
             <el-form-item label="盘点单号">
-              <el-input v-model="form.inventoryCode" placeholder="请输入盘点单号" :disabled="form.id" />
+              <el-input v-model="form.inventoryCode" placeholder="请输入盘点单号" :disabled="true" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="盘点类型">
+              <el-select v-model="form.inventoryType" placeholder="请选择盘点类型">
+                <el-option 
+                  v-for="option in inventoryTypeOptions" 
+                  :key="option.value" 
+                  :label="option.label" 
+                  :value="option.value" 
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24" v-if="form.inventoryType === 'dept'">
+            <el-form-item label="盘点部门">
+              <el-cascader
+                v-model="selectedDepts"
+                :options="deptOptions"
+                :props="deptProps"
+                placeholder="请选择盘点部门"
+                collapse-tags
+                :filterable="true"
+                :clearable="true"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24" v-if="form.inventoryType === 'category'">
+            <el-form-item label="盘点分类">
+              <el-cascader
+                v-model="selectedCategories"
+                :options="categoryOptions"
+                :props="categoryProps"
+                placeholder="请选择盘点分类"
+                collapse-tags
+                :filterable="true"
+                :clearable="true"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -96,7 +139,7 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="24">
+          <el-col :span="24" v-if="form.id">
             <el-form-item label="状态">
               <el-select v-model="form.status" placeholder="请选择状态">
                 <el-option 
@@ -139,12 +182,38 @@ import api from '@/api'
 
 const inventoryList = ref([])
 const inventoryStatusOptions = ref([
+  { label: '未开始', value: 'pending' },
   { label: '进行中', value: 'in_progress' },
   { label: '已完成', value: 'completed' },
   { label: '已取消', value: 'cancelled' }
 ])
+const inventoryTypeOptions = ref([
+  { label: '全部盘点', value: 'all' },
+  { label: '按部门盘点', value: 'dept' },
+  { label: '按分类盘点', value: 'category' }
+])
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增盘点')
+
+// 部门和分类选项
+const deptOptions = ref([])
+const categoryOptions = ref([])
+const selectedDepts = ref([])
+const selectedCategories = ref([])
+
+// 部门和分类树形配置
+const deptProps = {
+  value: 'id',
+  label: 'name',
+  children: 'children',
+  multiple: true
+}
+const categoryProps = {
+  value: 'id',
+  label: 'name',
+  children: 'children',
+  multiple: true
+}
 
 // 分页相关
 const currentPage = ref(1)
@@ -155,9 +224,12 @@ const form = ref({
   id: '',
   inventoryCode: '',
   inventoryName: '',
+  inventoryType: 'all',
+  inventoryDepts: '',
+  inventoryCategories: '',
   startTime: '',
   endTime: '',
-  status: 'in_progress',
+  status: 'pending',
   creatorId: '',
   remark: ''
 })
@@ -191,6 +263,8 @@ const formatDate = (timestamp) => {
 // 获取状态类型
 const getStatusType = (status) => {
   switch (status) {
+    case 'pending':
+      return 'info'
     case 'in_progress':
       return 'warning'
     case 'completed':
@@ -205,6 +279,8 @@ const getStatusType = (status) => {
 // 获取状态文本
 const getStatusText = (status) => {
   switch (status) {
+    case 'pending':
+      return '未开始'
     case 'in_progress':
       return '进行中'
     case 'completed':
@@ -216,24 +292,68 @@ const getStatusText = (status) => {
   }
 }
 
+// 获取盘点类型文本
+const getInventoryTypeText = (type) => {
+  switch (type) {
+    case 'all':
+      return '全部盘点'
+    case 'dept':
+      return '按部门盘点'
+    case 'category':
+      return '按分类盘点'
+    default:
+      return type
+  }
+}
+
+// 加载部门列表
+const loadDepts = async () => {
+  try {
+    const response = await api.get('/dept/tree')
+    deptOptions.value = response
+  } catch (error) {
+    console.error('加载部门列表失败:', error)
+  }
+}
+
+// 加载分类列表
+const loadCategories = async () => {
+  try {
+    const response = await api.get('/asset-type/tree')
+    categoryOptions.value = response
+  } catch (error) {
+    console.error('加载分类列表失败:', error)
+  }
+}
+
 // 打开新增对话框
-const openAddDialog = () => {
+const openAddDialog = async () => {
   dialogTitle.value = '新增盘点'
   form.value = {
     id: '',
     inventoryCode: '',
     inventoryName: '',
+    inventoryType: 'all',
+    inventoryDepts: '',
+    inventoryCategories: '',
     startTime: '',
     endTime: '',
-    status: 'in_progress',
+    status: 'pending',
     creatorId: '',
     remark: ''
   }
+  selectedDepts.value = []
+  selectedCategories.value = []
+  
+  // 加载部门和分类数据
+  await loadDepts()
+  await loadCategories()
+  
   dialogVisible.value = true
 }
 
 // 打开编辑对话框
-const openEditDialog = (row) => {
+const openEditDialog = async (row) => {
   dialogTitle.value = '编辑盘点'
   const formData = { ...row }
   // 转换时间格式
@@ -244,6 +364,15 @@ const openEditDialog = (row) => {
     formData.endTime = new Date(formData.endTime).toISOString().slice(0, 19).replace('T', ' ')
   }
   form.value = formData
+  
+  // 处理部门和分类数据
+  selectedDepts.value = formData.inventoryDepts ? formData.inventoryDepts.split(',').map(id => parseInt(id)) : []
+  selectedCategories.value = formData.inventoryCategories ? formData.inventoryCategories.split(',').map(id => parseInt(id)) : []
+  
+  // 加载部门和分类数据
+  await loadDepts()
+  await loadCategories()
+  
   dialogVisible.value = true
 }
 
@@ -257,6 +386,20 @@ const submitForm = async () => {
     }
     if (formData.endTime) {
       formData.endTime = new Date(formData.endTime).getTime()
+    }
+    
+    // 根据盘点类型设置部门和分类
+    if (formData.inventoryType === 'all') {
+      formData.inventoryDepts = ''
+      formData.inventoryCategories = ''
+    } else if (formData.inventoryType === 'dept') {
+      // 处理部门数据
+      formData.inventoryDepts = selectedDepts.value.join(',')
+      formData.inventoryCategories = ''
+    } else if (formData.inventoryType === 'category') {
+      // 处理分类数据
+      formData.inventoryCategories = selectedCategories.value.join(',')
+      formData.inventoryDepts = ''
     }
     
     if (form.value.id) {

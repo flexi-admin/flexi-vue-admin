@@ -194,6 +194,9 @@ CREATE TABLE IF NOT EXISTS `asset_inventory` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `inventory_code` VARCHAR(255) NOT NULL COMMENT '盘点单号',
   `inventory_name` VARCHAR(255) NOT NULL COMMENT '盘点名称',
+  `inventory_type` VARCHAR(50) NOT NULL COMMENT '盘点类型（全部盘点、按部门盘点、按分类盘点）',
+  `inventory_depts` VARCHAR(500) COMMENT '盘点部门IDs，逗号分隔',
+  `inventory_categories` VARCHAR(500) COMMENT '盘点分类IDs，逗号分隔',
   `start_time` BIGINT NOT NULL COMMENT '开始时间',
   `end_time` BIGINT COMMENT '结束时间',
   `status` VARCHAR(50) NOT NULL COMMENT '状态（进行中、已完成、已取消）',
@@ -232,6 +235,8 @@ INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VA
 ('inventory_detail_status', 'normal', '正常', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('inventory_detail_status', 'overage', '盘盈', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('inventory_detail_status', 'shortage', '盘亏', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+
 
 -- 插入资产盘点管理菜单和权限
 -- 资产盘点管理
