@@ -188,3 +188,63 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 -- 为admin角色分配供应商管理权限
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES
 (1, 51), (1, 52), (1, 53), (1, 54), (1, 55);
+
+-- 资产盘点表
+CREATE TABLE IF NOT EXISTS `asset_inventory` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `inventory_code` VARCHAR(255) NOT NULL COMMENT '盘点单号',
+  `inventory_name` VARCHAR(255) NOT NULL COMMENT '盘点名称',
+  `start_time` BIGINT NOT NULL COMMENT '开始时间',
+  `end_time` BIGINT COMMENT '结束时间',
+  `status` VARCHAR(50) NOT NULL COMMENT '状态（进行中、已完成、已取消）',
+  `creator_id` BIGINT COMMENT '创建人ID',
+  `create_time` BIGINT NOT NULL COMMENT '创建时间',
+  `update_time` BIGINT NOT NULL COMMENT '更新时间',
+  `remark` VARCHAR(500) COMMENT '备注',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_inventory_code` (`inventory_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资产盘点表';
+
+-- 资产盘点明细表
+CREATE TABLE IF NOT EXISTS `asset_inventory_detail` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `inventory_id` BIGINT NOT NULL COMMENT '盘点单ID',
+  `asset_id` BIGINT NOT NULL COMMENT '资产ID',
+  `expected_quantity` INT NOT NULL DEFAULT 1 COMMENT '预期数量',
+  `actual_quantity` INT NOT NULL DEFAULT 1 COMMENT '实际数量',
+  `status` VARCHAR(50) NOT NULL COMMENT '状态（正常、盘盈、盘亏）',
+  `remark` VARCHAR(500) COMMENT '备注',
+  `create_time` BIGINT NOT NULL COMMENT '创建时间',
+  `update_time` BIGINT NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  INDEX `idx_inventory_id` (`inventory_id`),
+  INDEX `idx_asset_id` (`asset_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资产盘点明细表';
+
+-- 插入资产盘点状态字典数据
+INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VALUES
+('inventory_status', 'in_progress', '进行中', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('inventory_status', 'completed', '已完成', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('inventory_status', 'cancelled', '已取消', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 插入资产盘点明细状态字典数据
+INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VALUES
+('inventory_detail_status', 'normal', '正常', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('inventory_detail_status', 'overage', '盘盈', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('inventory_detail_status', 'shortage', '盘亏', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 插入资产盘点管理菜单和权限
+-- 资产盘点管理
+INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, status, order_num) VALUES
+(56, '资产盘点', '/asset/inventory', 'business/asset-inventory/Index', 35, 'DataAnalysis', NULL, 'menu', true, 20);
+
+-- 资产盘点操作权限
+INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, status, order_num) VALUES
+(57, '资产盘点列表', NULL, NULL, 56, NULL, 'asset:inventory:list', 'operation', true, 35),
+(58, '资产盘点添加', NULL, NULL, 56, NULL, 'asset:inventory:add', 'operation', true, 36),
+(59, '资产盘点编辑', NULL, NULL, 56, NULL, 'asset:inventory:edit', 'operation', true, 37),
+(60, '资产盘点删除', NULL, NULL, 56, NULL, 'asset:inventory:delete', 'operation', true, 38);
+
+-- 为admin角色分配资产盘点管理权限
+INSERT INTO sys_role_menu (role_id, menu_id) VALUES
+(1, 56), (1, 57), (1, 58), (1, 59), (1, 60);

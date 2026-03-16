@@ -20,19 +20,20 @@ public class AssetController {
 
     @RequirePermission("asset:list")
     @GetMapping
-    public R<List<AssetDTO>> list() {
-        return R.success(assetService.listWithDetails());
+    public R<com.baomidou.mybatisplus.core.metadata.IPage<AssetDTO>> list(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        return R.success(assetService.listWithDetails(page, size));
     }
 
     @RequirePermission("asset:add")
     @PostMapping
     public boolean add(@RequestBody Asset asset) {
         // 生成资产编码（使用雪花算法生成全局唯一ID）
-        String uuid = cn.hutool.core.util.IdUtil.simpleUUID();
-        String assetCode = "ZC" + uuid;
-        asset.setCode(assetCode);
+        String uuid = cn.hutool.core.util.IdUtil.objectId();
+        asset.setCode(uuid);
         // 用资产编码的值赋值给标签编码
-        asset.setLabelCode(assetCode);
+        asset.setLabelCode(uuid);
         
         asset.setCreateTime(System.currentTimeMillis());
         asset.setUpdateTime(System.currentTimeMillis());

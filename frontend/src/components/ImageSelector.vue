@@ -102,7 +102,7 @@ const loadImages = async () => {
     images.value = response.records.map(image => ({
       id: image.id,
       name: image.originalFilename,
-      url: imageBaseUrl.value + image.filename
+      url: image.filename
     }))
   } catch (error) {
     console.error('加载图片库失败:', error)

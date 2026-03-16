@@ -12,20 +12,28 @@
       
       <el-table :data="assetList" style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column label="图片" width="100">
+          <template #default="{ row }">
+            <el-image
+              v-if="row.image"
+              :src="row.image"
+              fit="cover"
+              style="width: 60px; height: 60px"
+            />
+            <span v-else>无图片</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="name" label="资产名称" />
-        <el-table-column prop="code" label="资产编码" />
+        <el-table-column prop="code" label="资产编码" width="230" />
         <el-table-column prop="typeName" label="资产类型" />
         <el-table-column prop="locationName" label="资产位置" />
         <el-table-column prop="specification" label="规格" />
         <el-table-column prop="model" label="型号" />
-        <el-table-column prop="supplierName" label="供应商" />
-        <el-table-column prop="sourceName" label="资产来源" />
-        <el-table-column prop="unitName" label="计量单位" />
         <el-table-column prop="adminUserName" label="管理员" />
         <el-table-column prop="userName" label="使用人" />
         <el-table-column prop="deptName" label="部门" />
         <el-table-column prop="statusName" label="状态" />
-        <el-table-column label="操作" width="240">
+        <el-table-column label="操作" width="300">
           <template #default="{ row }">
             <el-button size="small" @click="openEditDialog(row)">
               编辑
@@ -36,9 +44,28 @@
             <el-button size="small" type="danger" @click="deleteAsset(row.id)">
               删除
             </el-button>
+            <el-button size="small" type="success" @click="printAsset(row)">
+              打印
+            </el-button>
           </template>
         </el-table-column>
+        <el-table-column prop="supplierName" label="供应商" />
+        <el-table-column prop="sourceName" label="资产来源" />
+        <el-table-column prop="unitName" label="计量单位" />
       </el-table>
+      
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
+          @update:page-size="handleSizeChange"
+          @update:current-page="handleCurrentChange"
+        />
+      </div>
     </el-card>
 
     <!-- 新增/编辑对话框 -->
@@ -319,6 +346,11 @@ const userLoading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增资产')
 
+// 分页相关
+const currentPage = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+
 
 // 配置store
 const configStore = useConfigStore()
@@ -353,15 +385,41 @@ const form = ref({
 // 加载资产列表
 const loadAssetList = async () => {
   try {
-    // 直接使用后端返回的带有关联数据的资产列表
-    const assets = await api.get('/asset')
-    // 处理资产图片路径，确保格式正确
-    assetList.value = assets.map(asset => {
-      if (asset.image) {
-        asset.image = asset.image.startsWith('/') ? imageBaseUrl.value + asset.image : imageBaseUrl.value + '/' + asset.image
+    // 调用后端接口获取分页数据
+    const response = await api.get('/asset', {
+      params: {
+        page: currentPage.value,
+        size: pageSize.value
       }
-      return asset
     })
+    console.log('响应数据:', response)
+    console.log('响应数据类型:', typeof response)
+    console.log('响应数据是否有records属性:', 'records' in response)
+    
+    // 检查响应数据结构
+    if (response && response.records) {
+      // 处理资产图片路径，确保格式正确
+      assetList.value = response.records.map(asset => {
+        if (asset.image) {
+          asset.image = imageBaseUrl.value + asset.image
+        }
+        return asset
+      })
+      // 更新总记录数
+      total.value = response.total
+    } else {
+      // 如果响应数据没有records属性，可能是后端返回了旧格式的数据
+      console.log('响应数据没有records属性，尝试作为旧格式处理')
+      // 处理资产图片路径，确保格式正确
+      assetList.value = response.map(asset => {
+        if (asset.image) {
+          asset.image = asset.image.startsWith('/') ? imageBaseUrl.value + asset.image : imageBaseUrl.value + '/' + asset.image
+        }
+        return asset
+      })
+      // 更新总记录数
+      total.value = response.length
+    }
   } catch (error) {
     ElMessage.error('加载资产列表失败')
     console.error('加载资产列表失败:', error)
@@ -728,6 +786,51 @@ const deleteAsset = async (id) => {
   }
 }
 
+// 分页大小变化处理
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  loadAssetList()
+}
+
+// 当前页码变化处理
+const handleCurrentChange = (current) => {
+  currentPage.value = current
+  loadAssetList()
+}
+
+// 打印资产
+const printAsset = async (row) => {
+  try {
+    // 准备请求数据
+    const data = {
+      CardName: row.name,
+      CardSerial: row.code
+    }
+    
+    // 发送POST请求
+    const response = await fetch(configStore.printServiceUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+    
+    // 获取响应数据
+    const result = await response.json()
+    
+    // 在控制台打印接口输出
+    console.log('打印接口输出:', result)
+    
+    // 显示成功消息
+    ElMessage.success('打印请求已发送')
+  } catch (error) {
+    // 显示错误消息
+    ElMessage.error('打印请求失败')
+    console.error('打印请求失败:', error)
+  }
+}
+
 // 组件挂载时加载数据
 onMounted(async () => {
   // 加载配置
@@ -753,5 +856,10 @@ onMounted(async () => {
   justify-content: flex-end;
 }
 
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
 
 </style>

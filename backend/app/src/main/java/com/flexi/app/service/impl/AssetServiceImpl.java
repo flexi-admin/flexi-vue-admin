@@ -1,5 +1,7 @@
 package com.flexi.app.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.flexi.app.entity.Asset;
 import com.flexi.app.entity.AssetDTO;
@@ -50,70 +52,89 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         
         // 转换为DTO
         return assets.stream().map(asset -> {
-            AssetDTO dto = new AssetDTO();
-            BeanUtils.copyProperties(asset, dto);
-            
-            // 填充资产类型名称
-            if (asset.getTypeId() != null) {
-                AssetType type = assetTypeService.getById(asset.getTypeId());
-                if (type != null) {
-                    dto.setTypeName(type.getName());
-                }
-            }
-            
-            // 填充资产位置名称
-            if (asset.getLocationId() != null) {
-                AssetLocation location = assetLocationService.getById(asset.getLocationId());
-                if (location != null) {
-                    dto.setLocationName(location.getName());
-                }
-            }
-            
-            // 填充供应商名称
-            if (asset.getSupplierId() != null) {
-                AssetSupplier supplier = assetSupplierService.getById(asset.getSupplierId());
-                if (supplier != null) {
-                    dto.setSupplierName(supplier.getName());
-                }
-            }
-            
-            // 填充资产状态名称
-            if (asset.getStatus() != null) {
-                String statusName = dictService.getDictLabel("asset_status", asset.getStatus());
-                dto.setStatusName(statusName);
-            }
-            
-            // 填充管理员名称
-            if (asset.getAdminUserId() != null) {
-                String adminUserName = userService.getUserNameById(asset.getAdminUserId());
-                dto.setAdminUserName(adminUserName);
-            }
-            
-            // 填充使用人名称
-            if (asset.getUserId() != null) {
-                String userName = userService.getUserNameById(asset.getUserId());
-                dto.setUserName(userName);
-            }
-            
-            // 填充部门名称
-            if (asset.getDeptId() != null) {
-                String deptName = deptService.getDeptNameById(asset.getDeptId());
-                dto.setDeptName(deptName);
-            }
-            
-            // 填充资产来源名称
-            if (asset.getSource() != null) {
-                String sourceName = dictService.getDictLabel("asset_source", asset.getSource());
-                dto.setSourceName(sourceName);
-            }
-            
-            // 填充计量单位名称
-            if (asset.getUnit() != null) {
-                String unitName = dictService.getDictLabel("asset_unit", asset.getUnit());
-                dto.setUnitName(unitName);
-            }
-            
-            return dto;
+            return convertToDTO(asset);
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public IPage<AssetDTO> listWithDetails(Integer page, Integer size) {
+        // 创建分页对象
+        Page<Asset> pageInfo = new Page<>(page, size);
+        
+        // 执行分页查询
+        IPage<Asset> assetPage = baseMapper.selectPage(pageInfo, null);
+        
+        // 转换为DTO并返回
+        return assetPage.convert(this::convertToDTO);
+    }
+
+    /**
+     * 将Asset转换为AssetDTO
+     */
+    private AssetDTO convertToDTO(Asset asset) {
+        AssetDTO dto = new AssetDTO();
+        BeanUtils.copyProperties(asset, dto);
+        
+        // 填充资产类型名称
+        if (asset.getTypeId() != null) {
+            AssetType type = assetTypeService.getById(asset.getTypeId());
+            if (type != null) {
+                dto.setTypeName(type.getName());
+            }
+        }
+        
+        // 填充资产位置名称
+        if (asset.getLocationId() != null) {
+            AssetLocation location = assetLocationService.getById(asset.getLocationId());
+            if (location != null) {
+                dto.setLocationName(location.getName());
+            }
+        }
+        
+        // 填充供应商名称
+        if (asset.getSupplierId() != null) {
+            AssetSupplier supplier = assetSupplierService.getById(asset.getSupplierId());
+            if (supplier != null) {
+                dto.setSupplierName(supplier.getName());
+            }
+        }
+        
+        // 填充资产状态名称
+        if (asset.getStatus() != null) {
+            String statusName = dictService.getDictLabel("asset_status", asset.getStatus());
+            dto.setStatusName(statusName);
+        }
+        
+        // 填充管理员名称
+        if (asset.getAdminUserId() != null) {
+            String adminUserName = userService.getUserNameById(asset.getAdminUserId());
+            dto.setAdminUserName(adminUserName);
+        }
+        
+        // 填充使用人名称
+        if (asset.getUserId() != null) {
+            String userName = userService.getUserNameById(asset.getUserId());
+            dto.setUserName(userName);
+        }
+        
+        // 填充部门名称
+        if (asset.getDeptId() != null) {
+            String deptName = deptService.getDeptNameById(asset.getDeptId());
+            dto.setDeptName(deptName);
+        }
+        
+        // 填充资产来源名称
+        if (asset.getSource() != null) {
+            String sourceName = dictService.getDictLabel("asset_source", asset.getSource());
+            dto.setSourceName(sourceName);
+        }
+        
+        // 填充计量单位名称
+        if (asset.getUnit() != null) {
+            String unitName = dictService.getDictLabel("asset_unit", asset.getUnit());
+            dto.setUnitName(unitName);
+        }
+        
+        return dto;
     }
 }

@@ -27,6 +27,10 @@ export const useConfigStore = defineStore('config', {
       return state.config['system.image_base_url'] || '/api/images/'
     },
 
+    printServiceUrl: (state) => {
+      return state.config['system.print_service_url'] || 'http://127.0.0.1:8000'
+    },
+
     menus: (state) => {
       return state.menuData
     }
