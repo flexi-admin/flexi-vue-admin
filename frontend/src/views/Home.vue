@@ -67,7 +67,7 @@
             </div>
             <div class="breadcrumb-right">
               <div class="user-section">
-                <span class="username">{{ userStore.userInfo.username || '管理员' }}</span>
+                <span class="username">{{ userStore.userInfo.nickname || userStore.userInfo.username || '管理员' }}</span>
                 <el-avatar :size="32" style="margin-left: 12px;" />
                 <el-dropdown trigger="click">
                   <el-button link style="margin-left: 12px;">

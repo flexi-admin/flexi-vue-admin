@@ -10,6 +10,7 @@
       <el-table :data="users" style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="username" label="用户名" />
+        <el-table-column prop="nickname" label="昵称" />
         <el-table-column label="角色" width="180">
           <template #default="scope">
             <el-tag v-for="role in getUserRoleNames(scope.row.id)" :key="role" size="small" style="margin-right: 4px;">
@@ -55,6 +56,9 @@
       <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="form.username" placeholder="请输入用户名" />
+        </el-form-item>
+        <el-form-item label="昵称" prop="nickname">
+          <el-input v-model="form.nickname" placeholder="请输入昵称" />
         </el-form-item>
         <el-form-item label="密码" prop="password" v-if="!form.id">
           <el-input v-model="form.password" type="password" placeholder="请输入密码" />
@@ -114,6 +118,7 @@ const pagination = reactive({
 const form = reactive({
   id: '',
   username: '',
+  nickname: '',
   password: '',
   roleIds: [],
   status: true,
@@ -228,6 +233,7 @@ const handleAdd = () => {
   Object.assign(form, {
     id: '',
     username: '',
+    nickname: '',
     password: '',
     roleIds: [],
     status: true,

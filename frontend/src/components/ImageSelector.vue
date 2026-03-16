@@ -3,7 +3,7 @@
     <!-- 图片预览 -->
     <div v-if="modelValue" class="image-preview">
       <el-image
-        :src="modelValue"
+        :src="imageBaseUrl + modelValue"
         fit="cover"
         style="width: 100px; height: 100px"
       />
@@ -35,7 +35,7 @@
             @click="selectImage(image)"
           >
             <el-image
-              :src="image.url"
+              :src="imageBaseUrl + image.url"
               fit="cover"
               style="width: 100px; height: 100px"
             />

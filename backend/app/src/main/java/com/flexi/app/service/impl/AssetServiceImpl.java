@@ -68,6 +68,22 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         return assetPage.convert(this::convertToDTO);
     }
 
+    @Override
+    public IPage<AssetDTO> listMyAssets(Integer page, Integer size, Long userId) {
+        // 创建分页对象
+        Page<Asset> pageInfo = new Page<>(page, size);
+        
+        // 构建查询条件，根据userId查询
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> queryWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        
+        // 执行分页查询
+        IPage<Asset> assetPage = baseMapper.selectPage(pageInfo, queryWrapper);
+        
+        // 转换为DTO并返回
+        return assetPage.convert(this::convertToDTO);
+    }
+
     /**
      * 将Asset转换为AssetDTO
      */

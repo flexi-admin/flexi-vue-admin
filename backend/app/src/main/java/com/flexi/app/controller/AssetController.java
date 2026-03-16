@@ -6,6 +6,7 @@ import com.flexi.app.service.AssetService;
 import com.flexi.app.utils.SnowflakeIdGenerator;
 import io.github.zmxckj.flexiadmin.common.R;
 import io.github.zmxckj.flexiadmin.security.RequirePermission;
+import io.github.zmxckj.flexiadmin.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,15 @@ public class AssetController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
         return R.success(assetService.listWithDetails(page, size));
+    }
+
+    @RequirePermission("asset:my:list")
+    @GetMapping("/my")
+    public R<com.baomidou.mybatisplus.core.metadata.IPage<AssetDTO>> listMyAssets(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        return R.success(assetService.listMyAssets(page, size, userId));
     }
 
     @RequirePermission("asset:add")

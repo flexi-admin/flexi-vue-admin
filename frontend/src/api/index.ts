@@ -52,4 +52,25 @@ api.interceptors.response.use(
   }
 )
 
+// 资产相关API
+export const getAssetList = (params: { page: number; size: number; name?: string }) => {
+  return api.get('/asset', { params })
+}
+
+export const getAssetMyList = (params: { page: number; size: number; name?: string }) => {
+  return api.get('/asset/my', { params })
+}
+
+export const addAsset = (data: any) => {
+  return api.post('/asset', data)
+}
+
+export const updateAsset = (data: any) => {
+  return api.put('/asset', data)
+}
+
+export const deleteAsset = (id: number) => {
+  return api.delete(`/asset/${id}`)
+}
+
 export default api

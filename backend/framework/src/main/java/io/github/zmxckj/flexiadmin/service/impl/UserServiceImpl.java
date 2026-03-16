@@ -56,7 +56,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public String getUserNameById(Long userId) {
         User user = getById(userId);
-        return user != null ? user.getUsername() : "";
+        if (user != null) {
+            return user.getNickname() != null && !user.getNickname().isEmpty() ? user.getNickname() : user.getUsername();
+        }
+        return "";
     }
 
     @Override

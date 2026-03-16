@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+
 import cn.hutool.core.util.IdUtil;
 
 @RestController
@@ -54,5 +56,22 @@ public class AssetInventoryController {
     public R<?> delete(@PathVariable Long id) {
         assetInventoryService.removeById(id);
         return R.success();
+    }
+
+    // 同步盘点明细
+    @PostMapping("/sync")
+    public R<?> sync(@RequestBody Map<String, Object> params) {
+        Long inventoryId = Long.parseLong(params.get("inventoryId").toString());
+        String inventoryType = params.get("inventoryType").toString();
+        String inventoryDepts = params.get("inventoryDepts") != null ? params.get("inventoryDepts").toString() : "";
+        String inventoryCategories = params.get("inventoryCategories") != null ? params.get("inventoryCategories").toString() : "";
+        assetInventoryService.syncInventory(inventoryId, inventoryType, inventoryDepts, inventoryCategories);
+        return R.success();
+    }
+
+    // 下发盘点
+    @GetMapping("/issue/{id}")
+    public R<?> issue(@PathVariable Long id) {
+        return R.success(assetInventoryService.issueInventory(id));
     }
 }

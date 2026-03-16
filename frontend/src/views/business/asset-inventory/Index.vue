@@ -35,10 +35,19 @@
           </template>
         </el-table-column>
         <el-table-column prop="creatorId" label="创建人" />
-        <el-table-column label="操作" width="200">
+        <el-table-column label="操作" width="440">
           <template #default="{ row }">
             <el-button size="small" @click="openEditDialog(row)">
               编辑
+            </el-button>
+            <el-button size="small" type="warning" @click="syncInventory(row.id, row.inventoryType, row.inventoryDepts, row.inventoryCategories)">
+              同步
+            </el-button>
+            <el-button size="small" type="primary" @click="openDetailDialog(row.id, row.inventoryName)">
+              明细
+            </el-button>
+            <el-button size="small" type="info" @click="issueInventory(row.id, row.inventoryName)">
+              下发
             </el-button>
             <el-button size="small" type="danger" @click="deleteInventory(row.id)">
               删除
@@ -170,6 +179,79 @@
       </template>
     </el-dialog>
 
+    <!-- 明细对话框 -->
+    <el-dialog
+      v-model="detailDialogVisible"
+      :title="`${detailDialogTitle} - 盘点明细`"
+      width="80%"
+    >
+      <div class="filter-container">
+        <el-select v-model="detailStatusFilter" placeholder="状态筛选" clearable @change="handleDetailStatusFilter">
+          <el-option label="全部" value="" />
+          <el-option label="待盘点" value="pending" />
+          <el-option label="正常" value="normal" />
+          <el-option label="盘盈" value="surplus" />
+          <el-option label="盘亏" value="shortage" />
+        </el-select>
+      </div>
+      <el-table :data="inventoryDetails" style="width: 100%">
+        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="assetCode" label="资产编码" />
+        <el-table-column prop="assetName" label="资产名称" />
+        <el-table-column prop="assetType" label="资产类型" />
+        <el-table-column prop="assetLocation" label="资产位置" />
+        <el-table-column prop="deptName" label="部门" />
+        <el-table-column prop="userName" label="使用人" />
+        <el-table-column prop="adminUserName" label="管理员" />
+        <el-table-column prop="status" label="状态">
+          <template #default="{ row }">
+            {{ getDetailStatusText(row.status) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" width="180">
+          <template #default="{ row }">
+            {{ formatDate(row.createTime) }}
+          </template>
+        </el-table-column>
+      </el-table>
+      
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="detailCurrentPage"
+          v-model:page-size="detailPageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="detailTotal"
+          @update:page-size="handleDetailSizeChange"
+          @update:current-page="handleDetailCurrentChange"
+        />
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="detailDialogVisible = false">关闭</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- 下发对话框 -->
+    <el-dialog
+      v-model="issueDialogVisible"
+      :title="`${issueDialogTitle} - 下发数据`"
+      width="80%"
+    >
+      <div class="issue-container">
+        <el-divider content-position="left">原始接口返回数据</el-divider>
+        <pre style="background-color: #f5f7fa; padding: 16px; border-radius: 4px; overflow-x: auto;">
+          {{ JSON.stringify(issueData, null, 2) }}
+        </pre>
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="issueDialogVisible = false">关闭</el-button>
+        </span>
+      </template>
+    </el-dialog>
 
   </div>
 </template>
@@ -194,6 +276,29 @@ const inventoryTypeOptions = ref([
 ])
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增盘点')
+
+// 明细对话框
+const detailDialogVisible = ref(false)
+const detailDialogTitle = ref('')
+const currentInventoryId = ref(0)
+const detailStatusFilter = ref('')
+const inventoryDetails = ref([])
+const detailCurrentPage = ref(1)
+const detailPageSize = ref(10)
+const detailTotal = ref(0)
+
+// 下发对话框
+const issueDialogVisible = ref(false)
+const issueDialogTitle = ref('')
+const issueData = ref({
+  inventoryCode: '',
+  inventoryName: '',
+  inventoryType: '',
+  startTime: '',
+  endTime: '',
+  status: '',
+  details: []
+})
 
 // 部门和分类选项
 const deptOptions = ref([])
@@ -431,6 +536,99 @@ const deleteInventory = async (id) => {
   }
 }
 
+// 同步盘点
+const syncInventory = async (id, inventoryType, inventoryDepts, inventoryCategories) => {
+  try {
+    await api.post('/asset/inventory/sync', {
+      inventoryId: id,
+      inventoryType: inventoryType,
+      inventoryDepts: inventoryDepts,
+      inventoryCategories: inventoryCategories
+    })
+    ElMessage.success('同步成功')
+  } catch (error) {
+    ElMessage.error('同步失败')
+    console.error('同步失败:', error)
+  }
+}
+
+// 打开明细对话框
+const openDetailDialog = async (id, name) => {
+  currentInventoryId.value = id
+  detailDialogTitle.value = name
+  detailCurrentPage.value = 1
+  detailPageSize.value = 10
+  detailStatusFilter.value = ''
+  await loadInventoryDetails(id, detailCurrentPage.value, detailPageSize.value, detailStatusFilter.value)
+  detailDialogVisible.value = true
+}
+
+// 加载盘点明细
+const loadInventoryDetails = async (inventoryId, page, size, status) => {
+  try {
+    const response = await api.get('/asset/inventory/detail/list', {
+      params: {
+        inventoryId: inventoryId,
+        page: page,
+        size: size,
+        status: status
+      }
+    })
+    inventoryDetails.value = response.records
+    detailTotal.value = response.total
+  } catch (error) {
+    ElMessage.error('加载盘点明细失败')
+    console.error('加载盘点明细失败:', error)
+  }
+}
+
+// 明细分页大小变化处理
+const handleDetailSizeChange = (size) => {
+  detailPageSize.value = size
+  loadInventoryDetails(currentInventoryId.value, detailCurrentPage.value, detailPageSize.value, detailStatusFilter.value)
+}
+
+// 明细当前页码变化处理
+const handleDetailCurrentChange = (current) => {
+  detailCurrentPage.value = current
+  loadInventoryDetails(currentInventoryId.value, detailCurrentPage.value, detailPageSize.value, detailStatusFilter.value)
+}
+
+// 处理状态筛选
+const handleDetailStatusFilter = () => {
+  detailCurrentPage.value = 1
+  loadInventoryDetails(currentInventoryId.value, detailCurrentPage.value, detailPageSize.value, detailStatusFilter.value)
+}
+
+// 下发盘点
+const issueInventory = async (id, name) => {
+  issueDialogTitle.value = name
+  try {
+    const response = await api.get(`/asset/inventory/issue/${id}`)
+    issueData.value = response
+    issueDialogVisible.value = true
+  } catch (error) {
+    ElMessage.error('下发失败')
+    console.error('下发失败:', error)
+  }
+}
+
+// 获取明细状态文本
+const getDetailStatusText = (status) => {
+  switch (status) {
+    case 'pending':
+      return '待盘点'
+    case 'normal':
+      return '正常'
+    case 'surplus':
+      return '盘盈'
+    case 'shortage':
+      return '盘亏'
+    default:
+      return status
+  }
+}
+
 // 分页大小变化处理
 const handleSizeChange = (size) => {
   pageSize.value = size
@@ -469,6 +667,10 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.filter-container {
+  margin-bottom: 16px;
 }
 
 </style>

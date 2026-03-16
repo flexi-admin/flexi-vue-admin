@@ -11,4 +11,5 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 public interface AssetService extends IService<Asset> {
     List<AssetDTO> listWithDetails();
     IPage<AssetDTO> listWithDetails(Integer page, Integer size);
+    IPage<AssetDTO> listMyAssets(Integer page, Integer size, Long userId);
 }

@@ -48,6 +48,7 @@ public class UserController {
             Map<String, Object> userMap = new HashMap<>();
             userMap.put("id", user.getId());
             userMap.put("username", user.getUsername());
+            userMap.put("nickname", user.getNickname());
             userMap.put("status", user.getStatus());
             userMap.put("createTime", user.getCreateTime());
             userMap.put("updateTime", user.getUpdateTime());

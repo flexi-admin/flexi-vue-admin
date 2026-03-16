@@ -15,8 +15,8 @@
         <el-table-column label="图片" width="100">
           <template #default="{ row }">
             <el-image
-              v-if="row.image"
-              :src="row.image"
+              v-if="row.showImage"
+              :src="row.showImage"
               fit="cover"
               style="width: 60px; height: 60px"
             />
@@ -360,8 +360,8 @@ const form = ref({
   id: '',
   name: '',
   code: '',
-  typeId: [],
-  locationId: [],
+  typeId: null,
+  locationId: null,
   specification: '',
   model: '',
   manufacturer: '',
@@ -401,7 +401,7 @@ const loadAssetList = async () => {
       // 处理资产图片路径，确保格式正确
       assetList.value = response.records.map(asset => {
         if (asset.image) {
-          asset.image = imageBaseUrl.value + asset.image
+          asset.showImage = imageBaseUrl.value + asset.image
         }
         return asset
       })
@@ -413,7 +413,7 @@ const loadAssetList = async () => {
       // 处理资产图片路径，确保格式正确
       assetList.value = response.map(asset => {
         if (asset.image) {
-          asset.image = asset.image.startsWith('/') ? imageBaseUrl.value + asset.image : imageBaseUrl.value + '/' + asset.image
+          asset.showImage = asset.image.startsWith('/') ? imageBaseUrl.value + asset.image : imageBaseUrl.value + '/' + asset.image
         }
         return asset
       })
@@ -430,7 +430,7 @@ const loadAssetList = async () => {
 const loadAssetTypes = async () => {
   try {
     // 获取树形结构数据
-    const treeData = await api.get('/asset-type/tree')
+    const response = await api.get('/asset-type/tree')
     // 处理树形数据，添加isLeaf字段
     const processTree = (nodes) => {
       return nodes.map(node => {
@@ -442,7 +442,7 @@ const loadAssetTypes = async () => {
         return processedNode
       })
     }
-    assetTypeTree.value = processTree(treeData)
+    assetTypeTree.value = processTree(response)
   } catch (error) {
     console.error('加载资产类型失败:', error)
   }
@@ -452,7 +452,7 @@ const loadAssetTypes = async () => {
 const loadAssetLocations = async () => {
   try {
     // 获取树形结构数据
-    const treeData = await api.get('/asset-location/tree')
+    const response = await api.get('/asset-location/tree')
     // 处理树形数据，添加isLeaf字段
     const processTree = (nodes) => {
       return nodes.map(node => {
@@ -464,7 +464,7 @@ const loadAssetLocations = async () => {
         return processedNode
       })
     }
-    assetLocationTree.value = processTree(treeData)
+    assetLocationTree.value = processTree(response)
   } catch (error) {
     console.error('加载资产位置失败:', error)
   }
@@ -553,7 +553,7 @@ const loadUsers = async (keyword = '') => {
       }
     })
     users.value = response.list.map(user => ({
-      label: user.username,
+      label: user.nickname || user.username,
       value: user.id
     }))
   } catch (error) {
@@ -620,8 +620,8 @@ const openAddDialog = async () => {
   form.value = {
     id: '',
     name: '',
-    typeId: [],
-    locationId: [],
+    typeId: null,
+    locationId: null,
     specification: '',
     model: '',
     manufacturer: '',
@@ -668,10 +668,7 @@ const openEditDialog = async (row) => {
   }
   
   const formData = { ...row }
-  // 将typeId转换为数组格式，以适应el-cascader
-  formData.typeId = row.typeId ? [row.typeId] : []
-  // 将locationId转换为数组格式，以适应el-cascader
-  formData.locationId = row.locationId ? [row.locationId] : []
+  // 直接使用原始的typeId和locationId值，因为emitPath设置为false
   form.value = formData
   dialogVisible.value = true
 }

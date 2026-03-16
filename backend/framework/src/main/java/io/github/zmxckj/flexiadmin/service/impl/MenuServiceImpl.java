@@ -46,9 +46,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     public List<Menu> getMenuTree() {
-        // 获取所有状态为正常的菜单和操作
+        // 获取所有状态为正常的菜单和操作，并按order_num排序
         List<Menu> allMenus = baseMapper.selectList(new QueryWrapper<Menu>()
-                .eq("status", true));
+                .eq("status", true)
+                .orderByAsc("order_num"));
         
         // 构建菜单树
         return buildMenuTree(allMenus);
@@ -87,11 +88,12 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             return new ArrayList<>();
         }
         
-        // 获取用户有权限的菜单类型且状态为正常的菜单
+        // 获取用户有权限的菜单类型且状态为正常的菜单，并按order_num排序
         List<Menu> userMenus = baseMapper.selectList(new QueryWrapper<Menu>()
                 .in("id", menuIds)
                 .eq("type", "menu")
-                .eq("status", true));
+                .eq("status", true)
+                .orderByAsc("order_num"));
         System.out.println("User menus size: " + userMenus.size());
         
         // 构建菜单树
@@ -152,6 +154,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     private void buildChildren(Menu parent, Map<Long, List<Menu>> menuMap) {
         List<Menu> children = menuMap.getOrDefault(parent.getId(), new ArrayList<>());
         if (!children.isEmpty()) {
+            // 对子菜单按order_num排序
+            children.sort((a, b) -> Integer.compare(a.getOrderNum(), b.getOrderNum()));
             parent.setChildren(children);
             for (Menu child : children) {
                 buildChildren(child, menuMap);

@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS sys_user (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(100) NOT NULL,
+    nickname VARCHAR(50),
     status BOOLEAN DEFAULT TRUE,
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -164,8 +165,8 @@ INSERT INTO sys_role (id, name, description) VALUES (1, 'admin', '管理员');
 INSERT INTO sys_role (id, name, description) VALUES (2, 'log_admin', '日志管理员');
 
 -- 插入用户
-INSERT INTO sys_user (id, username, password, status) VALUES (1, 'admin', '$2a$10$ct6Dw92R4r1aEVQ4oOAmRuv/DNOC7v906EPJ5VCYXq9.JYZo/Eu1O', true);
-INSERT INTO sys_user (id, username, password, status) VALUES (2, 'test_user', '$2a$10$ct6Dw92R4r1aEVQ4oOAmRuv/DNOC7v906EPJ5VCYXq9.JYZo/Eu1O', true);
+INSERT INTO sys_user (id, username, password, nickname, status) VALUES (1, 'admin', '$2a$10$ct6Dw92R4r1aEVQ4oOAmRuv/DNOC7v906EPJ5VCYXq9.JYZo/Eu1O', '管理员', true);
+INSERT INTO sys_user (id, username, password, nickname, status) VALUES (2, 'test_user', '$2a$10$ct6Dw92R4r1aEVQ4oOAmRuv/DNOC7v906EPJ5VCYXq9.JYZo/Eu1O', '测试用户', true);
 
 -- 插入菜单和操作数据
 INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, status, order_num) VALUES
@@ -224,4 +225,5 @@ INSERT INTO sys_config (config_key, value, description) VALUES
 ('system.name', 'Flexi Admin', '系统名称'),
 ('system.version', '1.0.0', '系统版本'),
 ('system.enabled_modules', 'user,role,menu,log,config,dict,task,image', '启用的模块'),
-('system.default_home', '/system/user', '默认首页路径');
+('system.default_home', '/system/user', '默认首页路径'),
+('system.image_base_url', '/api/images/', '图片基础URL');
