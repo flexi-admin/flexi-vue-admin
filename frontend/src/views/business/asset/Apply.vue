@@ -370,16 +370,20 @@ const submitForm = async () => {
   try {
     const formData = { ...form.value }
     
-    // 处理typeId：如果是数组且有值，取最后一个元素；否则设置为null
+    // 处理typeId：如果是数组且有值，取最后一个元素；如果是有效值，直接使用；否则设置为null
     if (Array.isArray(formData.typeId) && formData.typeId.length > 0) {
       formData.typeId = formData.typeId[formData.typeId.length - 1]
+    } else if (formData.typeId) {
+      // 已经是单个值，直接使用
     } else {
       formData.typeId = null
     }
     
-    // 按类型领用时，不需要assetId
+    // 按类型领用时，不需要assetId，设置为0
     if (formData.applyType === 'type') {
-      formData.assetId = null
+      formData.assetId = 0
+    }else if(formData.applyType === 'idle'){
+      formData.typeId = 0
     }
     
     if (form.value.id) {

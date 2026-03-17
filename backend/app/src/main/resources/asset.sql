@@ -215,68 +215,68 @@ INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VA
 -- 插入菜单和权限
 -- 资产管理主菜单
 INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, status, order_num) VALUES
-(35, '资产管理', '/asset', '', 0, 'Briefcase', NULL, 'menu', true, 15),
+(1000, '资产管理', '/asset', '', 0, 'Briefcase', NULL, 'menu', true, 15),
 -- 资产类型管理
-(36, '资产类型管理', '/asset/type', 'business/asset-type/Index', 35, 'List', NULL, 'menu', true, 16),
+(1001, '资产类型管理', '/asset/type', 'business/asset-type/Index', 1000, 'List', NULL, 'menu', true, 16),
 -- 资产位置管理
-(37, '资产位置管理', '/asset/location', 'business/asset-location/Index', 35, 'Location', NULL, 'menu', true, 17),
+(1002, '资产位置管理', '/asset/location', 'business/asset-location/Index', 1000, 'Location', NULL, 'menu', true, 17),
 -- 资产管理
-(38, '资产管理', '/asset/list', 'business/asset/Index', 35, 'Inventory', NULL, 'menu', true, 19),
+(1003, '资产管理', '/asset/list', 'business/asset/Index', 1000, 'Inventory', NULL, 'menu', true, 19),
 -- 我的资产
-(61, '我的资产', '/asset/my', 'business/asset/MyAsset', 35, 'User', NULL, 'menu', true, 21),
+(1004, '我的资产', '/asset/my', 'business/asset/MyAsset', 1000, 'User', NULL, 'menu', true, 21),
 -- 资产领用
-(63, '资产领用', '/asset/apply', 'business/asset/Apply', 35, 'Document', NULL, 'menu', true, 22),
+(1005, '资产领用', '/asset/apply', 'business/asset/Apply', 1000, 'Document', NULL, 'menu', true, 22),
 -- 供应商管理
-(51, '供应商管理', '/asset/supplier', 'business/asset-supplier/Index', 35, 'UserFilled', NULL, 'menu', true, 18),
+(1006, '供应商管理', '/asset/supplier', 'business/asset-supplier/Index', 1000, 'UserFilled', NULL, 'menu', true, 18),
 -- 资产盘点管理
-(56, '资产盘点', '/asset/inventory', 'business/asset-inventory/Index', 35, 'DataAnalysis', NULL, 'menu', true, 20);
+(1007, '资产盘点', '/asset/inventory', 'business/asset-inventory/Index', 1000, 'DataAnalysis', NULL, 'menu', true, 20);
 
 -- 操作权限
 -- 资产类型操作
 INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, status, order_num) VALUES
-(39, '资产类型列表', NULL, NULL, 36, NULL, 'asset:type:list', 'operation', true, 19),
-(40, '资产类型添加', NULL, NULL, 36, NULL, 'asset:type:add', 'operation', true, 20),
-(41, '资产类型编辑', NULL, NULL, 36, NULL, 'asset:type:edit', 'operation', true, 21),
-(42, '资产类型删除', NULL, NULL, 36, NULL, 'asset:type:delete', 'operation', true, 22),
+(1008, '资产类型列表', NULL, NULL, 1001, NULL, 'asset:type:list', 'operation', true, 19),
+(1009, '资产类型添加', NULL, NULL, 1001, NULL, 'asset:type:add', 'operation', true, 20),
+(1010, '资产类型编辑', NULL, NULL, 1001, NULL, 'asset:type:edit', 'operation', true, 21),
+(1011, '资产类型删除', NULL, NULL, 1001, NULL, 'asset:type:delete', 'operation', true, 22),
 -- 资产位置操作
-(43, '资产位置列表', NULL, NULL, 37, NULL, 'asset:location:list', 'operation', true, 23),
-(44, '资产位置添加', NULL, NULL, 37, NULL, 'asset:location:add', 'operation', true, 24),
-(45, '资产位置编辑', NULL, NULL, 37, NULL, 'asset:location:edit', 'operation', true, 25),
-(46, '资产位置删除', NULL, NULL, 37, NULL, 'asset:location:delete', 'operation', true, 26),
+(1012, '资产位置列表', NULL, NULL, 1002, NULL, 'asset:location:list', 'operation', true, 23),
+(1013, '资产位置添加', NULL, NULL, 1002, NULL, 'asset:location:add', 'operation', true, 24),
+(1014, '资产位置编辑', NULL, NULL, 1002, NULL, 'asset:location:edit', 'operation', true, 25),
+(1015, '资产位置删除', NULL, NULL, 1002, NULL, 'asset:location:delete', 'operation', true, 26),
 -- 资产操作
-(47, '资产列表', NULL, NULL, 38, NULL, 'asset:list', 'operation', true, 27),
-(48, '资产添加', NULL, NULL, 38, NULL, 'asset:add', 'operation', true, 28),
-(49, '资产编辑', NULL, NULL, 38, NULL, 'asset:edit', 'operation', true, 29),
-(50, '资产删除', NULL, NULL, 38, NULL, 'asset:delete', 'operation', true, 30),
+(1016, '资产列表', NULL, NULL, 1003, NULL, 'asset:list', 'operation', true, 27),
+(1017, '资产添加', NULL, NULL, 1003, NULL, 'asset:add', 'operation', true, 28),
+(1018, '资产编辑', NULL, NULL, 1003, NULL, 'asset:edit', 'operation', true, 29),
+(1019, '资产删除', NULL, NULL, 1003, NULL, 'asset:delete', 'operation', true, 30),
 -- 我的资产操作
-(62, '我的资产列表', NULL, NULL, 61, NULL, 'asset:my:list', 'operation', true, 39),
+(1020, '我的资产列表', NULL, NULL, 1004, NULL, 'asset:my:list', 'operation', true, 39),
 -- 资产领用操作
-(64, '资产领用列表', NULL, NULL, 63, NULL, 'asset:apply:list', 'operation', true, 40),
-(65, '资产领用添加', NULL, NULL, 63, NULL, 'asset:apply:add', 'operation', true, 41),
-(66, '资产领用编辑', NULL, NULL, 63, NULL, 'asset:apply:edit', 'operation', true, 42),
-(67, '资产领用删除', NULL, NULL, 63, NULL, 'asset:apply:delete', 'operation', true, 43),
+(1021, '资产领用列表', NULL, NULL, 1005, NULL, 'asset:apply:list', 'operation', true, 40),
+(1022, '资产领用添加', NULL, NULL, 1005, NULL, 'asset:apply:add', 'operation', true, 41),
+(1023, '资产领用编辑', NULL, NULL, 1005, NULL, 'asset:apply:edit', 'operation', true, 42),
+(1024, '资产领用删除', NULL, NULL, 1005, NULL, 'asset:apply:delete', 'operation', true, 43),
 -- 供应商操作权限
-(52, '供应商列表', NULL, NULL, 51, NULL, 'asset:supplier:list', 'operation', true, 31),
-(53, '供应商添加', NULL, NULL, 51, NULL, 'asset:supplier:add', 'operation', true, 32),
-(54, '供应商编辑', NULL, NULL, 51, NULL, 'asset:supplier:edit', 'operation', true, 33),
-(55, '供应商删除', NULL, NULL, 51, NULL, 'asset:supplier:delete', 'operation', true, 34),
+(1025, '供应商列表', NULL, NULL, 1006, NULL, 'asset:supplier:list', 'operation', true, 31),
+(1026, '供应商添加', NULL, NULL, 1006, NULL, 'asset:supplier:add', 'operation', true, 32),
+(1027, '供应商编辑', NULL, NULL, 1006, NULL, 'asset:supplier:edit', 'operation', true, 33),
+(1028, '供应商删除', NULL, NULL, 1006, NULL, 'asset:supplier:delete', 'operation', true, 34),
 -- 资产盘点操作权限
-(57, '资产盘点列表', NULL, NULL, 56, NULL, 'asset:inventory:list', 'operation', true, 35),
-(58, '资产盘点添加', NULL, NULL, 56, NULL, 'asset:inventory:add', 'operation', true, 36),
-(59, '资产盘点编辑', NULL, NULL, 56, NULL, 'asset:inventory:edit', 'operation', true, 37),
-(60, '资产盘点删除', NULL, NULL, 56, NULL, 'asset:inventory:delete', 'operation', true, 38);
+(1029, '资产盘点列表', NULL, NULL, 1007, NULL, 'asset:inventory:list', 'operation', true, 35),
+(1030, '资产盘点添加', NULL, NULL, 1007, NULL, 'asset:inventory:add', 'operation', true, 36),
+(1031, '资产盘点编辑', NULL, NULL, 1007, NULL, 'asset:inventory:edit', 'operation', true, 37),
+(1032, '资产盘点删除', NULL, NULL, 1007, NULL, 'asset:inventory:delete', 'operation', true, 38);
 
 -- 为admin角色分配权限
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES
 -- 资产管理权限
-(1, 35), (1, 36), (1, 37), (1, 38), (1, 61), (1, 63),
-(1, 39), (1, 40), (1, 41), (1, 42),
-(1, 43), (1, 44), (1, 45), (1, 46),
-(1, 47), (1, 48), (1, 49), (1, 50), (1, 62), (1, 64), (1, 65), (1, 66), (1, 67),
+(1, 1000), (1, 1001), (1, 1002), (1, 1003), (1, 1004), (1, 1005),
+(1, 1008), (1, 1009), (1, 1010), (1, 1011),
+(1, 1012), (1, 1013), (1, 1014), (1, 1015),
+(1, 1016), (1, 1017), (1, 1018), (1, 1019), (1, 1020), (1, 1021), (1, 1022), (1, 1023), (1, 1024),
 -- 供应商管理权限
-(1, 51), (1, 52), (1, 53), (1, 54), (1, 55),
+(1, 1006), (1, 1025), (1, 1026), (1, 1027), (1, 1028),
 -- 资产盘点管理权限
-(1, 56), (1, 57), (1, 58), (1, 59), (1, 60);
+(1, 1007), (1, 1029), (1, 1030), (1, 1031), (1, 1032);
 
 -- 插入系统配置
 INSERT INTO sys_config (config_key, value, description, create_time, update_time) VALUES
