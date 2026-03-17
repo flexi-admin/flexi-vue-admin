@@ -57,4 +57,14 @@ public class RedisUtils {
     public void refreshCacheExpiration(String key, long expiration) {
         redisTemplate.expire(key, expiration, TimeUnit.SECONDS);
     }
-}
+
+    // 通用设置缓存
+    public void set(String key, Object value, long expiration, TimeUnit timeUnit) {
+        redisTemplate.opsForValue().set(key, value, expiration, timeUnit);
+    }
+
+    // 通用获取缓存
+    public Object get(String key) {
+        return redisTemplate.opsForValue().get(key);
+    }
+} 

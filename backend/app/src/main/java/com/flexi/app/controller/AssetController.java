@@ -23,8 +23,11 @@ public class AssetController {
     @GetMapping
     public R<com.baomidou.mybatisplus.core.metadata.IPage<AssetDTO>> list(
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
-        return R.success(assetService.listWithDetails(page, size));
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long typeId) {
+        return R.success(assetService.listWithDetails(page, size, name, status, typeId));
     }
 
     @RequirePermission("asset:my:list")
@@ -63,6 +66,21 @@ public class AssetController {
     @DeleteMapping("/{id}")
     public R<?> delete(@PathVariable Long id) {
         assetService.removeById(id);
+        return R.success();
+    }
+
+    @RequirePermission("asset:list")
+    @GetMapping("/without-label-code")
+    public R<List<String>> listAssetsWithoutLabelCode() {
+        List<Asset> assets = assetService.listAssetsWithoutLabelCode();
+        List<String> codes = assets.stream().map(Asset::getCode).collect(java.util.stream.Collectors.toList());
+        return R.success(codes);
+    }
+
+    @RequirePermission("asset:edit")
+    @PostMapping("/update-label-code")
+    public R<?> updateLabelCode(@RequestBody java.util.Map<String, String> codeLabelMap) {
+        assetService.updateLabelCode(codeLabelMap);
         return R.success();
     }
 }

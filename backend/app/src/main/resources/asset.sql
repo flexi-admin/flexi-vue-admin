@@ -154,6 +154,24 @@ CREATE TABLE IF NOT EXISTS `asset_inventory_detail` (
   INDEX `idx_asset_id` (`asset_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资产盘点明细表';
 
+-- 资产领用表
+CREATE TABLE IF NOT EXISTS `asset_apply` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `asset_id` BIGINT NOT NULL COMMENT '资产ID',
+  `user_id` BIGINT NOT NULL COMMENT '领用用户ID',
+  `dept_id` BIGINT COMMENT '领用部门ID',
+  `apply_time` BIGINT NOT NULL COMMENT '申请时间',
+  `approval_time` BIGINT COMMENT '审批时间',
+  `status` VARCHAR(50) NOT NULL COMMENT '状态（待审批、已审批、已拒绝）',
+  `remark` VARCHAR(500) COMMENT '备注',
+  `create_time` BIGINT NOT NULL COMMENT '创建时间',
+  `update_time` BIGINT NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  INDEX `idx_asset_id` (`asset_id`),
+  INDEX `idx_user_id` (`user_id`),
+  INDEX `idx_dept_id` (`dept_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资产领用表';
+
 -- 插入字典数据
 -- 资产状态字典数据
 INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VALUES
@@ -188,6 +206,12 @@ INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VA
 ('inventory_detail_status', 'overage', '盘盈', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('inventory_detail_status', 'shortage', '盘亏', 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+-- 资产领用状态字典数据
+INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VALUES
+('asset_apply_status', 'pending', '待审批', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('asset_apply_status', 'approved', '已审批', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('asset_apply_status', 'rejected', '已拒绝', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
 -- 插入菜单和权限
 -- 资产管理主菜单
 INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, status, order_num) VALUES
@@ -200,6 +224,8 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 (38, '资产管理', '/asset/list', 'business/asset/Index', 35, 'Inventory', NULL, 'menu', true, 19),
 -- 我的资产
 (61, '我的资产', '/asset/my', 'business/asset/MyAsset', 35, 'User', NULL, 'menu', true, 21),
+-- 资产领用
+(63, '资产领用', '/asset/apply', 'business/asset/Apply', 35, 'Document', NULL, 'menu', true, 22),
 -- 供应商管理
 (51, '供应商管理', '/asset/supplier', 'business/asset-supplier/Index', 35, 'UserFilled', NULL, 'menu', true, 18),
 -- 资产盘点管理
@@ -224,6 +250,11 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 (50, '资产删除', NULL, NULL, 38, NULL, 'asset:delete', 'operation', true, 30),
 -- 我的资产操作
 (62, '我的资产列表', NULL, NULL, 61, NULL, 'asset:my:list', 'operation', true, 39),
+-- 资产领用操作
+(64, '资产领用列表', NULL, NULL, 63, NULL, 'asset:apply:list', 'operation', true, 40),
+(65, '资产领用添加', NULL, NULL, 63, NULL, 'asset:apply:add', 'operation', true, 41),
+(66, '资产领用编辑', NULL, NULL, 63, NULL, 'asset:apply:edit', 'operation', true, 42),
+(67, '资产领用删除', NULL, NULL, 63, NULL, 'asset:apply:delete', 'operation', true, 43),
 -- 供应商操作权限
 (52, '供应商列表', NULL, NULL, 51, NULL, 'asset:supplier:list', 'operation', true, 31),
 (53, '供应商添加', NULL, NULL, 51, NULL, 'asset:supplier:add', 'operation', true, 32),
@@ -238,10 +269,10 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 -- 为admin角色分配权限
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES
 -- 资产管理权限
-(1, 35), (1, 36), (1, 37), (1, 38), (1, 61),
+(1, 35), (1, 36), (1, 37), (1, 38), (1, 61), (1, 63),
 (1, 39), (1, 40), (1, 41), (1, 42),
 (1, 43), (1, 44), (1, 45), (1, 46),
-(1, 47), (1, 48), (1, 49), (1, 50), (1, 62),
+(1, 47), (1, 48), (1, 49), (1, 50), (1, 62), (1, 64), (1, 65), (1, 66), (1, 67),
 -- 供应商管理权限
 (1, 51), (1, 52), (1, 53), (1, 54), (1, 55),
 -- 资产盘点管理权限
@@ -249,4 +280,4 @@ INSERT INTO sys_role_menu (role_id, menu_id) VALUES
 
 -- 插入系统配置
 INSERT INTO sys_config (config_key, value, description, create_time, update_time) VALUES
-('system.print_service_url', 'http://127.0.0.1:8000/api/print', '打印服务URL', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+('system.print_service_url', 'http://127.0.0.1:8000/api', '打印服务URL', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

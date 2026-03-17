@@ -227,3 +227,21 @@ INSERT INTO sys_config (config_key, value, description) VALUES
 ('system.enabled_modules', 'user,role,menu,log,config,dict,task,image', '启用的模块'),
 ('system.default_home', '/system/user', '默认首页路径'),
 ('system.image_base_url', '/api/images/', '图片基础URL');
+
+-- 创建appid表
+CREATE TABLE IF NOT EXISTS sys_appid (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    app_id VARCHAR(50) NOT NULL UNIQUE,
+    secret VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    status BOOLEAN DEFAULT TRUE,
+    permissions VARCHAR(500) COMMENT '权限列表，逗号分隔',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 插入初始appid数据
+INSERT INTO sys_appid (app_id, secret, name, status, permissions) VALUES
+('test', 'testsecret', '测试应用', true, 'user:list,user:add'),
+('api', 'apisecret', 'API应用', true, 'user:list,role:list');
+

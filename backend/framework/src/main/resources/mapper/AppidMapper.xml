@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.zmxckj.flexiadmin.mapper.AppidMapper">
+    <select id="selectByAppId" parameterType="java.lang.String" resultType="io.github.zmxckj.flexiadmin.entity.Appid">
+        SELECT * FROM sys_appid WHERE app_id = #{appId}
+    </select>
+</mapper>

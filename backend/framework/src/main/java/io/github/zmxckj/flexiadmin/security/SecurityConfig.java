@@ -21,11 +21,13 @@ public class SecurityConfig {
 
     private final JwtUtils jwtUtils;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AppIdAuthenticationFilter appIdAuthenticationFilter;
 
     @Autowired
-    public SecurityConfig(JwtUtils jwtUtils, JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtUtils jwtUtils, JwtAuthenticationFilter jwtAuthenticationFilter, AppIdAuthenticationFilter appIdAuthenticationFilter) {
         this.jwtUtils = jwtUtils;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.appIdAuthenticationFilter = appIdAuthenticationFilter;
     }
 
     @Bean
@@ -41,6 +43,8 @@ public class SecurityConfig {
             .formLogin(form -> form.disable())
             .httpBasic(httpBasic -> httpBasic.disable());
 
+        // 先添加AppId过滤器，再添加JWT过滤器
+        http.addFilterBefore(appIdAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

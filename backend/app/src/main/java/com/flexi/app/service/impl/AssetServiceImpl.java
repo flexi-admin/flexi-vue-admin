@@ -84,6 +84,65 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         return assetPage.convert(this::convertToDTO);
     }
 
+    @Override
+    public IPage<AssetDTO> listWithDetails(Integer page, Integer size, String name, String status, Long typeId) {
+        // 创建分页对象
+        Page<Asset> pageInfo = new Page<>(page, size);
+        
+        // 构建查询条件
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> queryWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        
+        // 添加过滤条件
+        if (name != null && !name.isEmpty()) {
+            queryWrapper.like("name", name);
+        }
+        if (status != null && !status.isEmpty()) {
+            queryWrapper.eq("status", status);
+        }
+        if (typeId != null) {
+            queryWrapper.eq("type_id", typeId);
+        }
+        
+        // 执行分页查询
+        IPage<Asset> assetPage = baseMapper.selectPage(pageInfo, queryWrapper);
+        
+        // 转换为DTO并返回
+        return assetPage.convert(this::convertToDTO);
+    }
+
+    @Override
+    public List<Asset> listAssetsWithoutLabelCode() {
+        // 构建查询条件，查询code = label_code的资产
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> queryWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        queryWrapper.apply("code = label_code");
+        
+        // 执行查询
+        return baseMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public void updateLabelCode(java.util.Map<String, String> codeLabelMap) {
+        // 遍历codeLabelMap，更新每个资产的label_code
+        for (java.util.Map.Entry<String, String> entry : codeLabelMap.entrySet()) {
+            String code = entry.getKey();
+            String labelCode = entry.getValue();
+            
+            // 构建查询条件，根据code查找资产
+            com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> queryWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+            queryWrapper.eq("code", code);
+            
+            // 查找资产
+            Asset asset = baseMapper.selectOne(queryWrapper);
+            if (asset != null) {
+                // 更新label_code
+                asset.setLabelCode(labelCode);
+                asset.setUpdateTime(System.currentTimeMillis());
+                // 保存更新
+                baseMapper.updateById(asset);
+            }
+        }
+    }
+
     /**
      * 将Asset转换为AssetDTO
      */

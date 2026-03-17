@@ -4,9 +4,14 @@
       <template #header>
         <div class="card-header">
           <span>资产管理</span>
-          <el-button type="primary" @click="openAddDialog">
-            <el-icon><Plus /></el-icon> 新增
-          </el-button>
+          <div>
+            <el-button type="primary" @click="openAddDialog">
+              <el-icon><Plus /></el-icon> 新增
+            </el-button>
+            <el-button type="info" @click="syncRfidTags">
+              <el-icon><Refresh /></el-icon> 同步RFID标签
+            </el-button>
+          </div>
         </div>
       </template>
       
@@ -33,7 +38,7 @@
         <el-table-column prop="userName" label="使用人" />
         <el-table-column prop="deptName" label="部门" />
         <el-table-column prop="statusName" label="状态" />
-        <el-table-column label="操作" width="300">
+        <el-table-column label="操作" width="400">
           <template #default="{ row }">
             <el-button size="small" @click="openEditDialog(row)">
               编辑
@@ -46,6 +51,9 @@
             </el-button>
             <el-button size="small" type="success" @click="printAsset(row)">
               打印
+            </el-button>
+            <el-button size="small" type="info" @click="syncSingleRfidTag(row)">
+              同步RFID标签
             </el-button>
           </template>
         </el-table-column>
@@ -290,7 +298,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Refresh } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/api'
 import { useConfigStore } from '@/stores/config'
@@ -799,13 +807,13 @@ const handleCurrentChange = (current) => {
 const printAsset = async (row) => {
   try {
     // 准备请求数据
-    const data = {
+    const data = [{
       CardName: row.name,
       CardSerial: row.code
-    }
+    }]
     
     // 发送POST请求
-    const response = await fetch(configStore.printServiceUrl, {
+    const response = await fetch(configStore.printServiceUrl + '/print', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -828,6 +836,107 @@ const printAsset = async (row) => {
   }
 }
 
+// 同步RFID标签
+const syncRfidTags = async () => {
+  try {
+    // 显示加载中消息
+    ElMessage({ 
+      message: '正在同步RFID标签...', 
+      type: 'info',
+      duration: 3000,
+      showClose: true
+    })
+    
+    // 从服务器获取所有code = label_code的资产记录的code
+    const codes = await api.get('/asset/without-label-code')
+    
+    if (codes.length === 0) {
+      ElMessage.success('所有资产都已有RFID标签')
+      return
+    }
+    
+    // 发送POST请求到query接口
+    const queryResponse = await fetch(configStore.printServiceUrl + '/query', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(codes)
+    })
+    
+    // 获取响应数据
+    const result = await queryResponse.json()
+    
+    // 在控制台打印接口输出
+    console.log('同步RFID标签接口输出:', result)
+    
+    // 提交数据到服务器更新label_code
+    if (Object.keys(result).length > 0) {
+      try {
+        await api.post('/asset/update-label-code', result)
+        ElMessage.success(`成功同步并更新 ${Object.keys(result).length} 个RFID标签`)
+      } catch (error) {
+        ElMessage.error('更新RFID标签失败')
+        console.error('更新RFID标签失败:', error)
+      }
+    } else {
+      ElMessage.success('同步RFID标签成功，但没有需要更新的数据')
+    }
+  } catch (error) {
+    // 显示错误消息
+    ElMessage.error('同步RFID标签失败')
+    console.error('同步RFID标签失败:', error)
+  }
+}
+
+// 同步单个资产的RFID标签
+const syncSingleRfidTag = async (row) => {
+  try {
+    // 显示加载中消息
+    ElMessage({ 
+      message: '正在同步RFID标签...', 
+      type: 'info',
+      duration: 3000,
+      showClose: true
+    })
+    
+    // 准备请求数据，以数组形式
+    const codes = [row.code]
+    
+    // 发送POST请求到query接口
+    const queryResponse = await fetch(configStore.printServiceUrl + '/query', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(codes)
+    })
+    
+    // 获取响应数据
+    const result = await queryResponse.json()
+    
+    // 在控制台打印接口输出
+    console.log('同步单个RFID标签接口输出:', result)
+    
+    // 提交数据到服务器更新label_code
+    if (Object.keys(result).length > 0) {
+      try {
+        await api.post('/asset/update-label-code', result)
+        ElMessage.success(`成功同步并更新资产 ${row.name} 的RFID标签`)
+      } catch (error) {
+        ElMessage.error('更新RFID标签失败')
+        console.error('更新RFID标签失败:', error)
+      }
+    } else {
+      ElMessage.success(`同步资产 ${row.name} 的RFID标签成功，但没有需要更新的数据`)
+    }
+  } catch (error) {
+    // 显示错误消息
+    ElMessage.error('同步RFID标签失败')
+    console.error('同步单个RFID标签失败:', error)
+  }
+}
+
 // 组件挂载时加载数据
 onMounted(async () => {
   // 加载配置
@@ -846,6 +955,11 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.card-header > div {
+  display: flex;
+  gap: 8px;
 }
 
 .dialog-footer {
