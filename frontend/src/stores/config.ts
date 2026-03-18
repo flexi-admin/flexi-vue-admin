@@ -7,7 +7,8 @@ export const useConfigStore = defineStore('config', {
     menuData: [],
     loading: false,
     loaded: false,
-    menuLoaded: false
+    menuLoaded: false,
+    dynamicRoutesAdded: false
   }),
 
   getters: {
@@ -72,6 +73,10 @@ export const useConfigStore = defineStore('config', {
       this.menuLoaded = true
     },
 
+    setDynamicRoutesAdded(value: boolean) {
+      this.dynamicRoutesAdded = value
+    },
+
     resetConfig() {
       this.config = {}
       this.loaded = false
@@ -80,6 +85,7 @@ export const useConfigStore = defineStore('config', {
     resetMenuData() {
       this.menuData = []
       this.menuLoaded = false
+      this.dynamicRoutesAdded = false
     }
   }
 })

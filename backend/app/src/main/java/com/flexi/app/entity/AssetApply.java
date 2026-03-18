@@ -19,4 +19,6 @@ public class AssetApply {
     private String remark;
     private Long createTime;
     private Long updateTime;
+    private Long approverId;
+    private String rejectReason;
 }

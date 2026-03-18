@@ -83,4 +83,10 @@ public class AssetController {
         assetService.updateLabelCode(codeLabelMap);
         return R.success();
     }
+
+    @RequirePermission("asset:list")
+    @GetMapping("/{id}")
+    public R<AssetDTO> getAssetById(@PathVariable Long id) {
+        return R.success(assetService.getAssetById(id));
+    }
 }

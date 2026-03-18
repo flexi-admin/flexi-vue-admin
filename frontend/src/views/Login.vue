@@ -62,7 +62,10 @@ const handleLogin = async () => {
         const userData = await api.get('/auth/user')
         userStore.setUserInfo(userData.user)
         
-        // 3. 获取系统配置，跳转到默认首页
+        // 3. 重置菜单数据状态和动态路由状态，确保切换用户时重新获取菜单和路由
+        configStore.resetMenuData()
+        
+        // 5. 获取系统配置，跳转到默认首页
         try {
           await configStore.loadConfig()
           const defaultHome = configStore.defaultHome

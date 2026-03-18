@@ -143,6 +143,14 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
     }
 
+    @Override
+    public AssetDTO getAssetById(Long id) {
+        // 根据id查找资产
+        Asset asset = baseMapper.selectById(id);
+        // 转换为DTO并返回
+        return asset != null ? convertToDTO(asset) : null;
+    }
+
     /**
      * 将Asset转换为AssetDTO
      */

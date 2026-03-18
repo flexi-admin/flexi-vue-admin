@@ -2,6 +2,7 @@ package io.github.zmxckj.flexiadmin.controller;
 
 import io.github.zmxckj.flexiadmin.entity.Dept;
 import io.github.zmxckj.flexiadmin.common.R;
+import io.github.zmxckj.flexiadmin.security.RequirePermission;
 import io.github.zmxckj.flexiadmin.service.DeptService;
 import io.github.zmxckj.flexiadmin.service.UserDeptService;
 import io.github.zmxckj.flexiadmin.entity.UserDept;
@@ -32,6 +33,7 @@ public class DeptController {
     /**
      * 部门列表
      */
+    @RequirePermission("dept:list")
     @GetMapping("/list")
     public R<List<Dept>> list() {
         return R.success(deptService.list());
@@ -40,22 +42,16 @@ public class DeptController {
     /**
      * 部门分页列表
      */
+    @RequirePermission("dept:list")
     @GetMapping("/page")
     public R<Page<Dept>> page(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer size) {
         return R.success(deptService.page(new Page<>(page, size)));
     }
 
     /**
-     * 根据ID获取部门
-     */
-    @GetMapping("/{id}")
-    public R<Dept> getById(@PathVariable Long id) {
-        return R.success(deptService.getById(id));
-    }
-
-    /**
      * 新增部门
      */
+    @RequirePermission("dept:add")
     @PostMapping
     public R<?> save(@RequestBody Dept dept) {
         deptService.save(dept);
@@ -65,6 +61,7 @@ public class DeptController {
     /**
      * 修改部门
      */
+    @RequirePermission("dept:update")
     @PutMapping
     public R<?> update(@RequestBody Dept dept) {
         deptService.updateById(dept);
@@ -74,6 +71,7 @@ public class DeptController {
     /**
      * 删除部门
      */
+    @RequirePermission("dept:delete")
     @DeleteMapping("/{id}")
     public R<?> delete(@PathVariable Long id) {
         deptService.removeById(id);

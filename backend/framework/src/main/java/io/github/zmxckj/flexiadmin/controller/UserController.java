@@ -7,6 +7,7 @@ import io.github.zmxckj.flexiadmin.entity.UserDept;
 import io.github.zmxckj.flexiadmin.dto.AssignRoleDTO;
 import io.github.zmxckj.flexiadmin.dto.AssignDeptDTO;
 import io.github.zmxckj.flexiadmin.common.R;
+import io.github.zmxckj.flexiadmin.security.RequirePermission;
 import io.github.zmxckj.flexiadmin.service.UserService;
 import io.github.zmxckj.flexiadmin.service.UserRoleService;
 import io.github.zmxckj.flexiadmin.service.UserDeptService;
@@ -37,6 +38,7 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @RequirePermission("user:list")
     @GetMapping("/list")
     public R<Map<String, Object>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer pageSize, @RequestParam(required = false) String keyword) {
         Page<User> userPage = userService.page(new Page<>(page, pageSize), keyword);
@@ -72,6 +74,7 @@ public class UserController {
         return R.success(response);
     }
 
+    @RequirePermission("user:add")
     @PostMapping
     public R<User> add(@RequestBody User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -79,6 +82,7 @@ public class UserController {
         return R.success(user);
     }
 
+    @RequirePermission("user:update")
     @PutMapping
     public R<?> update(@RequestBody User user) {
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
@@ -88,6 +92,7 @@ public class UserController {
         return R.success();
     }
 
+    @RequirePermission("user:delete")
     @DeleteMapping("/{id}")
     public R<?> delete(@PathVariable Long id) {
         userService.removeById(id);

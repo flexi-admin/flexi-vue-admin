@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.github.zmxckj.flexiadmin.entity.Menu;
 import io.github.zmxckj.flexiadmin.entity.User;
 import io.github.zmxckj.flexiadmin.common.R;
+import io.github.zmxckj.flexiadmin.security.RequirePermission;
 import io.github.zmxckj.flexiadmin.service.MenuService;
 import io.github.zmxckj.flexiadmin.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +27,14 @@ public class MenuController {
     @Autowired
     private UserService userService;
 
+    @RequirePermission("menu:list")
     @GetMapping("/list")
     public R<List<Menu>> list() {
         List<Menu> menus = menuService.findAll();
         return R.success(menus);
     }
 
+    @RequirePermission("menu:list")
     @GetMapping("/page")
     public R<Map<String, Object>> page(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer pageSize) {
         Page<Menu> menuPage = menuService.page(new Page<>(page, pageSize));
@@ -41,18 +44,21 @@ public class MenuController {
         return R.success(response);
     }
 
+    @RequirePermission("menu:add")
     @PostMapping
     public R<?> add(@RequestBody Menu menu) {
         menuService.save(menu);
         return R.success();
     }
 
+    @RequirePermission("menu:update")
     @PutMapping
     public R<?> update(@RequestBody Menu menu) {
         menuService.updateById(menu);
         return R.success();
     }
 
+    @RequirePermission("menu:delete")
     @DeleteMapping("/{id}")
     public R<?> delete(@PathVariable Long id) {
         menuService.removeById(id);

@@ -15,4 +15,5 @@ public interface AssetService extends IService<Asset> {
     IPage<AssetDTO> listMyAssets(Integer page, Integer size, Long userId);
     List<Asset> listAssetsWithoutLabelCode();
     void updateLabelCode(java.util.Map<String, String> codeLabelMap);
+    AssetDTO getAssetById(Long id);
 }

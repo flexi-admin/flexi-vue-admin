@@ -23,8 +23,7 @@ const router = createRouter({
   routes
 })
 
-// 标记是否已经添加了动态路由
-let dynamicRoutesAdded = false
+// 动态路由状态管理由configStore处理
 
 // 使用Vite的glob导入功能，预加载所有视图组件
 const modules = import.meta.glob('../views/**/*.vue')
@@ -77,7 +76,8 @@ const addDynamicRoutes = (menus: any[]) => {
   console.log('Dynamic routes added:', router.getRoutes().map(r => r.path))
   
   // 标记动态路由已添加
-  dynamicRoutesAdded = true
+  const configStore = useConfigStore()
+  configStore.setDynamicRoutesAdded(true)
 }
 
 // 路由守卫
@@ -116,7 +116,7 @@ router.beforeEach(async (to, _from, next) => {
   await configStore.loadConfig()
   
   // 检查是否已经添加了动态路由
-  if (!dynamicRoutesAdded) {
+  if (!configStore.dynamicRoutesAdded) {
     // 还没有添加动态路由，获取菜单数据并添加动态路由
     try {
       // 从configStore获取菜单数据

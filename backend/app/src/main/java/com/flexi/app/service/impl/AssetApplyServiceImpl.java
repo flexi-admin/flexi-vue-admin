@@ -64,6 +64,22 @@ public class AssetApplyServiceImpl extends ServiceImpl<AssetApplyMapper, AssetAp
         return applyPage.convert(this::convertToDTO);
     }
 
+    @Override
+    public IPage<AssetApplyDTO> listPendingApplies(Integer page, Integer size) {
+        // 创建分页对象
+        Page<AssetApply> pageInfo = new Page<>(page, size);
+        
+        // 构建查询条件，只查询状态为pending的申请
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<AssetApply> queryWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        queryWrapper.eq("status", "pending");
+        
+        // 执行分页查询
+        IPage<AssetApply> applyPage = baseMapper.selectPage(pageInfo, queryWrapper);
+        
+        // 转换为DTO并返回
+        return applyPage.convert(this::convertToDTO);
+    }
+
     /**
      * 将AssetApply转换为AssetApplyDTO
      */

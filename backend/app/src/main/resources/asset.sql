@@ -166,10 +166,13 @@ CREATE TABLE IF NOT EXISTS `asset_apply` (
   `remark` VARCHAR(500) COMMENT '备注',
   `create_time` BIGINT NOT NULL COMMENT '创建时间',
   `update_time` BIGINT NOT NULL COMMENT '更新时间',
+  `approver_id` BIGINT COMMENT '审批人ID',
+  `reject_reason` VARCHAR(500) COMMENT '拒绝原因',
   PRIMARY KEY (`id`),
   INDEX `idx_asset_id` (`asset_id`),
   INDEX `idx_user_id` (`user_id`),
-  INDEX `idx_dept_id` (`dept_id`)
+  INDEX `idx_dept_id` (`dept_id`),
+  INDEX `idx_approver_id` (`approver_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资产领用表';
 
 -- 插入字典数据
@@ -226,6 +229,8 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 (1004, '我的资产', '/asset/my', 'business/asset/MyAsset', 1000, 'User', NULL, 'menu', true, 21),
 -- 资产领用
 (1005, '资产领用', '/asset/apply', 'business/asset/Apply', 1000, 'Document', NULL, 'menu', true, 22),
+-- 领用审批
+(1033, '领用审批', '/asset/approval', 'business/asset/Approval', 1000, 'CheckCircle', NULL, 'menu', true, 23),
 -- 供应商管理
 (1006, '供应商管理', '/asset/supplier', 'business/asset-supplier/Index', 1000, 'UserFilled', NULL, 'menu', true, 18),
 -- 资产盘点管理
@@ -255,6 +260,9 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 (1022, '资产领用添加', NULL, NULL, 1005, NULL, 'asset:apply:add', 'operation', true, 41),
 (1023, '资产领用编辑', NULL, NULL, 1005, NULL, 'asset:apply:edit', 'operation', true, 42),
 (1024, '资产领用删除', NULL, NULL, 1005, NULL, 'asset:apply:delete', 'operation', true, 43),
+-- 领用审批操作
+(1034, '领用审批列表', NULL, NULL, 1033, NULL, 'asset:approval:list', 'operation', true, 44),
+(1035, '领用审批操作', NULL, NULL, 1033, NULL, 'asset:approval:operate', 'operation', true, 45),
 -- 供应商操作权限
 (1025, '供应商列表', NULL, NULL, 1006, NULL, 'asset:supplier:list', 'operation', true, 31),
 (1026, '供应商添加', NULL, NULL, 1006, NULL, 'asset:supplier:add', 'operation', true, 32),
@@ -269,10 +277,10 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 -- 为admin角色分配权限
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES
 -- 资产管理权限
-(1, 1000), (1, 1001), (1, 1002), (1, 1003), (1, 1004), (1, 1005),
+(1, 1000), (1, 1001), (1, 1002), (1, 1003), (1, 1004), (1, 1005), (1, 1033),
 (1, 1008), (1, 1009), (1, 1010), (1, 1011),
 (1, 1012), (1, 1013), (1, 1014), (1, 1015),
-(1, 1016), (1, 1017), (1, 1018), (1, 1019), (1, 1020), (1, 1021), (1, 1022), (1, 1023), (1, 1024),
+(1, 1016), (1, 1017), (1, 1018), (1, 1019), (1, 1020), (1, 1021), (1, 1022), (1, 1023), (1, 1024), (1, 1034), (1, 1035),
 -- 供应商管理权限
 (1, 1006), (1, 1025), (1, 1026), (1, 1027), (1, 1028),
 -- 资产盘点管理权限
