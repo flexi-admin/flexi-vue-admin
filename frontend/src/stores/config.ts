@@ -6,6 +6,7 @@ export const useConfigStore = defineStore('config', {
     config: {},
     menuData: [],
     loading: false,
+    menuLoading: false,
     loaded: false,
     menuLoaded: false,
     dynamicRoutesAdded: false
@@ -54,9 +55,9 @@ export const useConfigStore = defineStore('config', {
     },
 
     async loadMenuData() {
-      if (this.menuLoaded || this.loading) return
+      if (this.menuLoaded || this.menuLoading) return
 
-      this.loading = true
+      this.menuLoading = true
       try {
         const response = await api.get('/menu/tree')
         this.menuData = response
@@ -64,7 +65,7 @@ export const useConfigStore = defineStore('config', {
       } catch (error) {
         console.error('获取菜单数据失败:', error)
       } finally {
-        this.loading = false
+        this.menuLoading = false
       }
     },
 
@@ -85,6 +86,7 @@ export const useConfigStore = defineStore('config', {
     resetMenuData() {
       this.menuData = []
       this.menuLoaded = false
+      this.menuLoading = false
       this.dynamicRoutesAdded = false
     }
   }

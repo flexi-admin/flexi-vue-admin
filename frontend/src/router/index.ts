@@ -115,8 +115,9 @@ router.beforeEach(async (to, _from, next) => {
   const configStore = useConfigStore()
   await configStore.loadConfig()
   
-  // 检查是否已经添加了动态路由
+  // 页面刷新时，重置菜单数据状态，确保重新加载菜单
   if (!configStore.dynamicRoutesAdded) {
+    configStore.resetMenuData()
     // 还没有添加动态路由，获取菜单数据并添加动态路由
     try {
       // 从configStore获取菜单数据
