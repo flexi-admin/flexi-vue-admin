@@ -379,35 +379,38 @@ watch(() => route.path, (newPath) => {
 })
 
 // 初始化
-onMounted(async () => {
-  
-  // 调试用户信息
-  console.log('User info:', userStore.userInfo)
-  console.log('Token:', userStore.token)
-  console.log('Username:', userStore.userInfo.username || '管理员')
-  
-  // 检查是否有token
-  if (userStore.token) {
-    // 检查是否有token但没有用户信息
-    if (!userStore.userInfo.username) {
-      // 尝试重新获取用户信息
-      try {
-        const userData = await api.get('/auth/user')
-        userStore.setUserInfo(userData.user)
-        console.log('User info updated:', userStore.userInfo)
-      } catch (error) {
-        console.error('获取用户信息失败:', error)
-        userStore.logout()
-        router.push('/login')
-        return
+  onMounted(async () => {
+    
+    // 调试用户信息
+    console.log('User info:', userStore.userInfo)
+    console.log('Token:', userStore.token)
+    console.log('Username:', userStore.userInfo.username || '管理员')
+    
+    // 检查是否有token
+    if (userStore.token) {
+      // 检查是否有token但没有用户信息
+      if (!userStore.userInfo.username) {
+        // 尝试重新获取用户信息
+        try {
+          const userData = await api.get('/auth/user')
+          userStore.setUserInfo(userData.user)
+          console.log('User info updated:', userStore.userInfo)
+        } catch (error) {
+          console.error('获取用户信息失败:', error)
+          userStore.logout()
+          router.push('/login')
+          return
+        }
       }
-    }
-    
-    // 从后端获取系统配置
-    await configStore.loadConfig()
-    
-    // 从后端获取菜单数据（仅用于显示菜单，不添加路由，路由由路由守卫添加）
-    await fetchMenuOptions()
+      
+      // 从后端获取系统配置
+      await configStore.loadConfig()
+      
+      // 动态设置页面标题
+      document.title = configStore.systemName || 'Flexi Admin'
+      
+      // 从后端获取菜单数据（仅用于显示菜单，不添加路由，路由由路由守卫添加）
+      await fetchMenuOptions()
     
     // 检查当前路径是否为根路径，如果是，跳转到默认首页
     if (route.path === '/') {
