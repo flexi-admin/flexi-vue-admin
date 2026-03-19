@@ -7,9 +7,11 @@ import com.flexi.app.utils.SnowflakeIdGenerator;
 import io.github.zmxckj.flexiadmin.common.R;
 import io.github.zmxckj.flexiadmin.security.RequirePermission;
 import io.github.zmxckj.flexiadmin.security.SecurityUtils;
+import io.github.zmxckj.flexiadmin.utils.DataScopeHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -58,6 +60,7 @@ public class AssetController {
     @PutMapping
     public R<?> edit(@RequestBody Asset asset) {
         asset.setUpdateTime(System.currentTimeMillis());
+        asset.setUpdaterId(SecurityUtils.getCurrentUserId());
         assetService.updateById(asset);
         return R.success();
     }
@@ -84,7 +87,7 @@ public class AssetController {
         return R.success();
     }
 
-    @RequirePermission("asset:list")
+    @RequirePermission("asset:query")
     @GetMapping("/{id}")
     public R<AssetDTO> getAssetById(@PathVariable Long id) {
         return R.success(assetService.getAssetById(id));

@@ -13,9 +13,11 @@ import com.flexi.app.service.AssetService;
 import com.flexi.app.service.AssetTypeService;
 import com.flexi.app.service.AssetLocationService;
 import com.flexi.app.service.AssetSupplierService;
+import io.github.zmxckj.flexiadmin.security.SecurityUtils;
 import io.github.zmxckj.flexiadmin.service.DictService;
 import io.github.zmxckj.flexiadmin.service.UserService;
 import io.github.zmxckj.flexiadmin.service.DeptService;
+import io.github.zmxckj.flexiadmin.utils.DataScopeHelper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -146,7 +148,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     @Override
     public AssetDTO getAssetById(Long id) {
         // 根据id查找资产
+        DataScopeHelper.set("user_id = " + SecurityUtils.getCurrentUserId());
         Asset asset = baseMapper.selectById(id);
+        DataScopeHelper.clear();
         // 转换为DTO并返回
         return asset != null ? convertToDTO(asset) : null;
     }

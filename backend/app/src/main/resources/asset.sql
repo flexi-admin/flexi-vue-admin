@@ -250,6 +250,7 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 (1015, '资产位置删除', NULL, NULL, 1002, NULL, 'asset:location:delete', 'operation', true, 26),
 -- 资产操作
 (1016, '资产列表', NULL, NULL, 1003, NULL, 'asset:list', 'operation', true, 27),
+(1036, '资产查询', NULL, NULL, 1003, NULL, 'asset:query', 'operation', true, 271),
 (1017, '资产添加', NULL, NULL, 1003, NULL, 'asset:add', 'operation', true, 28),
 (1018, '资产编辑', NULL, NULL, 1003, NULL, 'asset:edit', 'operation', true, 29),
 (1019, '资产删除', NULL, NULL, 1003, NULL, 'asset:delete', 'operation', true, 30),
@@ -280,7 +281,7 @@ INSERT INTO sys_role_menu (role_id, menu_id) VALUES
 (1, 1000), (1, 1001), (1, 1002), (1, 1003), (1, 1004), (1, 1005), (1, 1033),
 (1, 1008), (1, 1009), (1, 1010), (1, 1011),
 (1, 1012), (1, 1013), (1, 1014), (1, 1015),
-(1, 1016), (1, 1017), (1, 1018), (1, 1019), (1, 1020), (1, 1021), (1, 1022), (1, 1023), (1, 1024), (1, 1034), (1, 1035),
+(1, 1016), (1, 1036), (1, 1017), (1, 1018), (1, 1019), (1, 1020), (1, 1021), (1, 1022), (1, 1023), (1, 1024), (1, 1034), (1, 1035),
 -- 供应商管理权限
 (1, 1006), (1, 1025), (1, 1026), (1, 1027), (1, 1028),
 -- 资产盘点管理权限
