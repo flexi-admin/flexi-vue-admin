@@ -225,16 +225,18 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 (1002, '资产位置管理', '/asset/location', 'business/asset-location/Index', 1000, 'Location', NULL, 'menu', true, 17),
 -- 资产管理
 (1003, '资产管理', '/asset/list', 'business/asset/Index', 1000, 'Inventory', NULL, 'menu', true, 19),
--- 我的资产
-(1004, '我的资产', '/asset/my', 'business/asset/MyAsset', 1000, 'User', NULL, 'menu', true, 21),
--- 资产领用
-(1005, '资产领用', '/asset/apply', 'business/asset/Apply', 1000, 'Document', NULL, 'menu', true, 22),
--- 领用审批
-(1033, '领用审批', '/asset/approval', 'business/asset/Approval', 1000, 'CheckCircle', NULL, 'menu', true, 23),
 -- 供应商管理
 (1006, '供应商管理', '/asset/supplier', 'business/asset-supplier/Index', 1000, 'UserFilled', NULL, 'menu', true, 18),
 -- 资产盘点管理
-(1007, '资产盘点', '/asset/inventory', 'business/asset-inventory/Index', 1000, 'DataAnalysis', NULL, 'menu', true, 20);
+(1007, '资产盘点', '/asset/inventory', 'business/asset-inventory/Index', 1000, 'DataAnalysis', NULL, 'menu', true, 20),
+-- 领用审批
+(1033, '领用审批', '/asset/approval', 'business/asset/Approval', 1000, 'CheckCircle', NULL, 'menu', true, 23),
+-- 个人中心主菜单
+(2000, '个人中心', '/personal', '', 0, 'User', NULL, 'menu', true, 25),
+-- 我的资产
+(2001, '我的资产', '/personal/asset/my', 'business/asset/MyAsset', 2000, 'User', NULL, 'menu', true, 26),
+-- 资产领用
+(2002, '资产领用', '/personal/asset/apply', 'business/asset/Apply', 2000, 'Document', NULL, 'menu', true, 27);
 
 -- 操作权限
 -- 资产类型操作
@@ -254,13 +256,6 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 (1017, '资产添加', NULL, NULL, 1003, NULL, 'asset:add', 'operation', true, 28),
 (1018, '资产编辑', NULL, NULL, 1003, NULL, 'asset:edit', 'operation', true, 29),
 (1019, '资产删除', NULL, NULL, 1003, NULL, 'asset:delete', 'operation', true, 30),
--- 我的资产操作
-(1020, '我的资产列表', NULL, NULL, 1004, NULL, 'asset:my:list', 'operation', true, 39),
--- 资产领用操作
-(1021, '资产领用列表', NULL, NULL, 1005, NULL, 'asset:apply:list', 'operation', true, 40),
-(1022, '资产领用添加', NULL, NULL, 1005, NULL, 'asset:apply:add', 'operation', true, 41),
-(1023, '资产领用编辑', NULL, NULL, 1005, NULL, 'asset:apply:edit', 'operation', true, 42),
-(1024, '资产领用删除', NULL, NULL, 1005, NULL, 'asset:apply:delete', 'operation', true, 43),
 -- 领用审批操作
 (1034, '领用审批列表', NULL, NULL, 1033, NULL, 'asset:approval:list', 'operation', true, 44),
 (1035, '领用审批操作', NULL, NULL, 1033, NULL, 'asset:approval:operate', 'operation', true, 45),
@@ -273,19 +268,28 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 (1029, '资产盘点列表', NULL, NULL, 1007, NULL, 'asset:inventory:list', 'operation', true, 35),
 (1030, '资产盘点添加', NULL, NULL, 1007, NULL, 'asset:inventory:add', 'operation', true, 36),
 (1031, '资产盘点编辑', NULL, NULL, 1007, NULL, 'asset:inventory:edit', 'operation', true, 37),
-(1032, '资产盘点删除', NULL, NULL, 1007, NULL, 'asset:inventory:delete', 'operation', true, 38);
+(1032, '资产盘点删除', NULL, NULL, 1007, NULL, 'asset:inventory:delete', 'operation', true, 38),
+-- 我的资产操作
+(2003, '我的资产列表', NULL, NULL, 2001, NULL, 'asset:my:list', 'operation', true, 39),
+-- 资产领用操作
+(2004, '资产领用列表', NULL, NULL, 2002, NULL, 'asset:apply:list', 'operation', true, 40),
+(2005, '资产领用添加', NULL, NULL, 2002, NULL, 'asset:apply:add', 'operation', true, 41),
+(2006, '资产领用编辑', NULL, NULL, 2002, NULL, 'asset:apply:edit', 'operation', true, 42),
+(2007, '资产领用删除', NULL, NULL, 2002, NULL, 'asset:apply:delete', 'operation', true, 43);
 
 -- 为admin角色分配权限
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES
 -- 资产管理权限
-(1, 1000), (1, 1001), (1, 1002), (1, 1003), (1, 1004), (1, 1005), (1, 1033),
+(1, 1000), (1, 1001), (1, 1002), (1, 1003), (1, 1033),
 (1, 1008), (1, 1009), (1, 1010), (1, 1011),
 (1, 1012), (1, 1013), (1, 1014), (1, 1015),
-(1, 1016), (1, 1036), (1, 1017), (1, 1018), (1, 1019), (1, 1020), (1, 1021), (1, 1022), (1, 1023), (1, 1024), (1, 1034), (1, 1035),
+(1, 1016), (1, 1036), (1, 1017), (1, 1018), (1, 1019), (1, 1034), (1, 1035),
 -- 供应商管理权限
 (1, 1006), (1, 1025), (1, 1026), (1, 1027), (1, 1028),
 -- 资产盘点管理权限
-(1, 1007), (1, 1029), (1, 1030), (1, 1031), (1, 1032);
+(1, 1007), (1, 1029), (1, 1030), (1, 1031), (1, 1032),
+-- 个人中心权限
+(1, 2000), (1, 2001), (1, 2002), (1, 2003), (1, 2004), (1, 2005), (1, 2006), (1, 2007);
 
 -- 插入系统配置
 INSERT INTO sys_config (config_key, value, description, create_time, update_time) VALUES

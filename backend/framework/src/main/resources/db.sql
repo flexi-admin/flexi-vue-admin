@@ -225,7 +225,7 @@ INSERT INTO sys_config (config_key, value, description) VALUES
 ('system.name', 'Flexi Admin', '系统名称'),
 ('system.version', '1.0.0', '系统版本'),
 ('system.enabled_modules', 'user,role,menu,log,config,dict,task,image', '启用的模块'),
-('system.default_home', '/system/user', '默认首页路径'),
+('system.default_home', '/', '默认首页路径'),
 ('system.image_base_url', '/api/images/', '图片基础URL');
 
 -- 创建appid表

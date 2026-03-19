@@ -22,7 +22,7 @@ export const useConfigStore = defineStore('config', {
     },
 
     defaultHome: (state) => {
-      return state.config['system.default_home'] || '/system/user'
+      return state.config['system.default_home'] || '/'
     },
 
     imageBaseUrl: (state) => {

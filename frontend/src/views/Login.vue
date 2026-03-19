@@ -72,7 +72,7 @@ const handleLogin = async () => {
           router.push(defaultHome)
         } catch (configError) {
           console.error('获取系统配置失败，使用默认路径:', configError)
-          router.push('/system/user')
+          router.push('/')
         }
       } catch (error) {
         console.error('登录失败:', error)

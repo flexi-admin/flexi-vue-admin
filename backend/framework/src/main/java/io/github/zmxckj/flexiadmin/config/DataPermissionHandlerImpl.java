@@ -6,7 +6,9 @@ import io.github.zmxckj.flexiadmin.utils.DataScopeHelper;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
 import io.github.zmxckj.flexiadmin.security.SecurityUtils;
@@ -27,7 +29,7 @@ public class DataPermissionHandlerImpl implements MultiDataPermissionHandler {
         String sqlSegment = DataScopeHelper.get();
         if(StrUtil.isNotBlank(sqlSegment)) {
             try {
-                return CCJSqlParserUtil.parseCondExpression(sqlSegment);
+                return new ParenthesedExpressionList<>(CCJSqlParserUtil.parseCondExpression(sqlSegment));
             } catch (JSQLParserException e) {
                 throw new RuntimeException(e);
             }

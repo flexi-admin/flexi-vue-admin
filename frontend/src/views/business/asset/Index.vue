@@ -140,6 +140,7 @@
                 remote
                 :remote-method="searchSuppliers"
                 :loading="supplierLoading"
+                clearable
               >
                 <el-option 
                   v-for="supplier in suppliers" 
@@ -205,6 +206,7 @@
                 remote
                 :remote-method="remoteMethod"
                 :loading="userLoading"
+                clearable
               >
                 <el-option 
                   v-for="user in users" 
@@ -224,6 +226,7 @@
                 remote
                 :remote-method="remoteMethod"
                 :loading="userLoading"
+                clearable
               >
                 <el-option 
                   v-for="user in users" 

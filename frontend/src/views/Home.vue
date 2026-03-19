@@ -102,7 +102,8 @@
           <div class="main-content">
             <router-view v-slot="{ Component }">
               <transition name="fade" mode="out-in">
-                <component :is="Component" />
+                <component :is="Component" v-if="Component" />
+                <Welcome v-else />
               </transition>
             </router-view>
           </div>
@@ -120,6 +121,7 @@ import { useConfigStore } from '../stores/config'
 import { House, ArrowDown, Setting, Document, DataAnalysis, List, Timer, User } from '@element-plus/icons-vue'
 import api from '@/api'
 import { addDynamicRoutes } from '../router'
+import Welcome from './Welcome.vue'
 
 // 导入所有可能的图标组件
 import * as Icons from '@element-plus/icons-vue'
@@ -412,10 +414,8 @@ watch(() => route.path, (newPath) => {
       // 从后端获取菜单数据（仅用于显示菜单，不添加路由，路由由路由守卫添加）
       await fetchMenuOptions()
     
-    // 检查当前路径是否为根路径，如果是，跳转到默认首页
+    // 检查当前路径是否为根路径，如果是，不跳转，显示欢迎页
     if (route.path === '/') {
-      const defaultHome = configStore.defaultHome
-      router.push(defaultHome)
       return
     }
     
