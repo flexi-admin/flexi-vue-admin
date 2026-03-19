@@ -3,8 +3,8 @@ import api from '@/api'
 
 export const useConfigStore = defineStore('config', {
   state: () => ({
-    config: {},
-    menuData: [],
+    config: {} as Record<string, any>,
+    menuData: [] as any[],
     loading: false,
     menuLoading: false,
     loaded: false,

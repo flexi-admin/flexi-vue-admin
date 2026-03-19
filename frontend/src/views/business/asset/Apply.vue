@@ -201,7 +201,8 @@ const form = ref({
   assetId: '',
   typeId: null,
   status: '',
-  remark: ''
+  remark: '',
+  userId: ''
 })
 
 const getStatusType = (status: string) => {
@@ -352,7 +353,8 @@ const openAddDialog = async () => {
     assetId: '',
     typeId: null,
     status: 'pending',
-    remark: ''
+    remark: '',
+    userId: ''
   }
   
   dialogVisible.value = true
@@ -386,7 +388,7 @@ const submitForm = async () => {
     
     // 按类型领用时，不需要assetId，设置为0
     if (formData.applyType === 'type') {
-      formData.assetId = 0
+      formData.assetId = '0'
     }else if(formData.applyType === 'idle'){
       // 闲置领用时，保留typeId用于后端处理
       if (Array.isArray(formData.typeId) && formData.typeId.length > 0) {

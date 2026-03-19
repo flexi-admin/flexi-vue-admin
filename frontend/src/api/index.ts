@@ -2,11 +2,22 @@ import axios from 'axios'
 import { useUserStore } from '../stores/user'
 import { ElMessage } from 'element-plus'
 
+// 创建axios实例
 const api = axios.create({
   baseURL: '/api',
   timeout: 10000,
   withCredentials: false
 })
+
+// 为api实例添加类型定义
+declare module 'axios' {
+  interface AxiosInstance {
+    get<T = any>(url: string, config?: any): Promise<T>
+    post<T = any>(url: string, data?: any, config?: any): Promise<T>
+    put<T = any>(url: string, data?: any, config?: any): Promise<T>
+    delete<T = any>(url: string, config?: any): Promise<T>
+  }
+}
 
 api.interceptors.request.use(
   (config) => {
@@ -71,6 +82,15 @@ export const updateAsset = (data: any) => {
 
 export const deleteAsset = (id: number) => {
   return api.delete(`/asset/${id}`)
+}
+
+// 登录相关API
+export const login = (data: { username: string; password: string }) => {
+  return api.post('/auth/login', data)
+}
+
+export const getUserInfo = () => {
+  return api.get('/auth/user')
 }
 
 export default api

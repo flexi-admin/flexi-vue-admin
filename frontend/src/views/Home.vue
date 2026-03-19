@@ -114,17 +114,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, getCurrentInstance } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { useConfigStore } from '../stores/config'
-import { House, ArrowDown, Setting, Document, DataAnalysis, List, Timer, User } from '@element-plus/icons-vue'
+import { ArrowDown } from '@element-plus/icons-vue'
 import api from '@/api'
-import { addDynamicRoutes } from '../router'
 import Welcome from './Welcome.vue'
-
-// 导入所有可能的图标组件
-import * as Icons from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -133,17 +129,27 @@ const configStore = useConfigStore()
 const activeMenu = ref('user')
 const activeTab = ref('user')
 const activeFirstLevelMenu = ref('1') // 默认选中第一个一级菜单
-const currentFirstLevelMenu = ref(null)
+const currentFirstLevelMenu = ref<MenuItem | null>(null)
+
+// 菜单和标签页类型定义
+interface MenuItem {
+  label: string
+  key: string
+  path: string
+  icon?: string
+  component?: string
+  children: MenuItem[]
+}
 
 // 标签页数据
-const tabs = ref([])
+const tabs = ref<MenuItem[]>([])
 
 // 菜单数据（从后端获取）
-const menuOptions = ref([])
+const menuOptions = ref<MenuItem[]>([])
 
 // 递归处理菜单数据
-const processMenuItems = (items: any[]) => {
-  return items.map((item: any) => {
+const processMenuItems = (items: any[]): MenuItem[] => {
+  return items.map((item: any): MenuItem => {
     let path = item.path
     console.log('Processing menu item:', item.name, 'path:', path)
     return {
@@ -170,7 +176,7 @@ const fetchMenuOptions = async () => {
       
       console.log('Menu options:', menuOptions.value)
       // 设置默认选中的一级菜单
-      if (menuOptions.value.length > 0) {
+      if (menuOptions.value.length > 0 && menuOptions.value[0]) {
         activeFirstLevelMenu.value = menuOptions.value[0].key
         currentFirstLevelMenu.value = menuOptions.value[0]
       }
@@ -189,7 +195,7 @@ const handleFirstLevelMenuSelect = (key: string) => {
   if (menu) {
     currentFirstLevelMenu.value = menu
     // 如果有子菜单，默认选中第一个子菜单
-    if (menu.children && menu.children.length > 0) {
+    if (menu.children && menu.children.length > 0 && menu.children[0]) {
       activeMenu.value = menu.children[0].key
       // 跳转到第一个子菜单的路径
       if (menu.children[0].path) {
@@ -209,7 +215,7 @@ const handleFirstLevelMenuSelect = (key: string) => {
 }
 
 // 根据路径查找菜单项
-const findMenuByPath = (items: any[], path: string): any => {
+const findMenuByPath = (items: MenuItem[], path: string): MenuItem | null => {
   for (const item of items) {
     if (item.path === path) {
       return item
@@ -225,7 +231,7 @@ const findMenuByPath = (items: any[], path: string): any => {
 }
 
 // 递归构建面包屑路径
-const buildBreadcrumbPath = (items: any[], path: string): string[] => {
+const buildBreadcrumbPath = (items: MenuItem[], path: string): string[] => {
   for (const item of items) {
     // 只匹配非空路径且完全相同的路径
     if (item.path && item.path === path) {
@@ -261,10 +267,10 @@ const breadcrumbPath = computed(() => {
 })
 
 // 处理菜单更新
-const handleMenuUpdate = (key: string, keyPath: string[]) => {
+const handleMenuUpdate = (key: string, _keyPath: string[]) => {
   activeMenu.value = key
   // 递归查找当前菜单
-  const findMenu = (items: any[]) => {
+  const findMenu = (items: MenuItem[]): MenuItem | null => {
     for (const item of items) {
       if (item.key === key) {
         return item
@@ -301,9 +307,11 @@ const handleTabClose = (key: string) => {
   // 如果关闭的是当前活动标签，切换到前一个标签
   if (key === activeTab.value) {
     const newActiveTab = tabs.value[index - 1] || tabs.value[0]
-    activeTab.value = newActiveTab.key
-    activeMenu.value = newActiveTab.key
-    router.push(newActiveTab.path)
+    if (newActiveTab) {
+      activeTab.value = newActiveTab.key
+      activeMenu.value = newActiveTab.key
+      router.push(newActiveTab.path)
+    }
   }
 }
 
@@ -319,7 +327,7 @@ const handleTabUpdate = (tab: { props: { name: string } }) => {
 }
 
 // 添加标签
-const addTab = (menu: any) => {
+const addTab = (menu: MenuItem) => {
   // 检查标签是否已存在
   const existingTab = tabs.value.find(tab => tab.key === menu.key)
   if (!existingTab) {
@@ -333,7 +341,7 @@ const addTab = (menu: any) => {
 watch(() => route.path, (newPath) => {
   console.log('Route changed to:', newPath)
   // 递归查找当前菜单
-  const findMenu = (items: any[]) => {
+  const findMenu = (items: MenuItem[]): MenuItem | null => {
     for (const item of items) {
       if (item.path === newPath) {
         return item
@@ -354,13 +362,13 @@ watch(() => route.path, (newPath) => {
     addTab(menu)
     
     // 查找并设置一级菜单
-    const findFirstLevelMenu = (items: any[], targetMenu: any) => {
+    const findFirstLevelMenu = (items: MenuItem[], targetMenu: MenuItem): MenuItem | null => {
       for (let i = 0; i < items.length; i++) {
         const item = items[i]
-        if (item.key === targetMenu.key) {
+        if (item && item.key === targetMenu.key) {
           return item
         }
-        if (item.children && item.children.length > 0) {
+        if (item && item.children && item.children.length > 0) {
           const found = findFirstLevelMenu(item.children, targetMenu)
           if (found) {
             return item
@@ -381,39 +389,39 @@ watch(() => route.path, (newPath) => {
 })
 
 // 初始化
-  onMounted(async () => {
-    
-    // 调试用户信息
-    console.log('User info:', userStore.userInfo)
-    console.log('Token:', userStore.token)
-    console.log('Username:', userStore.userInfo.username || '管理员')
-    
-    // 检查是否有token
-    if (userStore.token) {
-      // 检查是否有token但没有用户信息
-      if (!userStore.userInfo.username) {
-        // 尝试重新获取用户信息
-        try {
-          const userData = await api.get('/auth/user')
-          userStore.setUserInfo(userData.user)
-          console.log('User info updated:', userStore.userInfo)
-        } catch (error) {
-          console.error('获取用户信息失败:', error)
-          userStore.logout()
-          router.push('/login')
-          return
-        }
+onMounted(async () => {
+  
+  // 调试用户信息
+  console.log('User info:', userStore.userInfo)
+  console.log('Token:', userStore.token)
+  console.log('Username:', userStore.userInfo.username || '管理员')
+  
+  // 检查是否有token
+  if (userStore.token) {
+    // 检查是否有token但没有用户信息
+    if (!userStore.userInfo.username) {
+      // 尝试重新获取用户信息
+      try {
+        const userData = await api.get('/auth/user')
+        userStore.setUserInfo(userData.user)
+        console.log('User info updated:', userStore.userInfo)
+      } catch (error) {
+        console.error('获取用户信息失败:', error)
+        userStore.logout()
+        router.push('/login')
+        return
       }
-      
-      // 从后端获取系统配置
-      await configStore.loadConfig()
-      
-      // 动态设置页面标题
-      document.title = configStore.systemName || 'Flexi Admin'
-      
-      // 从后端获取菜单数据（仅用于显示菜单，不添加路由，路由由路由守卫添加）
-      await fetchMenuOptions()
+    }
     
+    // 从后端获取系统配置
+    await configStore.loadConfig()
+    
+    // 动态设置页面标题
+    document.title = configStore.systemName || 'Flexi Admin'
+    
+    // 从后端获取菜单数据（仅用于显示菜单，不添加路由，路由由路由守卫添加）
+    await fetchMenuOptions()
+  
     // 检查当前路径是否为根路径，如果是，不跳转，显示欢迎页
     if (route.path === '/') {
       return
@@ -425,13 +433,13 @@ watch(() => route.path, (newPath) => {
       console.log('Current path on mount:', currentPath)
       
       // 递归查找当前菜单
-      const findMenu = (items: any[]) => {
+      const findMenu = (items: MenuItem[]): MenuItem | null => {
         for (let i = 0; i < items.length; i++) {
           const item = items[i]
-          if (item.path === currentPath) {
+          if (item && item.path === currentPath) {
             return item
           }
-          if (item.children && item.children.length > 0) {
+          if (item && item.children && item.children.length > 0) {
             const childMenu = findMenu(item.children)
             if (childMenu) {
               return childMenu
@@ -448,13 +456,13 @@ watch(() => route.path, (newPath) => {
         addTab(menu)
         
         // 查找并设置一级菜单
-        const findFirstLevelMenu = (items: any[], targetMenu: any) => {
+        const findFirstLevelMenu = (items: MenuItem[], targetMenu: MenuItem): MenuItem | null => {
           for (let i = 0; i < items.length; i++) {
             const item = items[i]
-            if (item.key === targetMenu.key) {
+            if (item && item.key === targetMenu.key) {
               return item
             }
-            if (item.children && item.children.length > 0) {
+            if (item && item.children && item.children.length > 0) {
               const found = findFirstLevelMenu(item.children, targetMenu)
               if (found) {
                 return item
