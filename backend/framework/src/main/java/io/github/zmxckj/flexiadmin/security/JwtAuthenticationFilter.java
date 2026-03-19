@@ -54,14 +54,49 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     // 构建用户权限列表
                     List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                    List<String> authorityStrings = new ArrayList<>();
+                    List<String> roles = new ArrayList<>();
+                    Long userId = null;
+                    
                     if (cachedUserInfo instanceof Map) {
                         Map<?, ?> userInfoMap = (Map<?, ?>) cachedUserInfo;
+                        
+                        // 获取用户ID
+                        Object idObj = userInfoMap.get("id");
+                        if (idObj != null) {
+                            if (idObj instanceof Long) {
+                                userId = (Long) idObj;
+                            } else if (idObj instanceof Integer) {
+                                userId = ((Integer) idObj).longValue();
+                            } else if (idObj instanceof String) {
+                                try {
+                                    userId = Long.parseLong((String) idObj);
+                                } catch (NumberFormatException e) {
+                                    // 解析失败，使用默认值
+                                }
+                            }
+                        }
+                        
+                        // 获取用户权限列表
                         Object permissionsObj = userInfoMap.get("permissions");
                         if (permissionsObj instanceof List) {
                             List<?> permissions = (List<?>) permissionsObj;
                             for (Object permission : permissions) {
                                 if (permission instanceof String) {
-                                    authorities.add(new SimpleGrantedAuthority((String) permission));
+                                    String perm = (String) permission;
+                                    authorities.add(new SimpleGrantedAuthority(perm));
+                                    authorityStrings.add(perm);
+                                }
+                            }
+                        }
+                        
+                        // 获取用户角色列表
+                        Object rolesObj = userInfoMap.get("roles");
+                        if (rolesObj instanceof List) {
+                            List<?> rolesList = (List<?>) rolesObj;
+                            for (Object role : rolesList) {
+                                if (role instanceof String) {
+                                    roles.add((String) role);
                                 }
                             }
                         }
@@ -73,9 +108,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         return;
                     }
 
-                    // 使用带有 GrantedAuthority 列表的构造函数创建已经认证的 token
+                    // 创建 CustomUserDetails
+                    CustomUserDetails userDetails = new CustomUserDetails(
+                            userId != null ? userId : 0L, // 如果没有用户ID，使用默认值
+                            username,
+                            authorityStrings,
+                            roles
+                    );
+
+                    // 使用 CustomUserDetails 作为 principal 创建认证 token
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            username, null, authorities
+                            userDetails, null, authorities
                     );
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);

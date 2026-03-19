@@ -69,6 +69,7 @@
           :props="permissionTreeProps"
           node-key="id"
           show-checkbox
+          check-strictly
           default-expand-all
           :checked-keys="checkedPermissionIds"
           @check-change="handlePermissionCheck"
@@ -252,30 +253,7 @@ const handleSavePermission = async () => {
   if (!currentRole.value) return
   try {
     // 获取最新的选中权限
-    let checkedKeys = treeRef.value ? treeRef.value.getCheckedKeys() : []
-    
-    // 获取所有半选状态的节点（一级菜单）
-    if (treeRef.value && permissionTree.value.length > 0) {
-      const getIndeterminateNodes = (nodes: any[]) => {
-        let indeterminateIds: number[] = []
-        nodes.forEach(node => {
-          // 检查节点是否处于半选状态
-          if (treeRef.value?.isNodeIndeterminate(node)) {
-            indeterminateIds.push(node.id)
-          }
-          // 递归检查子节点
-          if (node.children && node.children.length > 0) {
-            indeterminateIds = indeterminateIds.concat(getIndeterminateNodes(node.children))
-          }
-        })
-        return indeterminateIds
-      }
-      
-      const indeterminateIds = getIndeterminateNodes(permissionTree.value)
-      // 合并选中节点和半选节点，去重
-      checkedKeys = [...new Set([...checkedKeys, ...indeterminateIds])]
-    }
-    
+    const checkedKeys = treeRef.value ? treeRef.value.getCheckedKeys() : []
     await api.post('/role-permission', {
       roleId: currentRole.value.id,
       permissionIds: checkedKeys

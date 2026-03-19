@@ -1,6 +1,8 @@
 package io.github.zmxckj.flexiadmin.config;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.handler.MultiDataPermissionHandler;
+import io.github.zmxckj.flexiadmin.utils.DataScopeHelper;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -22,9 +24,14 @@ public class DataPermissionHandlerImpl implements MultiDataPermissionHandler {
     @Override
     public Expression getSqlSegment(Table table, Expression where, String mappedStatementId) {
         // 在此处编写自定义数据权限逻辑
-        System.out.println(table.getName());
-        System.out.println(mappedStatementId);
-        System.out.println(where);
+        String sqlSegment = DataScopeHelper.get();
+        if(StrUtil.isNotBlank(sqlSegment)) {
+            try {
+                return CCJSqlParserUtil.parseCondExpression(sqlSegment);
+            } catch (JSQLParserException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return null;
     }
 }

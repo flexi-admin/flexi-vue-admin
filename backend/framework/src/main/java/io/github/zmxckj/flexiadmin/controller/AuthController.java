@@ -8,6 +8,10 @@ import io.github.zmxckj.flexiadmin.dto.LoginDTO;
 import io.github.zmxckj.flexiadmin.service.MenuService;
 import io.github.zmxckj.flexiadmin.service.UserService;
 import io.github.zmxckj.flexiadmin.service.LoginLogService;
+import io.github.zmxckj.flexiadmin.service.UserRoleService;
+import io.github.zmxckj.flexiadmin.service.RoleService;
+import io.github.zmxckj.flexiadmin.entity.UserRole;
+import io.github.zmxckj.flexiadmin.entity.Role;
 import io.github.zmxckj.flexiadmin.utils.JwtUtils;
 import io.github.zmxckj.flexiadmin.utils.RedisUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,17 +39,21 @@ public class AuthController {
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
     private final RedisUtils redisUtils;
+    private final UserRoleService userRoleService;
+    private final RoleService roleService;
 
     @Value("${flexi.jwt.expiration}")
     private long expiration;
 
-    public AuthController(UserService userService, MenuService menuService, LoginLogService loginLogService, JwtUtils jwtUtils, PasswordEncoder passwordEncoder, RedisUtils redisUtils) {
+    public AuthController(UserService userService, MenuService menuService, LoginLogService loginLogService, JwtUtils jwtUtils, PasswordEncoder passwordEncoder, RedisUtils redisUtils, UserRoleService userRoleService, RoleService roleService) {
         this.userService = userService;
         this.menuService = menuService;
         this.loginLogService = loginLogService;
         this.jwtUtils = jwtUtils;
         this.passwordEncoder = passwordEncoder;
         this.redisUtils = redisUtils;
+        this.userRoleService = userRoleService;
+        this.roleService = roleService;
     }
 
     @PostMapping("/login")
@@ -87,6 +95,17 @@ public class AuthController {
             }
         }
         userInfo.put("permissions", operationCodes);
+        
+        // 获取用户角色列表并添加到用户信息中
+        List<String> roles = new ArrayList<>();
+        List<UserRole> userRoles = userRoleService.list(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<UserRole>().eq("user_id", user.getId()));
+        for (UserRole userRole : userRoles) {
+            Role role = roleService.getById(userRole.getRoleId());
+            if (role != null) {
+                roles.add(role.getName());
+            }
+        }
+        userInfo.put("roles", roles);
         
         // 缓存用户信息（包含权限）到 Redis
         redisUtils.cacheUserInfo(username, userInfo, expiration / 1000);
@@ -176,6 +195,27 @@ public class AuthController {
         userInfo.put("status", user.getStatus());
         userInfo.put("createTime", user.getCreateTime());
         userInfo.put("updateTime", user.getUpdateTime());
+        
+        // 获取用户操作权限并添加到用户信息中
+        List<Menu> operations = menuService.getOperationsByUserId(user.getId());
+        List<String> operationCodes = new ArrayList<>();
+        for (Menu operation : operations) {
+            if (operation.getCode() != null) {
+                operationCodes.add(operation.getCode());
+            }
+        }
+        userInfo.put("permissions", operationCodes);
+        
+        // 获取用户角色列表并添加到用户信息中
+        List<String> roles = new ArrayList<>();
+        List<UserRole> userRoles = userRoleService.list(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<UserRole>().eq("user_id", user.getId()));
+        for (UserRole userRole : userRoles) {
+            Role role = roleService.getById(userRole.getRoleId());
+            if (role != null) {
+                roles.add(role.getName());
+            }
+        }
+        userInfo.put("roles", roles);
 
         // 缓存用户信息到 Redis
         redisUtils.cacheUserInfo(username, userInfo, expiration / 1000);
