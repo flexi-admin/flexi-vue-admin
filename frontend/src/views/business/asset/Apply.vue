@@ -83,6 +83,16 @@
             </el-form-item>
           </el-col>
           <el-col :span="8" v-if="form.applyType === 'idle'">
+            <el-form-item label="资产类型">
+              <el-cascader
+                v-model="form.typeId"
+                :options="assetTypeTree"
+                :props="assetTypeProps"
+                placeholder="请选择资产类型"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8" v-if="form.applyType === 'idle'">
             <el-form-item label="闲置资产">
               <el-select 
                 v-model="form.assetId" 
@@ -143,7 +153,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/api'
@@ -287,47 +297,42 @@ const loadAssetTypes = async () => {
 const handleApplyTypeChange = () => {
   // 重置相关字段
   form.value.assetId = ''
-  form.value.typeId = null
+  if (form.value.applyType === 'idle') {
+    // 闲置领用时，保留 typeId 用于筛选
+  } else if (form.value.applyType === 'type') {
+    // 按类型领用时，重置 typeId
+    form.value.typeId = null
+  }
   assets.value = []
 }
 
 
 
 const searchIdleAssets = async (query) => {
-  if (query) {
-    assetLoading.value = true
-    try {
-      const response = await api.get('/asset', {
-        params: {
-          page: 1,
-          size: 100,
-          name: query,
-          status: 'idle'
-        }
-      })
-      assets.value = response.records
-    } catch (error) {
-      console.error('搜索闲置资产失败:', error)
-    } finally {
-      assetLoading.value = false
+  assetLoading.value = true
+  try {
+    // 处理typeId：如果是数组且有值，取最后一个元素；如果是有效值，直接使用；否则设置为null
+    let typeId = null
+    if (Array.isArray(form.value.typeId) && form.value.typeId.length > 0) {
+      typeId = form.value.typeId[form.value.typeId.length - 1]
+    } else if (form.value.typeId) {
+      typeId = form.value.typeId
     }
-  } else {
-    // 无查询条件时，直接获取所有闲置资产
-    assetLoading.value = true
-    try {
-      const response = await api.get('/asset', {
-        params: {
-          page: 1,
-          size: 100,
-          status: 'idle'
-        }
-      })
-      assets.value = response.records
-    } catch (error) {
-      console.error('获取闲置资产失败:', error)
-    } finally {
-      assetLoading.value = false
-    }
+    
+    const response = await api.get('/asset', {
+      params: {
+        page: 1,
+        size: 100,
+        name: query,
+        status: 'idle',
+        typeId: typeId
+      }
+    })
+    assets.value = response.records
+  } catch (error) {
+    console.error('搜索闲置资产失败:', error)
+  } finally {
+    assetLoading.value = false
   }
 }
 
@@ -383,7 +388,12 @@ const submitForm = async () => {
     if (formData.applyType === 'type') {
       formData.assetId = 0
     }else if(formData.applyType === 'idle'){
-      formData.typeId = 0
+      // 闲置领用时，保留typeId用于后端处理
+      if (Array.isArray(formData.typeId) && formData.typeId.length > 0) {
+        formData.typeId = formData.typeId[formData.typeId.length - 1]
+      } else if (!formData.typeId) {
+        formData.typeId = null
+      }
     }
     
     if (form.value.id) {
@@ -414,6 +424,13 @@ const deleteApply = async (id) => {
     console.error('删除失败:', error)
   }
 }
+
+// 监听资产类型变化，当在闲置领用时更改资产类型，自动重新搜索闲置资产
+watch(() => form.value.typeId, () => {
+  if (form.value.applyType === 'idle') {
+    searchIdleAssets('')
+  }
+}, { deep: true })
 
 // 组件挂载时加载数据
 onMounted(async () => {
