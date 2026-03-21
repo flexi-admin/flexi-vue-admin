@@ -155,6 +155,24 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         return asset != null ? convertToDTO(asset) : null;
     }
 
+    @Override
+    public List<java.util.Map<String, String>> getBatchPrintData() {
+        // 构建查询条件，查询code = label_code的资产
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> queryWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        queryWrapper.apply("code = label_code");
+        
+        // 执行查询
+        List<Asset> assets = baseMapper.selectList(queryWrapper);
+        
+        // 转换为前端需要的数据格式
+        return assets.stream().map(asset -> {
+            java.util.Map<String, String> printData = new java.util.HashMap<>();
+            printData.put("CardName", asset.getName());
+            printData.put("CardSerial", asset.getCode());
+            return printData;
+        }).collect(java.util.stream.Collectors.toList());
+    }
+
     /**
      * 将Asset转换为AssetDTO
      */

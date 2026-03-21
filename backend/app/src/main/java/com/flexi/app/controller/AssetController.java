@@ -92,4 +92,10 @@ public class AssetController {
     public R<AssetDTO> getAssetById(@PathVariable Long id) {
         return R.success(assetService.getAssetById(id));
     }
+
+    @RequirePermission("asset:print")
+    @GetMapping("/batch-print-data")
+    public R<List<java.util.Map<String, String>>> getBatchPrintData() {
+        return R.success(assetService.getBatchPrintData());
+    }
 }

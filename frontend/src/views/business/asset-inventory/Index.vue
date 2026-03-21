@@ -309,6 +309,9 @@ const issueData = ref({
 })
 const printServiceResponse = ref({})
 
+// 字典数据
+const inventoryDetailStatusDicts = ref([])
+
 // 部门和分类选项
 const deptOptions = ref([])
 const categoryOptions = ref([])
@@ -637,17 +640,21 @@ const issueInventory = async (id, name) => {
 
 // 获取明细状态文本
 const getDetailStatusText = (status) => {
-  switch (status) {
-    case 'pending':
-      return '待盘点'
-    case 'normal':
-      return '正常'
-    case 'surplus':
-      return '盘盈'
-    case 'shortage':
-      return '盘亏'
-    default:
-      return status
+  const dictItem = inventoryDetailStatusDicts.value.find(item => item.code === status)
+  return dictItem ? dictItem.value : status
+}
+
+// 加载字典数据
+const loadDicts = async () => {
+  try {
+    const response = await api.get('/dict/list-by-type', {
+      params: {
+        type: 'inventory_detail_status'
+      }
+    })
+    inventoryDetailStatusDicts.value = response
+  } catch (error) {
+    console.error('加载字典数据失败:', error)
   }
 }
 
@@ -664,7 +671,8 @@ const handleCurrentChange = (current) => {
 }
 
 // 组件挂载时加载数据
-onMounted(() => {
+onMounted(async () => {
+  await loadDicts()
   loadInventoryList()
 })
 </script>

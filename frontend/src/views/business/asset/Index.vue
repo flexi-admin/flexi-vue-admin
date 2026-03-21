@@ -11,6 +11,9 @@
             <el-button type="info" @click="syncRfidTags">
               <el-icon><Refresh /></el-icon> 同步RFID标签
             </el-button>
+            <el-button type="warning" @click="batchPrint">
+              <el-icon><Printer /></el-icon> 批量打印
+            </el-button>
           </div>
         </div>
       </template>
@@ -301,7 +304,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { Plus, Refresh } from '@element-plus/icons-vue'
+import { Plus, Refresh, Printer } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/api'
 import { useConfigStore } from '@/stores/config'
@@ -935,8 +938,44 @@ const syncSingleRfidTag = async (row) => {
     }
   } catch (error) {
     // 显示错误消息
-    ElMessage.error('同步RFID标签失败')
+    ElMessage.error('同步单个RFID标签失败')
     console.error('同步单个RFID标签失败:', error)
+  }
+}
+
+// 批量打印
+const batchPrint = async () => {
+  try {
+    // 先执行syncRfidTags的逻辑
+    await syncRfidTags()
+    
+    // 使用新的接口获取批量打印数据
+    const response = await api.get('/asset/batch-print-data')
+    const data = response
+    
+    // 打印数据到控制台
+    console.log('批量打印数据:', data)
+    
+    // 发送POST请求到打印服务
+    const printResponse = await fetch(configStore.printServiceUrl + '/print', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+    
+    // 获取响应数据
+    const result = await printResponse.json()
+    
+    // 在控制台打印接口输出
+    console.log('打印接口输出:', result)
+    
+    // 显示成功消息
+    ElMessage.success(`批量打印请求已发送，共 ${data.length} 个资产标签`)
+  } catch (error) {
+    ElMessage.error('批量打印失败')
+    console.error('批量打印失败:', error)
   }
 }
 

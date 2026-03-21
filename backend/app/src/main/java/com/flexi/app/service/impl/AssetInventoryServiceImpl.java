@@ -172,6 +172,7 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
         }).collect(Collectors.toList());
         
         // 3. 构建返回数据
+        result.put("id", inventory.getId());
         result.put("inventoryCode", inventory.getInventoryCode());
         result.put("inventoryName", inventory.getInventoryName());
         result.put("inventoryType", inventory.getInventoryType());

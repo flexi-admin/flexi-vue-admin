@@ -16,4 +16,5 @@ public interface AssetService extends IService<Asset> {
     List<Asset> listAssetsWithoutLabelCode();
     void updateLabelCode(java.util.Map<String, String> codeLabelMap);
     AssetDTO getAssetById(Long id);
+    List<java.util.Map<String, String>> getBatchPrintData();
 }
