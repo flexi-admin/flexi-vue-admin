@@ -83,14 +83,20 @@ public class AssetInventoryController {
     // 接收盘点数据
     @PostMapping("/save-details")
     public R<Boolean> saveInventoryDetails(@RequestBody List<AssetInventoryDetail> details) {
-        
+
+        System.out.println(details);
+        boolean result = false;
+
         //对于接口接收的details列表，只保留id不为空的，并且id在盘点明细id列表中的那些数据
         List<AssetInventoryDetail> validDetails = details.stream()
                 .filter(detail -> detail.getId() != null)
                 .collect(java.util.stream.Collectors.toList());
         
         //批量更新筛选后的数据
-        boolean result = assetInventoryDetailService.updateBatchDetails(validDetails);
+        if (!validDetails.isEmpty()) {
+            result = assetInventoryDetailService.updateBatchDetails(validDetails);
+        }
+
         return R.success(result);
     }
 }

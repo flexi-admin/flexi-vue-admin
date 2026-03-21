@@ -261,6 +261,9 @@ import { ref, onMounted } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/api'
+import { useConfigStore } from '@/stores/config'
+
+const configStore = useConfigStore()
 
 const inventoryList = ref([])
 const inventoryStatusOptions = ref([
@@ -606,6 +609,18 @@ const issueInventory = async (id, name) => {
   try {
     const response = await api.get(`/asset/inventory/issue/${id}`)
     issueData.value = response
+    
+    // 调用printServiceUrl + 'issue'接口
+    if (configStore.printServiceUrl) {
+      await fetch(configStore.printServiceUrl + '/issue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(issueData.value)
+      })
+    }
+    
     issueDialogVisible.value = true
   } catch (error) {
     ElMessage.error('下发失败')
