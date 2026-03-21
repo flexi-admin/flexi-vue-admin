@@ -105,5 +105,26 @@ public class AssetInventoryDetailServiceImpl extends ServiceImpl<AssetInventoryD
         
         return dtoPage;
     }
+
+    @Override
+    public List<Long> getDetailIdsByInventoryId(Long inventoryId) {
+        QueryWrapper<AssetInventoryDetail> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("inventory_id", inventoryId);
+        queryWrapper.select("id");
+        return baseMapper.selectObjs(queryWrapper).stream()
+                .map(obj -> Long.parseLong(obj.toString()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean updateBatchDetails(List<AssetInventoryDetail> details) {
+        // 为每个明细设置更新时间
+        long currentTime = System.currentTimeMillis();
+        for (AssetInventoryDetail detail : details) {
+            detail.setUpdateTime(currentTime);
+        }
+        // 批量更新明细数据
+        return this.updateBatchById(details);
+    }
 }
 

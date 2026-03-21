@@ -2,7 +2,9 @@ package com.flexi.app.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.flexi.app.entity.AssetInventory;
+import com.flexi.app.entity.AssetInventoryDetail;
 import com.flexi.app.service.AssetInventoryService;
+import com.flexi.app.service.AssetInventoryDetailService;
 import io.github.zmxckj.flexiadmin.common.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,9 @@ public class AssetInventoryController {
 
     @Autowired
     private AssetInventoryService assetInventoryService;
+
+    @Autowired
+    private AssetInventoryDetailService assetInventoryDetailService;
 
     // 分页查询
     @GetMapping("/list")
@@ -73,5 +78,19 @@ public class AssetInventoryController {
     @GetMapping("/issue/{id}")
     public R<?> issue(@PathVariable Long id) {
         return R.success(assetInventoryService.issueInventory(id));
+    }
+
+    // 接收盘点数据
+    @PostMapping("/save-details")
+    public R<Boolean> saveInventoryDetails(@RequestBody List<AssetInventoryDetail> details) {
+        
+        //对于接口接收的details列表，只保留id不为空的，并且id在盘点明细id列表中的那些数据
+        List<AssetInventoryDetail> validDetails = details.stream()
+                .filter(detail -> detail.getId() != null)
+                .collect(java.util.stream.Collectors.toList());
+        
+        //批量更新筛选后的数据
+        boolean result = assetInventoryDetailService.updateBatchDetails(validDetails);
+        return R.success(result);
     }
 }
