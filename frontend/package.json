@@ -2,11 +2,14 @@
   "name": "frontend",
   "private": true,
   "version": "0.0.0",
+  "main": "electron/main.ts",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:dev": "NODE_ENV=electron vite dev",
+    "electron:build": "NODE_ENV=electron vue-tsc -b && NODE_ENV=electron vite build && electron-builder"
   },
   "dependencies": {
     "@vueuse/core": "^14.2.1",
@@ -20,8 +23,42 @@
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^6.0.2",
     "@vue/tsconfig": "^0.8.1",
+    "electron": "^41.0.3",
+    "electron-builder": "^26.8.1",
     "typescript": "~5.9.3",
     "vite": "^7.3.1",
+    "vite-plugin-electron": "^0.29.1",
+    "vite-plugin-electron-renderer": "^0.14.6",
     "vue-tsc": "^3.1.5"
+  },
+  "build": {
+    "appId": "com.flexi.app",
+    "productName": "Flexi App",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
   }
 }
