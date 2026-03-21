@@ -241,6 +241,11 @@
       width="80%"
     >
       <div class="issue-container">
+        <el-divider content-position="left">Print Service 响应数据</el-divider>
+        <pre style="background-color: #f5f7fa; padding: 16px; border-radius: 4px; overflow-x: auto;">
+          {{ JSON.stringify(printServiceResponse, null, 2) }}
+        </pre>
+        
         <el-divider content-position="left">原始接口返回数据</el-divider>
         <pre style="background-color: #f5f7fa; padding: 16px; border-radius: 4px; overflow-x: auto;">
           {{ JSON.stringify(issueData, null, 2) }}
@@ -302,6 +307,7 @@ const issueData = ref({
   status: '',
   details: []
 })
+const printServiceResponse = ref({})
 
 // 部门和分类选项
 const deptOptions = ref([])
@@ -612,13 +618,14 @@ const issueInventory = async (id, name) => {
     
     // 调用printServiceUrl + 'issue'接口
     if (configStore.printServiceUrl) {
-      await fetch(configStore.printServiceUrl + '/issue', {
+      const printResponse = await fetch(configStore.printServiceUrl + '/issue', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(issueData.value)
       })
+      printServiceResponse.value = await printResponse.json()
     }
     
     issueDialogVisible.value = true
