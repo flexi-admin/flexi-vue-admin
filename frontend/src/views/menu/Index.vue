@@ -16,7 +16,7 @@
         >
           <template #default="{ node, data }">
             <div class="tree-node">
-              <span>{{ data.name }}</span>
+              <span>{{ data.id }} {{ data.name }}</span>
               <span class="node-info">{{ data.type === 'menu' ? data.path || '' : data.code || '' }}</span>
               <span class="node-actions">
                 <el-button size="small" @click="handleEdit(data)">编辑</el-button>
