@@ -12,7 +12,41 @@
     <!-- 选择按钮 -->
     <div v-else>
       <el-button type="primary" @click="openImageLibrary">选择图片</el-button>
+      <el-button type="success" @click="openUploadDialog" style="margin-left: 10px">上传图片</el-button>
     </div>
+    
+    <!-- 图片上传弹窗 -->
+    <el-dialog
+      v-model="uploadDialogVisible"
+      title="上传图片"
+      width="600px"
+    >
+      <el-upload
+        class="upload-demo"
+        :action="uploadUrl"
+        :headers="uploadHeaders"
+        :on-success="handleUploadSuccess"
+        :on-error="handleUploadError"
+        :file-list="fileList"
+        :auto-upload="false"
+        ref="uploadRef"
+      >
+        <template #trigger>
+          <el-button type="default">选择文件</el-button>
+        </template>
+        <template #tip>
+          <div class="el-upload__tip">
+            只能上传 JPG/PNG 文件，且不超过 2MB
+          </div>
+        </template>
+      </el-upload>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="uploadDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="$refs.uploadRef?.submit()">上传</el-button>
+        </span>
+      </template>
+    </el-dialog>
     
     <!-- 图片库弹窗 -->
     <el-dialog
@@ -77,6 +111,15 @@ const imageLibraryVisible = ref(false)
 const imageSearch = ref('')
 const images = ref([])
 
+// 上传相关
+const uploadDialogVisible = ref(false)
+const fileList = ref([])
+const uploadRef = ref()
+const uploadUrl = '/api/image/upload'
+const uploadHeaders = ref({
+  'Authorization': `Bearer ${localStorage.getItem('token')}`
+})
+
 // 打开图片库
 const openImageLibrary = async () => {
   // 确保配置已加载
@@ -86,6 +129,30 @@ const openImageLibrary = async () => {
   // 加载图片库数据
   await loadImages()
   imageLibraryVisible.value = true
+}
+
+// 打开上传弹窗
+const openUploadDialog = () => {
+  uploadDialogVisible.value = true
+}
+
+// 处理上传成功
+const handleUploadSuccess = async (response, uploadFile, uploadFiles) => {
+  ElMessage.success('上传成功')
+  // 关闭上传弹窗
+  uploadDialogVisible.value = false
+  // 清空文件列表
+  fileList.value = []
+  // 重新加载图片库数据
+  await loadImages()
+  // 打开图片库，让用户选择刚刚上传的图片
+  imageLibraryVisible.value = true
+}
+
+// 处理上传失败
+const handleUploadError = (error, uploadFile, uploadFiles) => {
+  ElMessage.error('上传失败，请重试')
+  console.error('上传失败:', error)
 }
 
 // 加载图片库数据
