@@ -218,285 +218,311 @@ INSERT INTO sys_dict (type, code, value, order_num, create_time, update_time) VA
 -- 插入菜单和权限
 -- 资产管理主菜单
 INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, status, order_num) VALUES
-(1000, '资产管理', '/asset', '', 0, 'Briefcase', NULL, 'menu', true, 15),
+(10000, '资产管理', '/asset', '', 0, 'Briefcase', NULL, 'menu', true, 15),
 -- 资产类型管理
-(1001, '资产类型管理', '/asset/type', 'business/asset-type/Index', 1000, 'List', NULL, 'menu', true, 16),
+(10001, '资产类型管理', '/asset/type', 'business/asset-type/Index', 10000, 'List', NULL, 'menu', true, 16),
 -- 资产位置管理
-(1002, '资产位置管理', '/asset/location', 'business/asset-location/Index', 1000, 'Location', NULL, 'menu', true, 17),
+(10002, '资产位置管理', '/asset/location', 'business/asset-location/Index', 10000, 'Location', NULL, 'menu', true, 17),
 -- 资产管理
-(1003, '资产管理', '/asset/list', 'business/asset/Index', 1000, 'Inventory', NULL, 'menu', true, 19),
--- 供应商管理
-(1006, '供应商管理', '/asset/supplier', 'business/asset-supplier/Index', 1000, 'UserFilled', NULL, 'menu', true, 18),
+(10003, '资产管理', '/asset/list', 'business/asset/Index', 10000, 'Inventory', NULL, 'menu', true, 19),
 -- 资产盘点管理
-(1007, '资产盘点', '/asset/inventory', 'business/asset-inventory/Index', 1000, 'DataAnalysis', NULL, 'menu', true, 20),
+(10004, '资产盘点', '/asset/inventory', 'business/asset-inventory/Index', 10000, 'DataAnalysis', NULL, 'menu', true, 20),
 -- 领用记录
-(1033, '领用记录', '/asset/approval', 'business/asset/Approval', 1000, 'CheckCircle', NULL, 'menu', true, 23),
+(10005, '领用记录', '/asset/approval', 'business/asset/Approval', 10000, 'CheckCircle', NULL, 'menu', true, 23),
 -- 退库记录
-(1034, '退库记录', '/asset/return', 'business/asset/ReturnRecord', 1000, 'Return', NULL, 'menu', true, 24),
+(10006, '退库记录', '/asset/return', 'business/asset/ReturnRecord', 10000, 'Return', NULL, 'menu', true, 24),
 -- 转移记录
-(1035, '转移记录', '/asset/transfer', 'business/asset/TransferRecord', 1000, 'Switch', NULL, 'menu', true, 25),
+(10007, '转移记录', '/asset/transfer', 'business/asset/TransferRecord', 10000, 'Switch', NULL, 'menu', true, 25),
 -- 资产报废
-(1044, '资产报废', '/asset/scrap', 'business/asset/Scrap', 1000, 'Delete', NULL, 'menu', true, 26),
+(10008, '资产报废', '/asset/scrap', 'business/asset/Scrap', 10000, 'Delete', NULL, 'menu', true, 26),
 -- 资产处置
-(1045, '资产处置', '/asset/dispose', 'business/asset/Dispose', 1000, 'Trash2', NULL, 'menu', true, 27),
+(10009, '资产处置', '/asset/dispose', 'business/asset/Dispose', 10000, 'Delete', NULL, 'menu', true, 27),
 -- 资产变更
-(1046, '资产变更', '/asset/change', 'business/asset/Change', 1000, 'Edit', NULL, 'menu', true, 28),
+(10010, '资产变更', '/asset/change', 'business/asset/Change', 10000, 'Edit', NULL, 'menu', true, 28),
 -- 报废列表
-(1047, '报废列表', '/asset/scrap-list', 'business/asset/ScrapList', 1000, 'List', NULL, 'menu', true, 29),
+(10011, '报废列表', '/asset/scrap-list', 'business/asset/ScrapList', 10000, 'List', NULL, 'menu', true, 29),
 -- 折旧设置
-(1048, '折旧设置', '/asset/depreciation', 'business/asset/Depreciation', 1000, 'Settings', NULL, 'menu', true, 30),
+(10012, '折旧设置', '/asset/depreciation', 'business/asset/Depreciation', 10000, 'Settings', NULL, 'menu', true, 30),
 -- 采购管理
-(3000, '采购管理', '/purchase', '', 0, 'ShoppingCart', NULL, 'menu', true, 20),
+(10100, '采购管理', '/purchase', '', 0, 'ShoppingCart', NULL, 'menu', true, 20),
 -- 采购管理二级菜单
-(3001, '采购管理', '/purchase/list', 'business/purchase/Index', 3000, 'List', NULL, 'menu', true, 1),
+(10101, '采购管理', '/purchase/list', 'business/purchase/Index', 10100, 'List', NULL, 'menu', true, 1),
 -- 收货管理
-(3002, '收货管理', '/purchase/receipt', 'business/purchase/Receipt', 3000, 'Inbox', NULL, 'menu', true, 2),
+(10102, '收货管理', '/purchase/receipt', 'business/purchase/Receipt', 10100, 'Inbox', NULL, 'menu', true, 2),
 -- 入库管理
-(3003, '入库管理', '/purchase/storage', 'business/purchase/Storage', 3000, 'Box', NULL, 'menu', true, 3),
+(10103, '入库管理', '/purchase/storage', 'business/purchase/Storage', 10100, 'Box', NULL, 'menu', true, 3),
+-- 供应商管理
+(10104, '供应商管理', '/purchase/supplier', 'business/supplier/Index', 10100, 'User', NULL, 'menu', true, 4),
 -- 物资管理
-(4000, '物资管理', '/material', '', 0, 'Box', NULL, 'menu', true, 21),
+(10200, '物资管理', '/material', '', 0, 'Box', NULL, 'menu', true, 21),
 -- 物资列表
-(4001, '物资列表', '/material/list', 'business/material/Index', 4000, 'List', NULL, 'menu', true, 1),
+(10201, '物资列表', '/material/list', 'business/material/Index', 10200, 'List', NULL, 'menu', true, 1),
 -- 批次列表
-(4002, '批次列表', '/material/batch', 'business/material/Batch', 4000, 'FileText', NULL, 'menu', true, 2),
+(10202, '批次列表', '/material/batch', 'business/material/Batch', 10200, 'FileText', NULL, 'menu', true, 2),
 -- 物资入库
-(4003, '物资入库', '/material/in', 'business/material/In', 4000, 'Inbox', NULL, 'menu', true, 3),
+(10203, '物资入库', '/material/in', 'business/material/In', 10200, 'Inbox', NULL, 'menu', true, 3),
 -- 物资出库
-(4004, '物资出库', '/material/out', 'business/material/Out', 4000, 'Outbox', NULL, 'menu', true, 4),
+(10204, '物资出库', '/material/out', 'business/material/Out', 10200, 'Outbox', NULL, 'menu', true, 4),
 -- 物资调拨
-(4005, '物资调拨', '/material/transfer', 'business/material/Transfer', 4000, 'Switch', NULL, 'menu', true, 5),
+(10205, '物资调拨', '/material/transfer', 'business/material/Transfer', 10200, 'Exchange', NULL, 'menu', true, 5),
 -- 物资盘点
-(4006, '物资盘点', '/material/inventory', 'business/material/Inventory', 4000, 'DataAnalysis', NULL, 'menu', true, 6),
+(10206, '物资盘点', '/material/inventory', 'business/material/Inventory', 10200, 'DataAnalysis', NULL, 'menu', true, 6),
 -- 物资分类
-(4007, '物资分类', '/material/category', 'business/material/Category', 4000, 'Layers', NULL, 'menu', true, 7),
+(10207, '物资分类', '/material/category', 'business/material/Category', 10200, 'Layers', NULL, 'menu', true, 7),
 -- 物资仓库
-(4008, '物资仓库', '/material/warehouse', 'business/material/Warehouse', 4000, 'Home', NULL, 'menu', true, 8),
+(10208, '物资仓库', '/material/warehouse', 'business/material/Warehouse', 10200, 'Home', NULL, 'menu', true, 8),
 -- 领用记录
-(4009, '领用记录', '/material/use', 'business/material/UseRecord', 4000, 'CheckCircle', NULL, 'menu', true, 9),
+(10209, '领用记录', '/material/use', 'business/material/UseRecord', 10200, 'CheckCircle', NULL, 'menu', true, 9),
 -- 资产统计
-(5000, '资产统计', '/asset-statistics', '', 0, 'PieChart', NULL, 'menu', true, 22),
+(10300, '资产统计', '/asset-statistics', '', 0, 'PieChart', NULL, 'menu', true, 22),
 -- 分类统计
-(5001, '分类统计', '/asset-statistics/category', 'business/asset-statistics/Category', 5000, 'Layers', NULL, 'menu', true, 1),
+(10301, '分类统计', '/asset-statistics/category', 'business/asset-statistics/Category', 10300, 'Layers', NULL, 'menu', true, 1),
 -- 位置统计
-(5002, '位置统计', '/asset-statistics/location', 'business/asset-statistics/Location', 5000, 'Location', NULL, 'menu', true, 2),
+(10302, '位置统计', '/asset-statistics/location', 'business/asset-statistics/Location', 10300, 'Location', NULL, 'menu', true, 2),
 -- 部门资产统计
-(5003, '部门资产统计', '/asset-statistics/dept', 'business/asset-statistics/Dept', 5000, 'Team', NULL, 'menu', true, 3),
+(10303, '部门资产统计', '/asset-statistics/dept', 'business/asset-statistics/Dept', 10300, 'Team', NULL, 'menu', true, 3),
 -- 员工资产统计
-(5004, '员工资产统计', '/asset-statistics/employee', 'business/asset-statistics/Employee', 5000, 'User', NULL, 'menu', true, 4),
+(10304, '员工资产统计', '/asset-statistics/employee', 'business/asset-statistics/Employee', 10300, 'User', NULL, 'menu', true, 4),
 -- 物资统计
-(6000, '物资统计', '/material-statistics', '', 0, 'PieChart', NULL, 'menu', true, 23),
+(10400, '物资统计', '/material-statistics', '', 0, 'PieChart', NULL, 'menu', true, 23),
 -- 库存统计
-(6001, '库存统计', '/material-statistics/stock', 'business/material-statistics/Stock', 6000, 'Box', NULL, 'menu', true, 1),
+(10401, '库存统计', '/material-statistics/stock', 'business/material-statistics/Stock', 10400, 'Box', NULL, 'menu', true, 1),
 -- 进出统计
-(6002, '进出统计', '/material-statistics/inout', 'business/material-statistics/InOut', 6000, 'Exchange', NULL, 'menu', true, 2),
+(10402, '进出统计', '/material-statistics/inout', 'business/material-statistics/InOut', 10400, 'Exchange', NULL, 'menu', true, 2),
 -- 领用统计
-(6003, '领用统计', '/material-statistics/use', 'business/material-statistics/Use', 6000, 'CheckCircle', NULL, 'menu', true, 3),
+(10403, '领用统计', '/material-statistics/use', 'business/material-statistics/Use', 10400, 'CheckCircle', NULL, 'menu', true, 3),
 -- 维保管理
-(7000, '维保管理', '/maintenance', '', 0, 'Tools', NULL, 'menu', true, 24),
--- 租借管理
-(8000, '租借管理', '/rental', '', 0, 'Sell', NULL, 'menu', true, 25),
+(10500, '维保管理', '/maintenance', '', 0, 'Tools', NULL, 'menu', true, 24),
+-- 数据大屏
+(10600, '数据大屏', '/dashboard', '', 0, 'DataAnalysis', NULL, 'menu', true, 25),
 -- 个人中心主菜单
-(2000, '个人中心', '/personal', '', 0, 'User', NULL, 'menu', true, 26),
+(10700, '个人中心', '/personal', '', 0, 'User', NULL, 'menu', true, 26),
 -- 我的资产
-(2001, '我的资产', '/personal/asset/my', 'business/asset/MyAsset', 2000, 'User', NULL, 'menu', true, 26),
+(10701, '我的资产', '/personal/asset/my', 'business/asset/MyAsset', 10700, 'User', NULL, 'menu', true, 26),
 -- 资产领用
-(2002, '资产领用', '/personal/asset/apply', 'business/asset/Apply', 2000, 'Document', NULL, 'menu', true, 27),
+(10702, '资产领用', '/personal/asset/apply', 'business/asset/Apply', 10700, 'Document', NULL, 'menu', true, 27),
 -- 资产退库
-(2008, '资产退库', '/personal/asset/return', 'business/asset/Return', 2000, 'Return', NULL, 'menu', true, 28),
+(10703, '资产退库', '/personal/asset/return', 'business/asset/Return', 10700, 'Return', NULL, 'menu', true, 28),
 -- 资产转移
-(2009, '资产转移', '/personal/asset/transfer', 'business/asset/Transfer', 2000, 'Switch', NULL, 'menu', true, 29),
+(10704, '资产转移', '/personal/asset/transfer', 'business/asset/Transfer', 10700, 'Switch', NULL, 'menu', true, 29),
 -- 资产报修
-(2010, '资产报修', '/personal/asset/repair', 'business/asset/Repair', 2000, 'Tool', NULL, 'menu', true, 30);
+(10705, '资产报修', '/personal/asset/repair', 'business/asset/Repair', 10700, 'Tool', NULL, 'menu', true, 30);
 
 -- 操作权限
 -- 资产类型操作
 INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, status, order_num) VALUES
-(1008, '资产类型列表', NULL, NULL, 1001, NULL, 'asset:type:list', 'operation', true, 19),
-(1009, '资产类型添加', NULL, NULL, 1001, NULL, 'asset:type:add', 'operation', true, 20),
-(1010, '资产类型编辑', NULL, NULL, 1001, NULL, 'asset:type:edit', 'operation', true, 21),
-(1011, '资产类型删除', NULL, NULL, 1001, NULL, 'asset:type:delete', 'operation', true, 22),
+(1000101, '资产类型列表', NULL, NULL, 10001, NULL, 'asset:type:list', 'operation', true, 1),
+(1000102, '资产类型添加', NULL, NULL, 10001, NULL, 'asset:type:add', 'operation', true, 2),
+(1000103, '资产类型编辑', NULL, NULL, 10001, NULL, 'asset:type:edit', 'operation', true, 3),
+(1000104, '资产类型删除', NULL, NULL, 10001, NULL, 'asset:type:delete', 'operation', true, 4),
 -- 资产位置操作
-(1012, '资产位置列表', NULL, NULL, 1002, NULL, 'asset:location:list', 'operation', true, 23),
-(1013, '资产位置添加', NULL, NULL, 1002, NULL, 'asset:location:add', 'operation', true, 24),
-(1014, '资产位置编辑', NULL, NULL, 1002, NULL, 'asset:location:edit', 'operation', true, 25),
-(1015, '资产位置删除', NULL, NULL, 1002, NULL, 'asset:location:delete', 'operation', true, 26),
+(1000201, '资产位置列表', NULL, NULL, 10002, NULL, 'asset:location:list', 'operation', true, 1),
+(1000202, '资产位置添加', NULL, NULL, 10002, NULL, 'asset:location:add', 'operation', true, 2),
+(1000203, '资产位置编辑', NULL, NULL, 10002, NULL, 'asset:location:edit', 'operation', true, 3),
+(1000204, '资产位置删除', NULL, NULL, 10002, NULL, 'asset:location:delete', 'operation', true, 4),
 -- 资产操作
-(1016, '资产列表', NULL, NULL, 1003, NULL, 'asset:list', 'operation', true, 27),
-(1036, '资产查询', NULL, NULL, 1003, NULL, 'asset:query', 'operation', true, 271),
-(1017, '资产添加', NULL, NULL, 1003, NULL, 'asset:add', 'operation', true, 28),
-(1018, '资产编辑', NULL, NULL, 1003, NULL, 'asset:edit', 'operation', true, 29),
-(1019, '资产删除', NULL, NULL, 1003, NULL, 'asset:delete', 'operation', true, 30),
--- 领用审批操作
-(1042, '领用审批列表', NULL, NULL, 1033, NULL, 'asset:approval:list', 'operation', true, 44),
-(1043, '领用审批操作', NULL, NULL, 1033, NULL, 'asset:approval:operate', 'operation', true, 45),
--- 退库记录操作
-(1038, '退库记录列表', NULL, NULL, 1034, NULL, 'asset:return:list', 'operation', true, 46),
-(1039, '退库记录查看', NULL, NULL, 1034, NULL, 'asset:return:view', 'operation', true, 47),
--- 转移记录操作
-(1040, '转移记录列表', NULL, NULL, 1035, NULL, 'asset:transfer:list', 'operation', true, 48),
-(1041, '转移记录查看', NULL, NULL, 1035, NULL, 'asset:transfer:view', 'operation', true, 49),
--- 资产报废操作
-(1049, '资产报废列表', NULL, NULL, 1044, NULL, 'asset:scrap:list', 'operation', true, 50),
-(1050, '资产报废添加', NULL, NULL, 1044, NULL, 'asset:scrap:add', 'operation', true, 51),
-(1051, '资产报废编辑', NULL, NULL, 1044, NULL, 'asset:scrap:edit', 'operation', true, 52),
-(1052, '资产报废删除', NULL, NULL, 1044, NULL, 'asset:scrap:delete', 'operation', true, 53),
--- 资产处置操作
-(1053, '资产处置列表', NULL, NULL, 1045, NULL, 'asset:dispose:list', 'operation', true, 54),
-(1054, '资产处置添加', NULL, NULL, 1045, NULL, 'asset:dispose:add', 'operation', true, 55),
-(1055, '资产处置编辑', NULL, NULL, 1045, NULL, 'asset:dispose:edit', 'operation', true, 56),
-(1056, '资产处置删除', NULL, NULL, 1045, NULL, 'asset:dispose:delete', 'operation', true, 57),
--- 资产变更操作
-(1057, '资产变更列表', NULL, NULL, 1046, NULL, 'asset:change:list', 'operation', true, 58),
-(1058, '资产变更添加', NULL, NULL, 1046, NULL, 'asset:change:add', 'operation', true, 59),
-(1059, '资产变更编辑', NULL, NULL, 1046, NULL, 'asset:change:edit', 'operation', true, 60),
-(1060, '资产变更删除', NULL, NULL, 1046, NULL, 'asset:change:delete', 'operation', true, 61),
--- 报废列表操作
-(1061, '报废列表查看', NULL, NULL, 1047, NULL, 'asset:scrap:list:view', 'operation', true, 62),
--- 折旧设置操作
-(1062, '折旧设置列表', NULL, NULL, 1048, NULL, 'asset:depreciation:list', 'operation', true, 63),
-(1063, '折旧设置添加', NULL, NULL, 1048, NULL, 'asset:depreciation:add', 'operation', true, 64),
-(1064, '折旧设置编辑', NULL, NULL, 1048, NULL, 'asset:depreciation:edit', 'operation', true, 65),-- 折旧设置删除
-(1065, '折旧设置删除', NULL, NULL, 1048, NULL, 'asset:depreciation:delete', 'operation', true, 66),
--- 物资列表操作
-(4010, '物资列表', NULL, NULL, 4001, NULL, 'material:list', 'operation', true, 1),
-(4011, '物资添加', NULL, NULL, 4001, NULL, 'material:add', 'operation', true, 2),
-(4012, '物资编辑', NULL, NULL, 4001, NULL, 'material:edit', 'operation', true, 3),
-(4013, '物资删除', NULL, NULL, 4001, NULL, 'material:delete', 'operation', true, 4),
--- 批次列表操作
-(4014, '批次列表', NULL, NULL, 4002, NULL, 'material:batch:list', 'operation', true, 5),
-(4015, '批次添加', NULL, NULL, 4002, NULL, 'material:batch:add', 'operation', true, 6),
-(4016, '批次编辑', NULL, NULL, 4002, NULL, 'material:batch:edit', 'operation', true, 7),
-(4017, '批次删除', NULL, NULL, 4002, NULL, 'material:batch:delete', 'operation', true, 8),
--- 物资入库操作
-(4018, '物资入库列表', NULL, NULL, 4003, NULL, 'material:in:list', 'operation', true, 9),
-(4019, '物资入库添加', NULL, NULL, 4003, NULL, 'material:in:add', 'operation', true, 10),
-(4020, '物资入库编辑', NULL, NULL, 4003, NULL, 'material:in:edit', 'operation', true, 11),
-(4021, '物资入库删除', NULL, NULL, 4003, NULL, 'material:in:delete', 'operation', true, 12),
--- 物资出库操作
-(4022, '物资出库列表', NULL, NULL, 4004, NULL, 'material:out:list', 'operation', true, 13),
-(4023, '物资出库添加', NULL, NULL, 4004, NULL, 'material:out:add', 'operation', true, 14),
-(4024, '物资出库编辑', NULL, NULL, 4004, NULL, 'material:out:edit', 'operation', true, 15),
-(4025, '物资出库删除', NULL, NULL, 4004, NULL, 'material:out:delete', 'operation', true, 16),
--- 物资调拨操作
-(4026, '物资调拨列表', NULL, NULL, 4005, NULL, 'material:transfer:list', 'operation', true, 17),
-(4027, '物资调拨添加', NULL, NULL, 4005, NULL, 'material:transfer:add', 'operation', true, 18),
-(4028, '物资调拨编辑', NULL, NULL, 4005, NULL, 'material:transfer:edit', 'operation', true, 19),
-(4029, '物资调拨删除', NULL, NULL, 4005, NULL, 'material:transfer:delete', 'operation', true, 20),
--- 物资盘点操作
-(4030, '物资盘点列表', NULL, NULL, 4006, NULL, 'material:inventory:list', 'operation', true, 21),
-(4031, '物资盘点添加', NULL, NULL, 4006, NULL, 'material:inventory:add', 'operation', true, 22),
-(4032, '物资盘点编辑', NULL, NULL, 4006, NULL, 'material:inventory:edit', 'operation', true, 23),
-(4033, '物资盘点删除', NULL, NULL, 4006, NULL, 'material:inventory:delete', 'operation', true, 24),
--- 物资分类操作
-(4034, '物资分类列表', NULL, NULL, 4007, NULL, 'material:category:list', 'operation', true, 25),
-(4035, '物资分类添加', NULL, NULL, 4007, NULL, 'material:category:add', 'operation', true, 26),
-(4036, '物资分类编辑', NULL, NULL, 4007, NULL, 'material:category:edit', 'operation', true, 27),
-(4037, '物资分类删除', NULL, NULL, 4007, NULL, 'material:category:delete', 'operation', true, 28),
--- 物资仓库操作
-(4038, '物资仓库列表', NULL, NULL, 4008, NULL, 'material:warehouse:list', 'operation', true, 29),
-(4039, '物资仓库添加', NULL, NULL, 4008, NULL, 'material:warehouse:add', 'operation', true, 30),
-(4040, '物资仓库编辑', NULL, NULL, 4008, NULL, 'material:warehouse:edit', 'operation', true, 31),
-(4041, '物资仓库删除', NULL, NULL, 4008, NULL, 'material:warehouse:delete', 'operation', true, 32),
--- 领用记录操作
-(4042, '领用记录列表', NULL, NULL, 4009, NULL, 'material:use:list', 'operation', true, 33),
-(4043, '领用记录添加', NULL, NULL, 4009, NULL, 'material:use:add', 'operation', true, 34),
-(4044, '领用记录编辑', NULL, NULL, 4009, NULL, 'material:use:edit', 'operation', true, 35),-- 领用记录删除
-(4045, '领用记录删除', NULL, NULL, 4009, NULL, 'material:use:delete', 'operation', true, 36),
--- 采购管理操作
-(3004, '采购管理列表', NULL, NULL, 3001, NULL, 'purchase:list', 'operation', true, 1),
-(3005, '采购管理添加', NULL, NULL, 3001, NULL, 'purchase:add', 'operation', true, 2),
-(3006, '采购管理编辑', NULL, NULL, 3001, NULL, 'purchase:edit', 'operation', true, 3),
-(3007, '采购管理删除', NULL, NULL, 3001, NULL, 'purchase:delete', 'operation', true, 4),
--- 收货管理操作
-(3008, '收货管理列表', NULL, NULL, 3002, NULL, 'purchase:receipt:list', 'operation', true, 5),
-(3009, '收货管理添加', NULL, NULL, 3002, NULL, 'purchase:receipt:add', 'operation', true, 6),
-(3010, '收货管理编辑', NULL, NULL, 3002, NULL, 'purchase:receipt:edit', 'operation', true, 7),
-(3011, '收货管理删除', NULL, NULL, 3002, NULL, 'purchase:receipt:delete', 'operation', true, 8),
--- 入库管理操作
-(3012, '入库管理列表', NULL, NULL, 3003, NULL, 'purchase:storage:list', 'operation', true, 9),
-(3013, '入库管理添加', NULL, NULL, 3003, NULL, 'purchase:storage:add', 'operation', true, 10),
-(3014, '入库管理编辑', NULL, NULL, 3003, NULL, 'purchase:storage:edit', 'operation', true, 11),-- 入库管理删除
-(3015, '入库管理删除', NULL, NULL, 3003, NULL, 'purchase:storage:delete', 'operation', true, 12),
--- 分类统计操作
-(5005, '分类统计查看', NULL, NULL, 5001, NULL, 'asset:statistics:category:view', 'operation', true, 1),
--- 位置统计操作
-(5006, '位置统计查看', NULL, NULL, 5002, NULL, 'asset:statistics:location:view', 'operation', true, 2),
--- 部门资产统计操作
-(5007, '部门资产统计查看', NULL, NULL, 5003, NULL, 'asset:statistics:dept:view', 'operation', true, 3),
--- 员工资产统计操作
-(5008, '员工资产统计查看', NULL, NULL, 5004, NULL, 'asset:statistics:employee:view', 'operation', true, 4),
--- 库存统计操作
-(6004, '库存统计查看', NULL, NULL, 6001, NULL, 'material:statistics:stock:view', 'operation', true, 1),
--- 进出统计操作
-(6005, '进出统计查看', NULL, NULL, 6002, NULL, 'material:statistics:inout:view', 'operation', true, 2),
--- 领用统计操作
-(6006, '领用统计查看', NULL, NULL, 6003, NULL, 'material:statistics:use:view', 'operation', true, 3),
--- 供应商操作权限
-(1025, '供应商列表', NULL, NULL, 1006, NULL, 'asset:supplier:list', 'operation', true, 31),
-(1026, '供应商添加', NULL, NULL, 1006, NULL, 'asset:supplier:add', 'operation', true, 32),
-(1027, '供应商编辑', NULL, NULL, 1006, NULL, 'asset:supplier:edit', 'operation', true, 33),
-(1028, '供应商删除', NULL, NULL, 1006, NULL, 'asset:supplier:delete', 'operation', true, 34),
+(1000301, '资产列表', NULL, NULL, 10003, NULL, 'asset:list', 'operation', true, 1),
+(1000302, '资产查询', NULL, NULL, 10003, NULL, 'asset:query', 'operation', true, 2),
+(1000303, '资产添加', NULL, NULL, 10003, NULL, 'asset:add', 'operation', true, 3),
+(1000304, '资产编辑', NULL, NULL, 10003, NULL, 'asset:edit', 'operation', true, 4),
+(1000305, '资产删除', NULL, NULL, 10003, NULL, 'asset:delete', 'operation', true, 5),
+(1000306, '资产标签打印', NULL, NULL, 10003, NULL, 'asset:print', 'operation', true, 6),
+(1000307, '资产统计', NULL, NULL, 10003, NULL, 'asset:statistics', 'operation', true, 7),
 -- 资产盘点操作权限
-(1029, '资产盘点列表', NULL, NULL, 1007, NULL, 'asset:inventory:list', 'operation', true, 35),
-(1030, '资产盘点添加', NULL, NULL, 1007, NULL, 'asset:inventory:add', 'operation', true, 36),
-(1031, '资产盘点编辑', NULL, NULL, 1007, NULL, 'asset:inventory:edit', 'operation', true, 37),
-(1032, '资产盘点删除', NULL, NULL, 1007, NULL, 'asset:inventory:delete', 'operation', true, 38),
+(1000401, '资产盘点列表', NULL, NULL, 10004, NULL, 'asset:inventory:list', 'operation', true, 1),
+(1000402, '资产盘点添加', NULL, NULL, 10004, NULL, 'asset:inventory:add', 'operation', true, 2),
+(1000403, '资产盘点编辑', NULL, NULL, 10004, NULL, 'asset:inventory:edit', 'operation', true, 3),
+(1000404, '资产盘点删除', NULL, NULL, 10004, NULL, 'asset:inventory:delete', 'operation', true, 4),
+(1000405, '资产盘点下发', NULL, NULL, 10004, NULL, 'asset:inventory:issue', 'operation', true, 5),
+(1000406, '资产盘点统计', NULL, NULL, 10004, NULL, 'asset:inventory:statistics', 'operation', true, 6),
+-- 领用审批操作
+(1000501, '领用记录列表', NULL, NULL, 10005, NULL, 'asset:approval:list', 'operation', true, 1),
+(1000502, '领用记录操作', NULL, NULL, 10005, NULL, 'asset:approval:operate', 'operation', true, 2),
+-- 退库记录操作
+(1000601, '退库记录列表', NULL, NULL, 10006, NULL, 'asset:return:list', 'operation', true, 1),
+(1000602, '退库记录操作', NULL, NULL, 10006, NULL, 'asset:return:operate', 'operation', true, 2),
+-- 转移记录操作
+(1000701, '转移记录列表', NULL, NULL, 10007, NULL, 'asset:transfer:list', 'operation', true, 1),
+(1000702, '转移记录操作', NULL, NULL, 10007, NULL, 'asset:transfer:operate', 'operation', true, 2),
+-- 资产报废操作
+(1000801, '资产报废列表', NULL, NULL, 10008, NULL, 'asset:scrap:list', 'operation', true, 1),
+(1000802, '资产报废添加', NULL, NULL, 10008, NULL, 'asset:scrap:add', 'operation', true, 2),
+(1000803, '资产报废编辑', NULL, NULL, 10008, NULL, 'asset:scrap:edit', 'operation', true, 3),
+(1000804, '资产报废删除', NULL, NULL, 10008, NULL, 'asset:scrap:delete', 'operation', true, 4),
+-- 资产处置操作
+(1000901, '资产处置列表', NULL, NULL, 10009, NULL, 'asset:dispose:list', 'operation', true, 1),
+(1000902, '资产处置添加', NULL, NULL, 10009, NULL, 'asset:dispose:add', 'operation', true, 2),
+(1000903, '资产处置编辑', NULL, NULL, 10009, NULL, 'asset:dispose:edit', 'operation', true, 3),
+(1000904, '资产处置删除', NULL, NULL, 10009, NULL, 'asset:dispose:delete', 'operation', true, 4),
+-- 资产变更操作
+(1001001, '资产变更列表', NULL, NULL, 10010, NULL, 'asset:change:list', 'operation', true, 1),
+(1001002, '资产变更添加', NULL, NULL, 10010, NULL, 'asset:change:add', 'operation', true, 2),
+(1001003, '资产变更编辑', NULL, NULL, 10010, NULL, 'asset:change:edit', 'operation', true, 3),
+(1001004, '资产变更删除', NULL, NULL, 10010, NULL, 'asset:change:delete', 'operation', true, 4),
+-- 报废列表操作
+(1001101, '报废列表查看', NULL, NULL, 10011, NULL, 'asset:scrap:list:view', 'operation', true, 1),
+-- 折旧设置操作
+(1001201, '折旧设置列表', NULL, NULL, 10012, NULL, 'asset:depreciation:list', 'operation', true, 1),
+(1001202, '折旧设置添加', NULL, NULL, 10012, NULL, 'asset:depreciation:add', 'operation', true, 2),
+(1001203, '折旧设置编辑', NULL, NULL, 10012, NULL, 'asset:depreciation:edit', 'operation', true, 3),
+(1001204, '折旧设置删除', NULL, NULL, 10012, NULL, 'asset:depreciation:delete', 'operation', true, 4),
+-- 采购管理操作
+(1010101, '采购管理列表', NULL, NULL, 10101, NULL, 'purchase:list', 'operation', true, 1),
+(1010102, '采购管理添加', NULL, NULL, 10101, NULL, 'purchase:add', 'operation', true, 2),
+(1010103, '采购管理编辑', NULL, NULL, 10101, NULL, 'purchase:edit', 'operation', true, 3),
+(1010104, '采购管理删除', NULL, NULL, 10101, NULL, 'purchase:delete', 'operation', true, 4),
+-- 收货管理操作
+(1010201, '收货管理列表', NULL, NULL, 10102, NULL, 'purchase:receipt:list', 'operation', true, 1),
+(1010202, '收货管理添加', NULL, NULL, 10102, NULL, 'purchase:receipt:add', 'operation', true, 2),
+(1010203, '收货管理编辑', NULL, NULL, 10102, NULL, 'purchase:receipt:edit', 'operation', true, 3),
+(1010204, '收货管理删除', NULL, NULL, 10102, NULL, 'purchase:receipt:delete', 'operation', true, 4),
+-- 入库管理操作
+(1010301, '入库管理列表', NULL, NULL, 10103, NULL, 'purchase:storage:list', 'operation', true, 1),
+(1010302, '入库管理添加', NULL, NULL, 10103, NULL, 'purchase:storage:add', 'operation', true, 2),
+(1010303, '入库管理编辑', NULL, NULL, 10103, NULL, 'purchase:storage:edit', 'operation', true, 3),
+(1010304, '入库管理删除', NULL, NULL, 10103, NULL, 'purchase:storage:delete', 'operation', true, 4),
+-- 供应商操作权限
+(1010401, '供应商列表', NULL, NULL, 10104, NULL, 'asset:supplier:list', 'operation', true, 1),
+(1010402, '供应商添加', NULL, NULL, 10104, NULL, 'asset:supplier:add', 'operation', true, 2),
+(1010403, '供应商编辑', NULL, NULL, 10104, NULL, 'asset:supplier:edit', 'operation', true, 3),
+(1010404, '供应商删除', NULL, NULL, 10104, NULL, 'asset:supplier:delete', 'operation', true, 4),
+-- 物资列表操作
+(1020101, '物资列表', NULL, NULL, 10201, NULL, 'material:list', 'operation', true, 1),
+(1020102, '物资添加', NULL, NULL, 10201, NULL, 'material:add', 'operation', true, 2),
+(1020103, '物资编辑', NULL, NULL, 10201, NULL, 'material:edit', 'operation', true, 3),
+(1020104, '物资删除', NULL, NULL, 10201, NULL, 'material:delete', 'operation', true, 4),
+-- 批次列表操作
+(1020201, '批次列表', NULL, NULL, 10202, NULL, 'material:batch:list', 'operation', true, 1),
+(1020202, '批次添加', NULL, NULL, 10202, NULL, 'material:batch:add', 'operation', true, 2),
+(1020203, '批次编辑', NULL, NULL, 10202, NULL, 'material:batch:edit', 'operation', true, 3),
+(1020204, '批次删除', NULL, NULL, 10202, NULL, 'material:batch:delete', 'operation', true, 4),
+-- 物资入库操作
+(1020301, '物资入库列表', NULL, NULL, 10203, NULL, 'material:in:list', 'operation', true, 1),
+(1020302, '物资入库添加', NULL, NULL, 10203, NULL, 'material:in:add', 'operation', true, 2),
+(1020303, '物资入库编辑', NULL, NULL, 10203, NULL, 'material:in:edit', 'operation', true, 3),
+(1020304, '物资入库删除', NULL, NULL, 10203, NULL, 'material:in:delete', 'operation', true, 4),
+-- 物资出库操作
+(1020401, '物资出库列表', NULL, NULL, 10204, NULL, 'material:out:list', 'operation', true, 1),
+(1020402, '物资出库添加', NULL, NULL, 10204, NULL, 'material:out:add', 'operation', true, 2),
+(1020403, '物资出库编辑', NULL, NULL, 10204, NULL, 'material:out:edit', 'operation', true, 3),
+(1020404, '物资出库删除', NULL, NULL, 10204, NULL, 'material:out:delete', 'operation', true, 4),
+-- 物资调拨操作
+(1020501, '物资调拨列表', NULL, NULL, 10205, NULL, 'material:transfer:list', 'operation', true, 1),
+(1020502, '物资调拨添加', NULL, NULL, 10205, NULL, 'material:transfer:add', 'operation', true, 2),
+(1020503, '物资调拨编辑', NULL, NULL, 10205, NULL, 'material:transfer:edit', 'operation', true, 3),
+(1020504, '物资调拨删除', NULL, NULL, 10205, NULL, 'material:transfer:delete', 'operation', true, 4),
+-- 物资盘点操作
+(1020601, '物资盘点列表', NULL, NULL, 10206, NULL, 'material:inventory:list', 'operation', true, 1),
+(1020602, '物资盘点添加', NULL, NULL, 10206, NULL, 'material:inventory:add', 'operation', true, 2),
+(1020603, '物资盘点编辑', NULL, NULL, 10206, NULL, 'material:inventory:edit', 'operation', true, 3),
+(1020604, '物资盘点删除', NULL, NULL, 10206, NULL, 'material:inventory:delete', 'operation', true, 4),
+-- 物资分类操作
+(1020701, '物资分类列表', NULL, NULL, 10207, NULL, 'material:category:list', 'operation', true, 1),
+(1020702, '物资分类添加', NULL, NULL, 10207, NULL, 'material:category:add', 'operation', true, 2),
+(1020703, '物资分类编辑', NULL, NULL, 10207, NULL, 'material:category:edit', 'operation', true, 3),
+(1020704, '物资分类删除', NULL, NULL, 10207, NULL, 'material:category:delete', 'operation', true, 4),
+-- 物资仓库操作
+(1020801, '物资仓库列表', NULL, NULL, 10208, NULL, 'material:warehouse:list', 'operation', true, 1),
+(1020802, '物资仓库添加', NULL, NULL, 10208, NULL, 'material:warehouse:add', 'operation', true, 2),
+(1020803, '物资仓库编辑', NULL, NULL, 10208, NULL, 'material:warehouse:edit', 'operation', true, 3),
+(1020804, '物资仓库删除', NULL, NULL, 10208, NULL, 'material:warehouse:delete', 'operation', true, 4),
+-- 领用记录操作
+(1020901, '领用记录列表', NULL, NULL, 10209, NULL, 'material:use:list', 'operation', true, 1),
+(1020902, '领用记录添加', NULL, NULL, 10209, NULL, 'material:use:add', 'operation', true, 2),
+(1020903, '领用记录编辑', NULL, NULL, 10209, NULL, 'material:use:edit', 'operation', true, 3),
+(1020904, '领用记录删除', NULL, NULL, 10209, NULL, 'material:use:delete', 'operation', true, 4),
+-- 分类统计操作
+(1030101, '分类统计查看', NULL, NULL, 10301, NULL, 'asset:statistics:category:view', 'operation', true, 1),
+-- 位置统计操作
+(1030201, '位置统计查看', NULL, NULL, 10302, NULL, 'asset:statistics:location:view', 'operation', true, 1),
+-- 部门资产统计操作
+(1030301, '部门资产统计查看', NULL, NULL, 10303, NULL, 'asset:statistics:dept:view', 'operation', true, 1),
+-- 员工资产统计操作
+(1030401, '员工资产统计查看', NULL, NULL, 10304, NULL, 'asset:statistics:employee:view', 'operation', true, 1),
+-- 库存统计操作
+(1040101, '库存统计查看', NULL, NULL, 10401, NULL, 'material:statistics:stock:view', 'operation', true, 1),
+-- 进出统计操作
+(1040201, '进出统计查看', NULL, NULL, 10402, NULL, 'material:statistics:inout:view', 'operation', true, 1),
+-- 领用统计操作
+(1040301, '领用统计查看', NULL, NULL, 10403, NULL, 'material:statistics:use:view', 'operation', true, 1),
 -- 我的资产操作
-(2003, '我的资产列表', NULL, NULL, 2001, NULL, 'asset:my:list', 'operation', true, 39),
+(1070101, '我的资产列表', NULL, NULL, 10701, NULL, 'asset:my:list', 'operation', true, 1),
 -- 资产领用操作
-(2004, '资产领用列表', NULL, NULL, 2002, NULL, 'asset:apply:list', 'operation', true, 40),
-(2005, '资产领用添加', NULL, NULL, 2002, NULL, 'asset:apply:add', 'operation', true, 41),
-(2006, '资产领用编辑', NULL, NULL, 2002, NULL, 'asset:apply:edit', 'operation', true, 42),
-(2007, '资产领用删除', NULL, NULL, 2002, NULL, 'asset:apply:delete', 'operation', true, 43),
+(1070201, '资产领用列表', NULL, NULL, 10702, NULL, 'asset:apply:list', 'operation', true, 1),
+(1070202, '资产领用添加', NULL, NULL, 10702, NULL, 'asset:apply:add', 'operation', true, 2),
+(1070203, '资产领用编辑', NULL, NULL, 10702, NULL, 'asset:apply:edit', 'operation', true, 3),
+(1070204, '资产领用删除', NULL, NULL, 10702, NULL, 'asset:apply:delete', 'operation', true, 4),
 -- 资产退库操作
-(2011, '资产退库列表', NULL, NULL, 2008, NULL, 'asset:return:list', 'operation', true, 44),
-(2012, '资产退库添加', NULL, NULL, 2008, NULL, 'asset:return:add', 'operation', true, 45),
-(2013, '资产退库编辑', NULL, NULL, 2008, NULL, 'asset:return:edit', 'operation', true, 46),
-(2014, '资产退库删除', NULL, NULL, 2008, NULL, 'asset:return:delete', 'operation', true, 47),
+(1070301, '资产退库列表', NULL, NULL, 10703, NULL, 'asset:return:list', 'operation', true, 1),
+(1070302, '资产退库添加', NULL, NULL, 10703, NULL, 'asset:return:add', 'operation', true, 2),
+(1070303, '资产退库编辑', NULL, NULL, 10703, NULL, 'asset:return:edit', 'operation', true, 3),
+(1070304, '资产退库删除', NULL, NULL, 10703, NULL, 'asset:return:delete', 'operation', true, 4),
 -- 资产转移操作
-(2015, '资产转移列表', NULL, NULL, 2009, NULL, 'asset:transfer:list', 'operation', true, 48),
-(2016, '资产转移添加', NULL, NULL, 2009, NULL, 'asset:transfer:add', 'operation', true, 49),
-(2017, '资产转移编辑', NULL, NULL, 2009, NULL, 'asset:transfer:edit', 'operation', true, 50),
-(2018, '资产转移删除', NULL, NULL, 2009, NULL, 'asset:transfer:delete', 'operation', true, 51),
+(1070401, '资产转移列表', NULL, NULL, 10704, NULL, 'asset:transfer:list', 'operation', true, 1),
+(1070402, '资产转移添加', NULL, NULL, 10704, NULL, 'asset:transfer:add', 'operation', true, 2),
+(1070403, '资产转移编辑', NULL, NULL, 10704, NULL, 'asset:transfer:edit', 'operation', true, 3),
+(1070404, '资产转移删除', NULL, NULL, 10704, NULL, 'asset:transfer:delete', 'operation', true, 4),
 -- 资产报修操作
-(2019, '资产报修列表', NULL, NULL, 2010, NULL, 'asset:repair:list', 'operation', true, 52),
-(2020, '资产报修添加', NULL, NULL, 2010, NULL, 'asset:repair:add', 'operation', true, 53),
-(2021, '资产报修编辑', NULL, NULL, 2010, NULL, 'asset:repair:edit', 'operation', true, 54),
-(2022, '资产报修删除', NULL, NULL, 2010, NULL, 'asset:repair:delete', 'operation', true, 55);
+(1070501, '资产报修列表', NULL, NULL, 10705, NULL, 'asset:repair:list', 'operation', true, 1),
+(1070502, '资产报修添加', NULL, NULL, 10705, NULL, 'asset:repair:add', 'operation', true, 2),
+(1070503, '资产报修编辑', NULL, NULL, 10705, NULL, 'asset:repair:edit', 'operation', true, 3),
+(1070504, '资产报修删除', NULL, NULL, 10705, NULL, 'asset:repair:delete', 'operation', true, 4);
 
 -- 为admin角色分配权限
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES
 -- 资产管理权限
-(1, 1000), (1, 1001), (1, 1002), (1, 1003), (1, 1033), (1, 1034), (1, 1035), (1, 1044), (1, 1045), (1, 1046), (1, 1047), (1, 1048),
-(1, 1008), (1, 1009), (1, 1010), (1, 1011),
-(1, 1012), (1, 1013), (1, 1014), (1, 1015),
-(1, 1016), (1, 1036), (1, 1017), (1, 1018), (1, 1019), (1, 1042), (1, 1043), (1, 1038), (1, 1039), (1, 1040), (1, 1041), (1, 1049), (1, 1050), (1, 1051), (1, 1052), (1, 1053), (1, 1054), (1, 1055), (1, 1056), (1, 1057), (1, 1058), (1, 1059), (1, 1060), (1, 1061), (1, 1062), (1, 1063), (1, 1064), (1, 1065),
--- 供应商管理权限
-(1, 1006), (1, 1025), (1, 1026), (1, 1027), (1, 1028),
--- 资产盘点管理权限
-(1, 1007), (1, 1029), (1, 1030), (1, 1031), (1, 1032),
+(1, 10000), 
+(1, 10001), (1, 1000101), (1, 1000102), (1, 1000103), (1, 1000104),
+(1, 10002), (1, 1000201), (1, 1000202), (1, 1000203), (1, 1000204),
+(1, 10003), (1, 1000301), (1, 1000302), (1, 1000303), (1, 1000304), (1, 1000305), (1, 1000306), (1, 1000307),
+(1, 10004), (1, 1000401), (1, 1000402), (1, 1000403), (1, 1000404), (1, 1000405), (1, 1000406),
+(1, 10005), (1, 1000501), (1, 1000502),
+(1, 10006), (1, 1000601), (1, 1000602),
+(1, 10007), (1, 1000701), (1, 1000702),
+(1, 10008), (1, 1000801), (1, 1000802), (1, 1000803), (1, 1000804),
+(1, 10009), (1, 1000901), (1, 1000902), (1, 1000903), (1, 1000904),
+(1, 10010), (1, 1001001), (1, 1001002), (1, 1001003), (1, 1001004),
+(1, 10011), (1, 1001101), 
+(1, 10012), (1, 1001201), (1, 1001202), (1, 1001203), (1, 1001204),
 -- 采购管理权限
-(1, 3000), (1, 3001), (1, 3002), (1, 3003),
-(1, 3004), (1, 3005), (1, 3006), (1, 3007), (1, 3008), (1, 3009), (1, 3010), (1, 3011), (1, 3012), (1, 3013), (1, 3014), (1, 3015),
+(1, 10100), 
+(1, 10101), (1, 1010101), (1, 1010102), (1, 1010103), (1, 1010104), 
+(1, 10102), (1, 1010201), (1, 1010202), (1, 1010203), (1, 1010204),
+(1, 10103), (1, 1010301), (1, 1010302), (1, 1010303), (1, 1010304),
+(1, 10104), (1, 1010401), (1, 1010402), (1, 1010403), (1, 1010404),
 -- 物资管理权限
-(1, 4000), (1, 4001), (1, 4002), (1, 4003), (1, 4004), (1, 4005), (1, 4006), (1, 4007), (1, 4008), (1, 4009),
-(1, 4010), (1, 4011), (1, 4012), (1, 4013), (1, 4014), (1, 4015), (1, 4016), (1, 4017), (1, 4018), (1, 4019), (1, 4020), (1, 4021), (1, 4022), (1, 4023), (1, 4024), (1, 4025), (1, 4026), (1, 4027), (1, 4028), (1, 4029), (1, 4030), (1, 4031), (1, 4032), (1, 4033), (1, 4034), (1, 4035), (1, 4036), (1, 4037), (1, 4038), (1, 4039), (1, 4040), (1, 4041), (1, 4042), (1, 4043), (1, 4044), (1, 4045),
+(1, 10200), 
+(1, 10201), (1, 1020101), (1, 1020102), (1, 1020103), (1, 1020104), 
+(1, 10202), (1, 1020201), (1, 1020202), (1, 1020203), (1, 1020204), 
+(1, 10203), (1, 1020301), (1, 1020302), (1, 1020303), (1, 1020304), 
+(1, 10204), (1, 1020401), (1, 1020402), (1, 1020403), (1, 1020404), 
+(1, 10205), (1, 1020501), (1, 1020502), (1, 1020503), (1, 1020504), 
+(1, 10206), (1, 1020601), (1, 1020602), (1, 1020603), (1, 1020604), 
+(1, 10207), (1, 1020701), (1, 1020702), (1, 1020703), (1, 1020704), 
+(1, 10208), (1, 1020801), (1, 1020802), (1, 1020803), (1, 1020804), 
+(1, 10209), (1, 1020901), (1, 1020902), (1, 1020903), (1, 1020904),
 -- 资产统计权限
-(1, 5000), (1, 5001), (1, 5002), (1, 5003), (1, 5004), (1, 5005), (1, 5006), (1, 5007), (1, 5008),
+(1, 10300), 
+(1, 10301), (1, 1030101), 
+(1, 10302), (1, 1030201), 
+(1, 10303), (1, 1030301), 
+(1, 10304), (1, 1030401),
 -- 物资统计权限
-(1, 6000), (1, 6001), (1, 6002), (1, 6003), (1, 6004), (1, 6005), (1, 6006),
+(1, 10400), 
+(1, 10401), (1, 1040101), 
+(1, 10402), (1, 1040201), 
+(1, 10403), (1, 1040301),
 -- 维保管理权限
-(1, 7000),
--- 租借管理权限
-(1, 8000),
+(1, 10500),
+-- 数据大屏权限
+(1, 10600),
 -- 个人中心权限
-(1, 2000), (1, 2001), (1, 2002), (1, 2003), (1, 2004), (1, 2005), (1, 2006), (1, 2007),
--- 资产退库权限
-(1, 2008), (1, 2011), (1, 2012), (1, 2013), (1, 2014),
--- 资产转移权限
-(1, 2009), (1, 2015), (1, 2016), (1, 2017), (1, 2018),
--- 资产报修权限
-(1, 2010), (1, 2019), (1, 2020), (1, 2021), (1, 2022);
+(1, 10700), 
+(1, 10701), (1, 1070101), 
+(1, 10702), (1, 1070201), (1, 1070202), (1, 1070203), (1, 1070204),
+(1, 10703), (1, 1070301), (1, 1070302), (1, 1070303), (1, 1070304),
+(1, 10704), (1, 1070401), (1, 1070402), (1, 1070403), (1, 1070404),
+(1, 10705), (1, 1070501), (1, 1070502), (1, 1070503), (1, 1070504);
 
 -- 插入系统配置
 INSERT INTO sys_config (config_key, value, description, create_time, update_time) VALUES
