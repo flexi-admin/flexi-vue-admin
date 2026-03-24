@@ -98,4 +98,45 @@ public class AssetController {
     public R<List<java.util.Map<String, String>>> getBatchPrintData() {
         return R.success(assetService.getBatchPrintData());
     }
+
+    // 统计相关API
+    @RequirePermission("asset:query")
+    @GetMapping("/statistics")
+    public R<java.util.Map<String, Object>> getAssetStatistics() {
+        return R.success(assetService.getAssetStatistics());
+    }
+
+    @RequirePermission("asset:query")
+    @GetMapping("/type-distribution")
+    public R<List<java.util.Map<String, Object>>> getAssetTypeDistribution() {
+        return R.success(assetService.getAssetTypeDistribution());
+    }
+
+    @RequirePermission("asset:query")
+    @GetMapping("/status-distribution")
+    public R<List<java.util.Map<String, Object>>> getAssetStatusDistribution() {
+        return R.success(assetService.getAssetStatusDistribution());
+    }
+
+    @RequirePermission("asset:query")
+    @GetMapping("/status-distribution-by-type")
+    public R<List<java.util.Map<String, Object>>> getAssetStatusDistributionByType(@RequestParam String type) {
+        return R.success(assetService.getAssetStatusDistributionByType(type));
+    }
+
+    @RequirePermission("asset:query")
+    @GetMapping("/idle-rate-analysis")
+    public R<List<java.util.Map<String, Object>>> getIdleRateAnalysis() {
+        return R.success(assetService.getIdleRateAnalysis());
+    }
+
+    @RequirePermission("asset:query")
+    @GetMapping("/amount-statistics")
+    public R<List<java.util.Map<String, Object>>> getAmountStatistics() {
+        return R.success(assetService.getAmountStatistics());
+    }
+
+
+
+
 }

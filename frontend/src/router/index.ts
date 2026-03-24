@@ -12,6 +12,12 @@ const routes: RouteRecordRaw[] = [
     children: []
   },
   {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('../views/Dashboard.vue'),
+    meta: { requiresAuth: true, title: '数据大屏' }
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('../views/Login.vue')

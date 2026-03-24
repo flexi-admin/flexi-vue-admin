@@ -27,7 +27,7 @@ flexi:
     secret: flexi_admin_secret_key
     expiration: 3600000
   upload:
-    dir: ${java.io.tmpdir}/flexi-upload/images
+    dir: /Users/renjianzhi/appdata/flexi-upload/images
     max-size: 10485760
   security:
     permit-paths: /asset/inventory/save-details

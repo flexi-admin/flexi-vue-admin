@@ -9,10 +9,8 @@ import com.flexi.app.entity.AssetLocation;
 import com.flexi.app.entity.AssetSupplier;
 import com.flexi.app.entity.AssetType;
 import com.flexi.app.mapper.AssetMapper;
-import com.flexi.app.service.AssetService;
-import com.flexi.app.service.AssetTypeService;
-import com.flexi.app.service.AssetLocationService;
-import com.flexi.app.service.AssetSupplierService;
+import com.flexi.app.service.*;
+import io.github.zmxckj.flexiadmin.entity.Dict;
 import io.github.zmxckj.flexiadmin.security.SecurityUtils;
 import io.github.zmxckj.flexiadmin.service.DictService;
 import io.github.zmxckj.flexiadmin.service.UserService;
@@ -242,4 +240,275 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         
         return dto;
     }
+
+    @Override
+    public java.util.Map<String, Object> getAssetStatistics() {
+        java.util.Map<String, Object> statistics = new java.util.HashMap<>();
+        
+        // 从数据库获取实际数据
+        // 1. 资产总数
+        long totalAssets = count();
+        statistics.put("totalAssets", totalAssets);
+        
+        // 2. 固定资产净值
+        double fixedAssetValue = 0;
+        List<Asset> assets = list();
+        for (Asset asset : assets) {
+            if (asset.getCurrentValue() != null) {
+                fixedAssetValue += asset.getCurrentValue();
+            }
+        }
+        statistics.put("fixedAssetValue", fixedAssetValue);
+        
+        // 3. 本年新增资产
+        // 计算本年开始时间戳
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        calendar.set(java.util.Calendar.MONTH, 0);
+        calendar.set(java.util.Calendar.DAY_OF_MONTH, 1);
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        calendar.set(java.util.Calendar.MINUTE, 0);
+        calendar.set(java.util.Calendar.SECOND, 0);
+        long startOfYear = calendar.getTimeInMillis();
+        
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> yearQuery = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        yearQuery.ge("create_time", startOfYear);
+        long newAssetsThisYear = count(yearQuery);
+        statistics.put("newAssetsThisYear", newAssetsThisYear);
+        
+        // 4. 本年报废资产
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> scrapQuery = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        scrapQuery.eq("status", "scrapped");
+        scrapQuery.ge("update_time", startOfYear);
+        long scrappedAssetsThisYear = count(scrapQuery);
+        statistics.put("scrappedAssetsThisYear", scrappedAssetsThisYear);
+        
+        // 5. 年折旧费
+        // 简单计算：总资产原值 - 总净值
+        double totalOriginalValue = 0;
+        double totalCurrentValue = 0;
+        for (Asset asset : assets) {
+            if (asset.getPrice() != null) {
+                totalOriginalValue += asset.getPrice();
+            }
+            if (asset.getCurrentValue() != null) {
+                totalCurrentValue += asset.getCurrentValue();
+            }
+        }
+        double annualDepreciation = totalOriginalValue - totalCurrentValue;
+        statistics.put("annualDepreciation", annualDepreciation);
+        
+        return statistics;
+    }
+
+    @Override
+    public List<java.util.Map<String, Object>> getAssetTypeDistribution() {
+        List<java.util.Map<String, Object>> distribution = new java.util.ArrayList<>();
+        
+        // 从数据库获取实际数据
+        // 1. 查询所有资产类型
+        List<AssetType> assetTypes = assetTypeService.list();
+        
+        // 2. 统计每种类型的资产数量
+        for (AssetType type : assetTypes) {
+            com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> queryWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+            queryWrapper.eq("type_id", type.getId());
+            long count = count(queryWrapper);
+            
+            // 构建分布数据
+            java.util.Map<String, Object> typeData = new java.util.HashMap<>();
+            typeData.put("name", type.getName());
+            typeData.put("value", count);
+            distribution.add(typeData);
+        }
+        
+        return distribution;
+    }
+
+    @Override
+    public List<java.util.Map<String, Object>> getAssetStatusDistribution() {
+        List<java.util.Map<String, Object>> distribution = new java.util.ArrayList<>();
+        
+        // 从数据库获取实际数据
+        // 1. 获取所有资产状态字典
+        List<Dict> statusDicts = dictService.listByType("asset_status");
+        
+        // 2. 统计每种状态的资产数量
+        for (Dict dict : statusDicts) {
+            String statusCode = dict.getCode();
+            String statusName = dict.getValue();
+            
+            com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> queryWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+            queryWrapper.eq("status", statusCode);
+            long count = count(queryWrapper);
+            
+            // 构建分布数据
+            java.util.Map<String, Object> statusData = new java.util.HashMap<>();
+            statusData.put("name", statusName);
+            statusData.put("value", count);
+            distribution.add(statusData);
+        }
+        
+        return distribution;
+    }
+
+    @Override
+    public List<java.util.Map<String, Object>> getAssetStatusDistributionByType(String type) {
+        List<java.util.Map<String, Object>> distribution = new java.util.ArrayList<>();
+        
+        // 从数据库获取实际数据
+        // 1. 获取所有资产状态字典
+        List<Dict> statusDicts = dictService.listByType("asset_status");
+        
+        // 2. 根据类型获取资产类型ID
+        Long typeId = null;
+        if (!"all".equals(type)) {
+            // 这里需要根据类型名称获取类型ID，假设类型名称与前端传递的type参数对应
+            // 实际项目中可能需要调整逻辑
+            List<AssetType> assetTypes = assetTypeService.list();
+            for (AssetType assetType : assetTypes) {
+                if (assetType.getName().contains(type)) {
+                    typeId = assetType.getId();
+                    break;
+                }
+            }
+        }
+        
+        // 3. 统计每种状态的资产数量
+        for (Dict dict : statusDicts) {
+            String statusCode = dict.getCode();
+            String statusName = dict.getValue();
+            
+            com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> queryWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+            queryWrapper.eq("status", statusCode);
+            if (typeId != null) {
+                queryWrapper.eq("type_id", typeId);
+            }
+            long count = count(queryWrapper);
+            
+            // 构建分布数据
+            java.util.Map<String, Object> statusData = new java.util.HashMap<>();
+            statusData.put("name", statusName);
+            statusData.put("value", count);
+            distribution.add(statusData);
+        }
+        
+        return distribution;
+    }
+
+    @Override
+    public List<java.util.Map<String, Object>> getIdleRateAnalysis() {
+        List<java.util.Map<String, Object>> analysis = new java.util.ArrayList<>();
+        
+        // 从数据库获取实际数据
+        // 1. 查询所有资产类型
+        List<AssetType> assetTypes = assetTypeService.list();
+        
+        // 2. 计算每种类型的闲置率
+        for (AssetType type : assetTypes) {
+            // 统计该类型的资产总数
+            com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> totalQuery = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+            totalQuery.eq("type_id", type.getId());
+            long totalCount = count(totalQuery);
+            
+            // 统计该类型的闲置资产数量
+            com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> idleQuery = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+            idleQuery.eq("type_id", type.getId());
+            idleQuery.eq("status", "idle"); // 假设闲置状态的code是"idle"
+            long idleCount = count(idleQuery);
+            
+            // 计算闲置率
+            String idleRate = "0%";
+            if (totalCount > 0) {
+                int rate = (int) (idleCount * 100 / totalCount);
+                idleRate = rate + "%";
+            }
+            
+            // 构建分析数据
+            java.util.Map<String, Object> typeData = new java.util.HashMap<>();
+            typeData.put("category", type.getName());
+            typeData.put("rate", idleRate);
+            analysis.add(typeData);
+        }
+        
+        return analysis;
+    }
+
+    @Override
+    public List<java.util.Map<String, Object>> getAmountStatistics() {
+        List<java.util.Map<String, Object>> statistics = new java.util.ArrayList<>();
+        
+        // 从数据库获取实际数据
+        // 1. 计算过去6个月的月份
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        int currentMonth = calendar.get(java.util.Calendar.MONTH);
+        
+        for (int i = 5; i >= 0; i--) {
+            // 基于当前月份计算过去的月份
+            int targetMonth = (currentMonth - i + 12) % 12;
+            int month = targetMonth + 1;
+            String monthStr = month + "月";
+            
+            // 计算该月的开始和结束时间戳
+            java.util.Calendar monthStart = java.util.Calendar.getInstance();
+            // 计算年份：如果目标月份大于当前月份，说明是上一年
+            int currentYear = monthStart.get(java.util.Calendar.YEAR);
+            int targetYear = currentYear;
+            if (targetMonth > currentMonth) {
+                targetYear = currentYear - 1;
+            }
+            monthStart.set(java.util.Calendar.YEAR, targetYear);
+            monthStart.set(java.util.Calendar.MONTH, targetMonth);
+            monthStart.set(java.util.Calendar.DAY_OF_MONTH, 1);
+            monthStart.set(java.util.Calendar.HOUR_OF_DAY, 0);
+            monthStart.set(java.util.Calendar.MINUTE, 0);
+            monthStart.set(java.util.Calendar.SECOND, 0);
+            long startTimestamp = monthStart.getTimeInMillis();
+            
+            java.util.Calendar monthEnd = java.util.Calendar.getInstance();
+            monthEnd.set(java.util.Calendar.YEAR, targetYear);
+            monthEnd.set(java.util.Calendar.MONTH, targetMonth + 1);
+            monthEnd.set(java.util.Calendar.DAY_OF_MONTH, 0);
+            monthEnd.set(java.util.Calendar.HOUR_OF_DAY, 23);
+            monthEnd.set(java.util.Calendar.MINUTE, 59);
+            monthEnd.set(java.util.Calendar.SECOND, 59);
+            long endTimestamp = monthEnd.getTimeInMillis();
+            
+            // 统计该月的采购金额
+            double purchaseValue = 0;
+            com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> purchaseQuery = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+            purchaseQuery.between("create_time", startTimestamp, endTimestamp);
+            List<Asset> purchaseAssets = list(purchaseQuery);
+            for (Asset asset : purchaseAssets) {
+                if (asset.getPrice() != null) {
+                    purchaseValue += asset.getPrice();
+                }
+            }
+            
+            // 统计到该月为止的资产总值
+            double totalValue = 0;
+            com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> totalQuery = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+            totalQuery.le("create_time", endTimestamp);
+            List<Asset> totalAssets = list(totalQuery);
+            for (Asset asset : totalAssets) {
+                if (asset.getCurrentValue() != null) {
+                    totalValue += asset.getCurrentValue();
+                } else if (asset.getPrice() != null) {
+                    totalValue += asset.getPrice();
+                }
+            }
+            
+            // 构建月份数据
+            java.util.Map<String, Object> monthData = new java.util.HashMap<>();
+            monthData.put("month", monthStr);
+            monthData.put("purchaseValue", purchaseValue);
+            monthData.put("totalValue", totalValue);
+            statistics.add(monthData);
+        }
+        
+        return statistics;
+    }
+
+
+
+
 }

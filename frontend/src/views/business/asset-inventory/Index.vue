@@ -626,7 +626,7 @@ const issueInventory = async (id, name) => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(issueData.value)
+        body: JSON.stringify({data: issueData.value})
       })
       printServiceResponse.value = await printResponse.json()
     }
