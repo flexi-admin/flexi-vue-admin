@@ -29,7 +29,9 @@ public class AssetInventoryController {
     @RequirePermission("asset:inventory:list")
     @GetMapping("/list")
     public R<Page<AssetInventory>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer size) {
-        return R.success(assetInventoryService.page(new Page<>(page, size)));
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<AssetInventory> queryWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        queryWrapper.orderByDesc("id");
+        return R.success(assetInventoryService.page(new Page<>(page, size), queryWrapper));
     }
 
     // 根据ID查询

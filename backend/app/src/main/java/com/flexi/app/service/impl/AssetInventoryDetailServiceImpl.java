@@ -48,6 +48,9 @@ public class AssetInventoryDetailServiceImpl extends ServiceImpl<AssetInventoryD
             queryWrapper.eq("status", status);
         }
         
+        // 按ID降序排序
+        queryWrapper.orderByDesc("id");
+        
         // 查询原始明细数据
         Page<AssetInventoryDetail> detailPage = new Page<>(page.getCurrent(), page.getSize());
         Page<AssetInventoryDetail> resultPage = baseMapper.selectPage(detailPage, queryWrapper);

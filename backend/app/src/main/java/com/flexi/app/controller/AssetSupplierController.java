@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.flexi.app.entity.AssetSupplier;
 import com.flexi.app.service.AssetSupplierService;
 import io.github.zmxckj.flexiadmin.common.R;
-import io.github.zmxckj.flexiadmin.core.annotation.RequirePermission;
+import io.github.zmxckj.flexiadmin.security.RequirePermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
