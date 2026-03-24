@@ -12,8 +12,8 @@
       
       <el-table :data="inventoryList" style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="inventoryCode" label="盘点单号" />
-        <el-table-column prop="inventoryName" label="盘点名称" />
+        <el-table-column prop="inventoryCode" label="盘点单号" width="250" />
+        <el-table-column prop="inventoryName" label="盘点名称" width="180" />
         <el-table-column prop="inventoryType" label="盘点类型">
           <template #default="{ row }">
             {{ getInventoryTypeText(row.inventoryType) }}

@@ -201,7 +201,7 @@ const getStatusType = (status: string) => {
 };
 
 const formatPrice = (row: any, column: any, cellValue: number) => {
-  return `¥${cellValue.toFixed(2)}`;
+  return `¥${cellValue ? cellValue.toFixed(2) : '0.00'}`;
 };
 
 const handleSearch = () => {
