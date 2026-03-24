@@ -85,16 +85,31 @@
           
           <!-- 标签栏 -->
           <div class="tabs-container">
-            <el-tabs v-model="activeTab" type="card" closable @tab-remove="handleTabClose" @tab-click="handleTabUpdate">
-              <el-tab-pane 
-                v-for="tab in tabs" 
-                :key="tab.key" 
-                :label="tab.label" 
-                :name="tab.key"
-              >
-                <!-- 标签内容由路由视图渲染 -->
-              </el-tab-pane>
-            </el-tabs>
+            <div class="tabs-wrapper">
+              <el-tabs v-model="activeTab" type="card" closable @tab-remove="handleTabClose" @tab-click="handleTabUpdate">
+                <el-tab-pane 
+                  v-for="tab in tabs" 
+                  :key="tab.key" 
+                  :label="tab.label" 
+                  :name="tab.key"
+                >
+                  <!-- 标签内容由路由视图渲染 -->
+                </el-tab-pane>
+              </el-tabs>
+              <div class="tabs-actions">
+                <el-dropdown trigger="click">
+                  <el-button link size="small">
+                    <el-icon><ArrowDownBold /></el-icon>
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item @click="handleCloseAllTabs">关闭所有标签页</el-dropdown-item>
+                      <el-dropdown-item @click="handleCloseOtherTabs">关闭其他标签页</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </div>
           </div>
         </el-header>
         <el-main>
@@ -118,7 +133,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { useConfigStore } from '../stores/config'
-import { ArrowDown } from '@element-plus/icons-vue'
+import { ArrowDown, ArrowDownBold } from '@element-plus/icons-vue'
 import api from '@/api'
 import Welcome from './Welcome.vue'
 
@@ -489,6 +504,29 @@ const handleLogout = () => {
   userStore.logout()
   router.push('/login')
 }
+
+// 关闭所有标签页
+const handleCloseAllTabs = () => {
+  // 清空所有标签
+  tabs.value = []
+  // 重置活动标签和菜单
+  activeTab.value = ''
+  activeMenu.value = ''
+  // 跳转到根路径，显示欢迎页
+  router.push('/')
+}
+
+// 关闭其他标签页
+const handleCloseOtherTabs = () => {
+  // 不允许关闭所有标签，至少保留一个
+  if (tabs.value.length <= 1) return
+  
+  // 保留当前标签
+  const currentTab = tabs.value.find(tab => tab.key === activeTab.value)
+  if (currentTab) {
+    tabs.value = [currentTab]
+  }
+}
 </script>
 
 <style scoped>
@@ -643,6 +681,23 @@ const handleLogout = () => {
   margin: 0 !important;
   padding: 0 !important;
   background-color: #fff;
+}
+
+.tabs-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.tabs-wrapper .el-tabs {
+  flex: 1;
+  overflow: hidden;
+}
+
+.tabs-actions {
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
 }
 
 /* 使用深度选择器覆盖Element Plus默认样式 */
