@@ -6,6 +6,7 @@ import com.flexi.app.entity.AssetInventoryDetail;
 import com.flexi.app.service.AssetInventoryService;
 import com.flexi.app.service.AssetInventoryDetailService;
 import io.github.zmxckj.flexiadmin.common.R;
+import io.github.zmxckj.flexiadmin.security.RequirePermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,18 +26,21 @@ public class AssetInventoryController {
     private AssetInventoryDetailService assetInventoryDetailService;
 
     // 分页查询
+    @RequirePermission("asset:inventory:list")
     @GetMapping("/list")
     public R<Page<AssetInventory>> list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer size) {
         return R.success(assetInventoryService.page(new Page<>(page, size)));
     }
 
     // 根据ID查询
+    @RequirePermission("asset:inventory:query")
     @GetMapping("/{id}")
     public R<AssetInventory> getById(@PathVariable Long id) {
         return R.success(assetInventoryService.getById(id));
     }
 
     // 新增
+    @RequirePermission("asset:inventory:add")
     @PostMapping
     public R<?> save(@RequestBody AssetInventory assetInventory) {
         // 生成盘点单号：PD+hutool的objectId
@@ -49,6 +53,7 @@ public class AssetInventoryController {
     }
 
     // 更新
+    @RequirePermission("asset:inventory:edit")
     @PutMapping
     public R<?> update(@RequestBody AssetInventory assetInventory) {
         assetInventory.setUpdateTime(System.currentTimeMillis());
@@ -57,6 +62,7 @@ public class AssetInventoryController {
     }
 
     // 删除
+    @RequirePermission("asset:inventory:delete")
     @DeleteMapping("/{id}")
     public R<?> delete(@PathVariable Long id) {
         assetInventoryService.removeById(id);
@@ -64,6 +70,7 @@ public class AssetInventoryController {
     }
 
     // 同步盘点明细
+    @RequirePermission("asset:inventory:edit")
     @PostMapping("/sync")
     public R<?> sync(@RequestBody Map<String, Object> params) {
         Long inventoryId = Long.parseLong(params.get("inventoryId").toString());
@@ -75,6 +82,7 @@ public class AssetInventoryController {
     }
 
     // 下发盘点
+    @RequirePermission("asset:inventory:issue")
     @GetMapping("/issue/{id}")
     public R<?> issue(@PathVariable Long id) {
         return R.success(assetInventoryService.issueInventory(id));
@@ -83,8 +91,6 @@ public class AssetInventoryController {
     // 接收盘点数据
     @PostMapping("/save-details")
     public R<Boolean> saveInventoryDetails(@RequestBody List<AssetInventoryDetail> details) {
-
-        System.out.println(details);
         boolean result = false;
 
         //对于接口接收的details列表，只保留id不为空的，并且id在盘点明细id列表中的那些数据
@@ -101,6 +107,7 @@ public class AssetInventoryController {
     }
     
     // 获取最新盘点统计
+    @RequirePermission("asset:inventory:statistics")
     @GetMapping("/latest-statistics")
     public R<java.util.Map<String, Object>> getLatestStatistics() {
         // 1. 获取最新的盘点记录
@@ -151,6 +158,7 @@ public class AssetInventoryController {
     }
     
     // 获取历史盘点正常率
+    @RequirePermission("asset:inventory:statistics")
     @GetMapping("/rate-history")
     public R<List<java.util.Map<String, Object>>> getInventoryRateHistory() {
         List<java.util.Map<String, Object>> history = new java.util.ArrayList<>();

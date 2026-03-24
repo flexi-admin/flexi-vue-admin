@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.flexi.app.entity.AssetSupplier;
 import com.flexi.app.service.AssetSupplierService;
 import io.github.zmxckj.flexiadmin.common.R;
+import io.github.zmxckj.flexiadmin.core.annotation.RequirePermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,7 @@ public class AssetSupplierController {
     @Autowired
     private AssetSupplierService assetSupplierService;
 
+    @RequirePermission("asset:supplier:list")
     @GetMapping
     public R<List<AssetSupplier>> list() {
         QueryWrapper<AssetSupplier> queryWrapper = new QueryWrapper<>();
@@ -23,6 +25,7 @@ public class AssetSupplierController {
         return R.success(assetSupplierService.list(queryWrapper));
     }
 
+    @RequirePermission("asset:supplier:add")
     @PostMapping
     public R<?> add(@RequestBody AssetSupplier assetSupplier) {
         assetSupplier.setIsDeleted(0);
@@ -32,6 +35,7 @@ public class AssetSupplierController {
         return R.success();
     }
 
+    @RequirePermission("asset:supplier:edit")
     @PutMapping
     public R<?> update(@RequestBody AssetSupplier assetSupplier) {
         assetSupplier.setUpdateTime(System.currentTimeMillis());
@@ -39,6 +43,7 @@ public class AssetSupplierController {
         return R.success();
     }
 
+    @RequirePermission("asset:supplier:delete")
     @DeleteMapping("/{id}")
     public R<?> delete(@PathVariable Long id) {
         AssetSupplier assetSupplier = new AssetSupplier();
@@ -49,6 +54,7 @@ public class AssetSupplierController {
         return R.success();
     }
 
+    @RequirePermission("asset:supplier:list")
     @GetMapping("/{id}")
     public R<AssetSupplier> getById(@PathVariable Long id) {
         return R.success(assetSupplierService.getById(id));

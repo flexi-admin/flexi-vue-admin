@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.flexi.app.entity.AssetInventoryDetailDTO;
 import com.flexi.app.service.AssetInventoryDetailService;
 import io.github.zmxckj.flexiadmin.common.R;
+import io.github.zmxckj.flexiadmin.security.RequirePermission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ public class AssetInventoryDetailController {
     private AssetInventoryDetailService assetInventoryDetailService;
 
     // 分页查询盘点明细
+    @RequirePermission("asset:inventory:query")
     @GetMapping("/list")
     public R<Page<AssetInventoryDetailDTO>> list(
             @RequestParam Long inventoryId,

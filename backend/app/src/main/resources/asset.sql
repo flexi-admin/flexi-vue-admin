@@ -335,6 +335,7 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 (1000404, '资产盘点删除', NULL, NULL, 10004, NULL, 'asset:inventory:delete', 'operation', true, 4),
 (1000405, '资产盘点下发', NULL, NULL, 10004, NULL, 'asset:inventory:issue', 'operation', true, 5),
 (1000406, '资产盘点统计', NULL, NULL, 10004, NULL, 'asset:inventory:statistics', 'operation', true, 6),
+(1000407, '资产盘点查询', NULL, NULL, 10004, NULL, 'asset:inventory:query', 'operation', true, 7),
 -- 领用审批操作
 (1000501, '领用记录列表', NULL, NULL, 10005, NULL, 'asset:approval:list', 'operation', true, 1),
 (1000502, '领用记录操作', NULL, NULL, 10005, NULL, 'asset:approval:operate', 'operation', true, 2),
@@ -475,7 +476,7 @@ INSERT INTO sys_role_menu (role_id, menu_id) VALUES
 (1, 10001), (1, 1000101), (1, 1000102), (1, 1000103), (1, 1000104),
 (1, 10002), (1, 1000201), (1, 1000202), (1, 1000203), (1, 1000204),
 (1, 10003), (1, 1000301), (1, 1000302), (1, 1000303), (1, 1000304), (1, 1000305), (1, 1000306), (1, 1000307),
-(1, 10004), (1, 1000401), (1, 1000402), (1, 1000403), (1, 1000404), (1, 1000405), (1, 1000406),
+(1, 10004), (1, 1000401), (1, 1000402), (1, 1000403), (1, 1000404), (1, 1000405), (1, 1000406), (1, 1000407),
 (1, 10005), (1, 1000501), (1, 1000502),
 (1, 10006), (1, 1000601), (1, 1000602),
 (1, 10007), (1, 1000701), (1, 1000702),
