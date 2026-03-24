@@ -228,11 +228,11 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 -- 资产盘点管理
 (10004, '资产盘点', '/asset/inventory', 'business/asset-inventory/Index', 10000, 'DataAnalysis', NULL, 'menu', true, 20),
 -- 领用记录
-(10005, '领用记录', '/asset/approval', 'business/asset/Approval', 10000, 'CheckCircle', NULL, 'menu', true, 23),
+(10005, '资产领用记录', '/asset/approval', 'business/asset/Approval', 10000, 'CheckCircle', NULL, 'menu', true, 23),
 -- 退库记录
-(10006, '退库记录', '/asset/return', 'business/asset/ReturnRecord', 10000, 'Return', NULL, 'menu', true, 24),
+(10006, '资产退库记录', '/asset/return', 'business/asset/ReturnRecord', 10000, 'Return', NULL, 'menu', true, 24),
 -- 转移记录
-(10007, '转移记录', '/asset/transfer', 'business/asset/TransferRecord', 10000, 'Switch', NULL, 'menu', true, 25),
+(10007, '资产转移记录', '/asset/transfer', 'business/asset/TransferRecord', 10000, 'Switch', NULL, 'menu', true, 25),
 -- 资产报废
 (10008, '资产报废', '/asset/scrap', 'business/asset/Scrap', 10000, 'Delete', NULL, 'menu', true, 26),
 -- 资产处置
@@ -272,7 +272,7 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 -- 物资仓库
 (10208, '物资仓库', '/material/warehouse', 'business/material/Warehouse', 10200, 'Home', NULL, 'menu', true, 8),
 -- 领用记录
-(10209, '领用记录', '/material/use', 'business/material/UseRecord', 10200, 'CheckCircle', NULL, 'menu', true, 9),
+(10209, '物资领用记录', '/material/use', 'business/material/UseRecord', 10200, 'CheckCircle', NULL, 'menu', true, 9),
 -- 资产统计
 (10300, '资产统计', '/asset-statistics', '', 0, 'PieChart', NULL, 'menu', true, 22),
 -- 分类统计
