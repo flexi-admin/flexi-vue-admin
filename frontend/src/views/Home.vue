@@ -553,7 +553,6 @@ const handleCloseOtherTabs = () => {
 /* 左侧一级菜单 */
 .menu-left {
   height: 100%;
-  overflow-y: auto;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -578,6 +577,7 @@ const handleCloseOtherTabs = () => {
 .menu-left .el-menu {
   flex: 1;
   border-right: none;
+  overflow-y: auto;
 }
 
 .menu-left .el-menu-item {
