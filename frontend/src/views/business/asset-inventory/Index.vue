@@ -196,7 +196,14 @@
       </div>
       <el-table :data="inventoryDetails" style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="assetCode" label="资产编码" />
+        <el-table-column label="资产编码" width="240">
+          <template #default="{ row }">
+            <div>
+              <div>{{ row.assetCode }}</div>
+              <div v-if="row.labelCode" style="font-size: 12px; color: #666;">标签: {{ row.labelCode }}</div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="assetName" label="资产名称" />
         <el-table-column prop="assetType" label="资产类型" />
         <el-table-column prop="assetLocation" label="资产位置" />

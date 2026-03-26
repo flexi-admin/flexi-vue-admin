@@ -32,7 +32,14 @@
           </template>
         </el-table-column>
         <el-table-column prop="name" label="资产名称" />
-        <el-table-column prop="code" label="资产编码" width="230" />
+        <el-table-column label="资产编码" width="230">
+          <template #default="{ row }">
+            <div>
+              <div>{{ row.code }}</div>
+              <div v-if="row.labelCode" style="font-size: 12px; color: #666;">标签{{ row.labelCode }}</div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="typeName" label="资产类型" />
         <el-table-column prop="locationName" label="资产位置" />
         <el-table-column prop="specification" label="规格" />

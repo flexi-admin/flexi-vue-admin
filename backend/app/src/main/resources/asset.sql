@@ -260,7 +260,7 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 -- 批次列表
 (10202, '批次列表', '/material/batch', 'business/material/Batch', 10200, 'FileText', NULL, 'menu', true, 2),
 -- 物资入库
-(10203, '物资入库', '/material/in', 'business/material/In', 10200, 'Inbox', NULL, 'menu', true, 3),
+(10203, '物资入库', '/material/in', 'business/material/In', 10200, 'Inbox', NULL, 'menu', true, 4),
 -- 物资出库
 (10204, '物资出库', '/material/out', 'business/material/Out', 10200, 'Outbox', NULL, 'menu', true, 4),
 -- 物资调拨
@@ -268,9 +268,13 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 -- 物资盘点
 (10206, '物资盘点', '/material/inventory', 'business/material/Inventory', 10200, 'DataAnalysis', NULL, 'menu', true, 6),
 -- 物资分类
-(10207, '物资分类', '/material/category', 'business/material/Category', 10200, 'Layers', NULL, 'menu', true, 7),
+(10207, '物资分类', '/material/category', 'business/material-category/Index', 10200, 'Layers', NULL, 'menu', true, 2),
+-- 物资品类
+(10210, '物资品类', '/material/brand', 'business/material-brand/Index', 10200, 'PriceTag', NULL, 'menu', true, 3),
 -- 物资仓库
-(10208, '物资仓库', '/material/warehouse', 'business/material/Warehouse', 10200, 'Home', NULL, 'menu', true, 8),
+(10208, '物资仓库', '/material/warehouse', 'business/material-warehouse/Index', 10200, 'Home', NULL, 'menu', true, 4),
+-- 物资管理
+(10212, '物资管理', '/material', 'business/material/Index', 10200, 'Inventory', NULL, 'menu', true, 5),
 -- 领用记录
 (10209, '物资领用记录', '/material/use', 'business/material/UseRecord', 10200, 'CheckCircle', NULL, 'menu', true, 9),
 -- 资产统计
@@ -422,11 +426,21 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 (1020702, '物资分类添加', NULL, NULL, 10207, NULL, 'material:category:add', 'operation', true, 2),
 (1020703, '物资分类编辑', NULL, NULL, 10207, NULL, 'material:category:edit', 'operation', true, 3),
 (1020704, '物资分类删除', NULL, NULL, 10207, NULL, 'material:category:delete', 'operation', true, 4),
+-- 物资品类操作
+(1021001, '物资品类列表', NULL, NULL, 10210, NULL, 'material:brand:list', 'operation', true, 1),
+(1021002, '物资品类添加', NULL, NULL, 10210, NULL, 'material:brand:add', 'operation', true, 2),
+(1021003, '物资品类编辑', NULL, NULL, 10210, NULL, 'material:brand:edit', 'operation', true, 3),
+(1021004, '物资品类删除', NULL, NULL, 10210, NULL, 'material:brand:delete', 'operation', true, 4),
 -- 物资仓库操作
 (1020801, '物资仓库列表', NULL, NULL, 10208, NULL, 'material:warehouse:list', 'operation', true, 1),
 (1020802, '物资仓库添加', NULL, NULL, 10208, NULL, 'material:warehouse:add', 'operation', true, 2),
 (1020803, '物资仓库编辑', NULL, NULL, 10208, NULL, 'material:warehouse:edit', 'operation', true, 3),
 (1020804, '物资仓库删除', NULL, NULL, 10208, NULL, 'material:warehouse:delete', 'operation', true, 4),
+-- 物资管理操作
+(1021201, '物资管理列表', NULL, NULL, 10212, NULL, 'material:list', 'operation', true, 1),
+(1021202, '物资管理添加', NULL, NULL, 10212, NULL, 'material:add', 'operation', true, 2),
+(1021203, '物资管理编辑', NULL, NULL, 10212, NULL, 'material:edit', 'operation', true, 3),
+(1021204, '物资管理删除', NULL, NULL, 10212, NULL, 'material:delete', 'operation', true, 4),
 -- 领用记录操作
 (1020901, '领用记录列表', NULL, NULL, 10209, NULL, 'material:use:list', 'operation', true, 1),
 (1020902, '领用记录添加', NULL, NULL, 10209, NULL, 'material:use:add', 'operation', true, 2),
@@ -502,6 +516,8 @@ INSERT INTO sys_role_menu (role_id, menu_id) VALUES
 (1, 10207), (1, 1020701), (1, 1020702), (1, 1020703), (1, 1020704), 
 (1, 10208), (1, 1020801), (1, 1020802), (1, 1020803), (1, 1020804), 
 (1, 10209), (1, 1020901), (1, 1020902), (1, 1020903), (1, 1020904),
+(1, 10210), (1, 1021001), (1, 1021002), (1, 1021003), (1, 1021004),
+(1, 10212), (1, 1021201), (1, 1021202), (1, 1021203), (1, 1021204),
 -- 资产统计权限
 (1, 10300), 
 (1, 10301), (1, 1030101), 
@@ -524,6 +540,165 @@ INSERT INTO sys_role_menu (role_id, menu_id) VALUES
 (1, 10703), (1, 1070301), (1, 1070302), (1, 1070303), (1, 1070304),
 (1, 10704), (1, 1070401), (1, 1070402), (1, 1070403), (1, 1070404),
 (1, 10705), (1, 1070501), (1, 1070502), (1, 1070503), (1, 1070504);
+
+-- 物资分类表
+CREATE TABLE IF NOT EXISTS `material_category` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `name` VARCHAR(255) NOT NULL COMMENT '名称',
+  `parent_id` BIGINT NOT NULL DEFAULT 0 COMMENT '父ID',
+  `path` VARCHAR(500) COMMENT '路径',
+  `level` INT NOT NULL DEFAULT 1 COMMENT '层级',
+  `remark` VARCHAR(500) COMMENT '备注',
+  `status` INT NOT NULL DEFAULT 1 COMMENT '状态',
+  `create_time` BIGINT NOT NULL COMMENT '创建时间',
+  `update_time` BIGINT NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  INDEX `idx_parent_id` (`parent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物资分类表';
+
+-- 插入物资分类示例数据
+-- 插入父节点
+INSERT INTO material_category (id, name, parent_id, path, level, remark, status, create_time, update_time) VALUES
+(1, '办公用品', 0, '1', 1, '办公用品分类', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(2, '维修耗材', 0, '2', 1, '维修耗材分类', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+
+-- 插入子节点
+-- 办公用品子节点
+INSERT INTO material_category (id, name, parent_id, path, level, remark, status, create_time, update_time) VALUES
+(3, '笔记本', 1, '1,3', 2, '各类笔记本', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(4, '打印纸', 1, '1,4', 2, 'A4打印纸等', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(5, '写字笔', 1, '1,5', 2, '签字笔、圆珠笔等', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+
+-- 维修耗材子节点
+INSERT INTO material_category (id, name, parent_id, path, level, remark, status, create_time, update_time) VALUES
+(6, '配件', 2, '2,6', 2, '各类维修配件', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+
+-- 物资品类表
+CREATE TABLE IF NOT EXISTS `material_brand` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `category_id` BIGINT NOT NULL COMMENT '物资分类ID',
+  `name` VARCHAR(255) NOT NULL COMMENT '品类名称',
+  `sn` VARCHAR(255) COMMENT '商品条码',
+  `specification` VARCHAR(255) COMMENT '规格型号',
+  `unit` VARCHAR(50) COMMENT '单位',
+  `pack_unit` VARCHAR(50) COMMENT '包装单位',
+  `pack_quantity` INT COMMENT '包装数量',
+  `pack_barcode` VARCHAR(255) COMMENT '包装条码',
+  `brand` VARCHAR(255) COMMENT '品牌',
+  `price` DECIMAL(10,2) COMMENT '价格',
+  `remark` VARCHAR(500) COMMENT '备注',
+  `status` INT NOT NULL DEFAULT 1 COMMENT '状态',
+  `create_time` BIGINT NOT NULL COMMENT '创建时间',
+  `update_time` BIGINT NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  INDEX `idx_category_id` (`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物资品类表';
+
+-- 插入物资品类示例数据
+INSERT INTO material_brand (id, category_id, name, sn, specification, unit, pack_unit, pack_quantity, pack_barcode, brand, price, remark, status, create_time, update_time) VALUES
+(1, 4, '晨光打印纸', '6921734900011', 'A4-500页', '包', '箱', 10, '6921734900028', '得力', 25.00, '得力办公用品', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(2, 5, '晨光写字笔', '6923566500012', '0.5mm', '支', '盒', 20, '6923566500029', '晨光', 2.00, '晨光文具', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(3, 6, '维修配件套装', '6921388000013', '套装', '套', '箱', 5, '6921388000020', '得力', 150.00, '维修配件', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+
+-- 物资仓库表
+CREATE TABLE IF NOT EXISTS `material_warehouse` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `name` VARCHAR(255) NOT NULL COMMENT '仓库名称',
+  `code` VARCHAR(50) NOT NULL COMMENT '仓库编码',
+  `address` VARCHAR(500) COMMENT '仓库地址',
+  `contact_person` VARCHAR(100) COMMENT '联系人',
+  `contact_phone` VARCHAR(50) COMMENT '联系电话',
+  `remark` VARCHAR(500) COMMENT '备注',
+  `status` INT NOT NULL DEFAULT 1 COMMENT '状态',
+  `create_time` BIGINT NOT NULL COMMENT '创建时间',
+  `update_time` BIGINT NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物资仓库表';
+
+-- 物资库位表
+CREATE TABLE IF NOT EXISTS `material_location` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `warehouse_id` BIGINT NOT NULL COMMENT '仓库ID',
+  `name` VARCHAR(255) NOT NULL COMMENT '库位名称',
+  `code` VARCHAR(50) NOT NULL COMMENT '库位编码',
+  `remark` VARCHAR(500) COMMENT '备注',
+  `status` INT NOT NULL DEFAULT 1 COMMENT '状态',
+  `create_time` BIGINT NOT NULL COMMENT '创建时间',
+  `update_time` BIGINT NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_warehouse_code` (`warehouse_id`, `code`),
+  INDEX `idx_warehouse_id` (`warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物资库位表';
+
+-- 插入物资仓库示例数据
+INSERT INTO material_warehouse (id, name, code, address, contact_person, contact_phone, remark, status, create_time, update_time) VALUES
+(1, '主仓库', 'WH001', '北京市朝阳区建国路88号', '张三', '13800138000', '主仓库', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(2, '分仓库', 'WH002', '上海市浦东新区张江高科技园区', '李四', '13900139000', '分仓库', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+
+-- 插入物资库位示例数据
+INSERT INTO material_location (id, warehouse_id, name, code, remark, status, create_time, update_time) VALUES
+(1, 1, 'A区', 'A001', 'A区库位', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(2, 1, 'B区', 'B001', 'B区库位', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(3, 2, 'C区', 'C001', 'C区库位', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(4, 2, 'D区', 'D001', 'D区库位', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+
+-- 物资主表
+CREATE TABLE IF NOT EXISTS `material` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `name` VARCHAR(255) NOT NULL COMMENT '物资名称',
+  `code` VARCHAR(50) NOT NULL COMMENT '物资编码',
+  `category_id` BIGINT NOT NULL COMMENT '物资分类ID',
+  `brand_id` BIGINT NOT NULL COMMENT '物资品类ID',
+  `total_quantity` DECIMAL(18,2) NOT NULL DEFAULT 0 COMMENT '总数量',
+  `status` INT NOT NULL DEFAULT 1 COMMENT '状态',
+  `remark` VARCHAR(500) COMMENT '备注',
+  `create_time` BIGINT NOT NULL COMMENT '创建时间',
+  `update_time` BIGINT NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_code` (`code`),
+  INDEX `idx_category_id` (`category_id`),
+  INDEX `idx_brand_id` (`brand_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物资主表';
+
+-- 物资明细表
+CREATE TABLE IF NOT EXISTS `material_detail` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `material_id` BIGINT NOT NULL COMMENT '物资ID',
+  `brand_id` BIGINT NOT NULL COMMENT '物资品类ID',
+  `warehouse_id` BIGINT NOT NULL COMMENT '仓库ID',
+  `location_id` BIGINT NOT NULL COMMENT '库位ID',
+  `quantity` DECIMAL(18,2) NOT NULL DEFAULT 0 COMMENT '数量',
+  `unit` VARCHAR(50) NOT NULL COMMENT '单位',
+  `batch_no` VARCHAR(100) COMMENT '批次号',
+  `expire_date` BIGINT COMMENT '过期日期',
+  `status` INT NOT NULL DEFAULT 1 COMMENT '状态',
+  `remark` VARCHAR(500) COMMENT '备注',
+  `create_time` BIGINT NOT NULL COMMENT '创建时间',
+  `update_time` BIGINT NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  INDEX `idx_material_id` (`material_id`),
+  INDEX `idx_brand_id` (`brand_id`),
+  INDEX `idx_warehouse_id` (`warehouse_id`),
+  INDEX `idx_location_id` (`location_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物资明细表';
+
+-- 插入物资主表示例数据
+INSERT INTO material (id, name, code, category_id, brand_id, total_quantity, status, remark, create_time, update_time) VALUES
+(1, '打印纸', 'MAT001', 4, 1, 100.00, 1, '打印纸物资', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(2, '写字笔', 'MAT002', 5, 2, 200.00, 1, '写字笔物资', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(3, '维修配件', 'MAT003', 6, 3, 50.00, 1, '维修配件物资', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+
+-- 插入物资明细示例数据
+INSERT INTO material_detail (id, material_id, brand_id, warehouse_id, location_id, quantity, unit, batch_no, expire_date, status, remark, create_time, update_time) VALUES
+(1, 1, 1, 1, 1, 50.00, '包', 'BATCH001', NULL, 1, '主仓库A区打印纸', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(2, 1, 1, 1, 2, 30.00, '包', 'BATCH002', NULL, 1, '主仓库B区打印纸', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(3, 1, 1, 2, 3, 20.00, '包', 'BATCH003', NULL, 1, '分仓库C区打印纸', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(4, 2, 2, 1, 1, 100.00, '支', 'BATCH004', NULL, 1, '主仓库A区写字笔', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(5, 2, 2, 1, 2, 60.00, '支', 'BATCH005', NULL, 1, '主仓库B区写字笔', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(6, 2, 2, 2, 3, 40.00, '支', 'BATCH006', NULL, 1, '分仓库C区写字笔', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(7, 3, 3, 1, 1, 30.00, '套', 'BATCH007', NULL, 1, '主仓库A区维修配件', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(8, 3, 3, 2, 3, 20.00, '套', 'BATCH008', NULL, 1, '分仓库C区维修配件', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
 -- 插入系统配置
 INSERT INTO sys_config (config_key, value, description, create_time, update_time) VALUES
