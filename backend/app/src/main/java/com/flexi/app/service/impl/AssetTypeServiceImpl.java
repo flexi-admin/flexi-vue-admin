@@ -30,6 +30,7 @@ public class AssetTypeServiceImpl extends ServiceImpl<AssetTypeMapper, AssetType
         AssetTypeTree tree = new AssetTypeTree();
         tree.setId(type.getId());
         tree.setName(type.getName());
+        tree.setCode(type.getCode());
         tree.setParentId(type.getParentId());
         tree.setPath(type.getPath());
         tree.setLevel(type.getLevel());

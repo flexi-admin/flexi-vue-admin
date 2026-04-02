@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 public interface AssetService extends IService<Asset> {
     List<AssetDTO> listWithDetails();
     IPage<AssetDTO> listWithDetails(Integer page, Integer size);
-    IPage<AssetDTO> listWithDetails(Integer page, Integer size, String name, String status, Long typeId);
+    IPage<AssetDTO> listWithDetails(Integer page, Integer size, String name, String status, String typeCode);
     IPage<AssetDTO> listMyAssets(Integer page, Integer size, Long userId);
     List<Asset> listAssetsWithoutLabelCode();
     void updateLabelCode(java.util.Map<String, String> codeLabelMap);

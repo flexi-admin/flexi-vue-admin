@@ -11,6 +11,7 @@ public class AssetType {
     @TableId(type = IdType.AUTO)
     private Long id;
     private String name;
+    private String code;
     private Long parentId;
     private String path;
     private Integer level;

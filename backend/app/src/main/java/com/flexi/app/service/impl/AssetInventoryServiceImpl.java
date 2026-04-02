@@ -3,9 +3,7 @@ package com.flexi.app.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.flexi.app.entity.Asset;
-import com.flexi.app.entity.AssetInventory;
-import com.flexi.app.entity.AssetInventoryDetail;
+import com.flexi.app.entity.*;
 import com.flexi.app.mapper.AssetInventoryMapper;
 import com.flexi.app.service.*;
 import io.github.zmxckj.flexiadmin.entity.User;
@@ -13,7 +11,6 @@ import io.github.zmxckj.flexiadmin.service.DeptService;
 import io.github.zmxckj.flexiadmin.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.flexi.app.entity.AssetInventoryDetailDTO;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,11 +61,10 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
             assetsToSync = assetService.list(assetQuery);
         } else if ("category".equals(inventoryType) && !inventoryCategories.isEmpty()) {
             // 按分类盘点，获取指定分类的资产
-            List<Long> categoryIds = Arrays.stream(inventoryCategories.split(","))
-                    .map(Long::parseLong)
+            List<String> categoryCodes = Arrays.stream(inventoryCategories.split(","))
                     .collect(Collectors.toList());
             QueryWrapper<Asset> assetQuery = new QueryWrapper<>();
-            assetQuery.in("type_id", categoryIds);
+            assetQuery.in("type_code", categoryCodes);
             assetsToSync = assetService.list(assetQuery);
         }
 
@@ -141,8 +137,11 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
                     dto.setSn(asset.getSn());
                     
                     // 获取资产类型名称
-                    if (asset.getTypeId() != null) {
-                        dto.setAssetType(assetTypeService.getById(asset.getTypeId()).getName());
+                    if (asset.getTypeCode() != null) {
+                        AssetType type = assetTypeService.getOne(new QueryWrapper<AssetType>().eq("code", asset.getTypeCode()));
+                        if (type != null) {
+                            dto.setAssetType(type.getName());
+                        }
                     }
                     
                     // 获取资产位置名称
@@ -171,7 +170,10 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
             return dto;
         }).collect(Collectors.toList());
         
-        // 3. 构建返回数据
+        // 3. 获取所有资产位置数据
+        List<AssetLocationTree> locations = assetLocationService.tree();
+        
+        // 4. 构建返回数据
         result.put("id", inventory.getId());
         result.put("inventoryCode", inventory.getInventoryCode());
         result.put("inventoryName", inventory.getInventoryName());
@@ -180,6 +182,7 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
         result.put("endTime", inventory.getEndTime());
         result.put("status", inventory.getStatus());
         result.put("details", details);
+        result.put("locations", locations);
         
         return result;
     }

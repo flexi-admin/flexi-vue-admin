@@ -12,7 +12,7 @@ public class Asset {
     private Long id;
     private String name;
     private String code;
-    private Long typeId;
+    private String typeCode;
     private Long locationId;
     private String specification;
     private String model;

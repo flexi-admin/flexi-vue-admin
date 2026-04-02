@@ -1,5 +1,6 @@
 package com.flexi.app.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -92,7 +93,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     }
 
     @Override
-    public IPage<AssetDTO> listWithDetails(Integer page, Integer size, String name, String status, Long typeId) {
+    public IPage<AssetDTO> listWithDetails(Integer page, Integer size, String name, String status, String typeCode) {
         // 创建分页对象
         Page<Asset> pageInfo = new Page<>(page, size);
         
@@ -106,8 +107,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (status != null && !status.isEmpty()) {
             queryWrapper.eq("status", status);
         }
-        if (typeId != null) {
-            queryWrapper.eq("type_id", typeId);
+        if (typeCode != null && !typeCode.isEmpty()) {
+            queryWrapper.eq("type_code", typeCode);
         }
         
         // 按ID降序排序
@@ -189,8 +190,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         BeanUtils.copyProperties(asset, dto);
         
         // 填充资产类型名称
-        if (asset.getTypeId() != null) {
-            AssetType type = assetTypeService.getById(asset.getTypeId());
+        if (asset.getTypeCode() != null) {
+            AssetType type = assetTypeService.getOne(new QueryWrapper<AssetType>().eq("code", asset.getTypeCode()));
             if (type != null) {
                 dto.setTypeName(type.getName());
             }
@@ -321,7 +322,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         // 2. 统计每种类型的资产数量
         for (AssetType type : assetTypes) {
             com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> queryWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
-            queryWrapper.eq("type_id", type.getId());
+            queryWrapper.eq("type_code", type.getCode());
             long count = count(queryWrapper);
             
             // 构建分布数据
@@ -369,15 +370,15 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         // 1. 获取所有资产状态字典
         List<Dict> statusDicts = dictService.listByType("asset_status");
         
-        // 2. 根据类型获取资产类型ID
-        Long typeId = null;
+        // 2. 根据类型获取资产类型编码
+        String typeCode = null;
         if (!"all".equals(type)) {
-            // 这里需要根据类型名称获取类型ID，假设类型名称与前端传递的type参数对应
+            // 这里需要根据类型名称获取类型编码，假设类型名称与前端传递的type参数对应
             // 实际项目中可能需要调整逻辑
             List<AssetType> assetTypes = assetTypeService.list();
             for (AssetType assetType : assetTypes) {
                 if (assetType.getName().contains(type)) {
-                    typeId = assetType.getId();
+                    typeCode = assetType.getCode();
                     break;
                 }
             }
@@ -390,8 +391,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             
             com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> queryWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
             queryWrapper.eq("status", statusCode);
-            if (typeId != null) {
-                queryWrapper.eq("type_id", typeId);
+            if (typeCode != null) {
+                queryWrapper.eq("type_code", typeCode);
             }
             long count = count(queryWrapper);
             
@@ -417,12 +418,12 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         for (AssetType type : assetTypes) {
             // 统计该类型的资产总数
             com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> totalQuery = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
-            totalQuery.eq("type_id", type.getId());
+            totalQuery.eq("type_code", type.getCode());
             long totalCount = count(totalQuery);
             
             // 统计该类型的闲置资产数量
             com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Asset> idleQuery = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
-            idleQuery.eq("type_id", type.getId());
+            idleQuery.eq("type_code", type.getCode());
             idleQuery.eq("status", "idle"); // 假设闲置状态的code是"idle"
             long idleCount = count(idleQuery);
             

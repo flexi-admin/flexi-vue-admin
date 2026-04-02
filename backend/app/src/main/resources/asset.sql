@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS `asset_type` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `name` VARCHAR(255) NOT NULL COMMENT '名称',
+  `code` VARCHAR(50) NOT NULL COMMENT '编码',
   `parent_id` BIGINT NOT NULL DEFAULT 0 COMMENT '父ID',
   `path` VARCHAR(500) COMMENT '路径',
   `level` INT NOT NULL DEFAULT 1 COMMENT '层级',
@@ -10,40 +11,41 @@ CREATE TABLE IF NOT EXISTS `asset_type` (
   `create_time` BIGINT NOT NULL COMMENT '创建时间',
   `update_time` BIGINT NOT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_code` (`code`),
   INDEX `idx_parent_id` (`parent_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资产类型表';
 
 -- 插入资产类型示例数据
 -- 插入父节点
-INSERT INTO asset_type (id, name, parent_id, path, level, remark, status, create_time, update_time) VALUES
-(1, '办公家具', 0, '1', 1, '办公家具分类', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-(2, '电子设备', 0, '2', 1, '电子设备分类', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-(3, '家电设备', 0, '3', 1, '家电设备分类', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-(4, '数码产品', 0, '4', 1, '数码产品分类', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+INSERT INTO asset_type (id, name, code, parent_id, path, level, remark, status, create_time, update_time) VALUES
+(1, '办公家具', 'BGJJ', 0, '1', 1, '办公家具分类', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(2, '电子设备', 'DZSB', 0, '2', 1, '电子设备分类', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(3, '家电设备', 'JDSB', 0, '3', 1, '家电设备分类', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(4, '数码产品', 'SMPC', 0, '4', 1, '数码产品分类', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
 -- 插入子节点
 -- 办公家具子节点
-INSERT INTO asset_type (id, name, parent_id, path, level, remark, status, create_time, update_time) VALUES
-(5, '办公桌', 1, '1,5', 2, '办公桌椅', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-(6, '办公椅', 1, '1,6', 2, '办公座椅', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+INSERT INTO asset_type (id, name, code, parent_id, path, level, remark, status, create_time, update_time) VALUES
+(5, '办公桌', 'BGZ', 1, '1,5', 2, '办公桌椅', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(6, '办公椅', 'BGY', 1, '1,6', 2, '办公座椅', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
 -- 电子设备子节点
-INSERT INTO asset_type (id, name, parent_id, path, level, remark, status, create_time, update_time) VALUES
-(7, '笔记本电脑', 2, '2,7', 2, '笔记本电脑', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-(8, '打印机', 2, '2,8', 2, '打印机', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-(9, '台式电脑', 2, '2,9', 2, '台式电脑', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+INSERT INTO asset_type (id, name, code, parent_id, path, level, remark, status, create_time, update_time) VALUES
+(7, '笔记本电脑', 'BJB', 2, '2,7', 2, '笔记本电脑', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(8, '打印机', 'DYJ', 2, '2,8', 2, '打印机', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(9, '台式电脑', 'TSB', 2, '2,9', 2, '台式电脑', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
 -- 家电设备子节点
-INSERT INTO asset_type (id, name, parent_id, path, level, remark, status, create_time, update_time) VALUES
-(10, '冰箱', 3, '3,10', 2, '冰箱', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-(11, '空调', 3, '3,11', 2, '空调', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-(12, '微波炉', 3, '3,12', 2, '微波炉', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+INSERT INTO asset_type (id, name, code, parent_id, path, level, remark, status, create_time, update_time) VALUES
+(10, '冰箱', 'BX', 3, '3,10', 2, '冰箱', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(11, '空调', 'KT', 3, '3,11', 2, '空调', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(12, '微波炉', 'WBL', 3, '3,12', 2, '微波炉', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
 -- 数码产品子节点
-INSERT INTO asset_type (id, name, parent_id, path, level, remark, status, create_time, update_time) VALUES
-(13, '扫描器', 4, '4,13', 2, '扫描器', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-(14, '摄像机', 4, '4,14', 2, '摄像机', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-(15, '投影仪', 4, '4,15', 2, '投影仪', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+INSERT INTO asset_type (id, name, code, parent_id, path, level, remark, status, create_time, update_time) VALUES
+(13, '扫描器', 'SMQ', 4, '4,13', 2, '扫描器', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(14, '摄像机', 'SXG', 4, '4,14', 2, '摄像机', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+(15, '投影仪', 'TYJ', 4, '4,15', 2, '投影仪', 1, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
 -- 资产位置表
 CREATE TABLE IF NOT EXISTS `asset_location` (
@@ -70,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `asset` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `name` VARCHAR(255) NOT NULL COMMENT '名称',
   `code` VARCHAR(255) NOT NULL COMMENT '编码',
-  `type_id` BIGINT NOT NULL COMMENT '类型ID',
+  `type_code` VARCHAR(50) NOT NULL COMMENT '类型编码',
   `location_id` BIGINT NOT NULL COMMENT '位置ID',
   `specification` VARCHAR(500) COMMENT '规格',
   `model` VARCHAR(255) COMMENT '型号',
@@ -98,7 +100,7 @@ CREATE TABLE IF NOT EXISTS `asset` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_code` (`code`),
   UNIQUE KEY `uk_label_code` (`label_code`),
-  INDEX `idx_type_id` (`type_id`),
+  INDEX `idx_type_code` (`type_code`),
   INDEX `idx_location_id` (`location_id`),
   INDEX `idx_admin_user_id` (`admin_user_id`),
   INDEX `idx_user_id` (`user_id`),

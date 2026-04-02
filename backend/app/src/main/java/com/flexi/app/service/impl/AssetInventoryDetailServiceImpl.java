@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.flexi.app.entity.Asset;
 import com.flexi.app.entity.AssetInventoryDetail;
 import com.flexi.app.entity.AssetInventoryDetailDTO;
+import com.flexi.app.entity.AssetType;
 import com.flexi.app.mapper.AssetInventoryDetailMapper;
 import com.flexi.app.service.AssetInventoryDetailService;
 import com.flexi.app.service.AssetService;
@@ -72,8 +73,11 @@ public class AssetInventoryDetailServiceImpl extends ServiceImpl<AssetInventoryD
                     dto.setSn(asset.getSn());
                     
                     // 获取资产类型名称
-                    if (asset.getTypeId() != null) {
-                        dto.setAssetType(assetTypeService.getById(asset.getTypeId()).getName());
+                    if (asset.getTypeCode() != null) {
+                        AssetType type = assetTypeService.getOne(new QueryWrapper<AssetType>().eq("code", asset.getTypeCode()));
+                        if (type != null) {
+                            dto.setAssetType(type.getName());
+                        }
                     }
                     
                     // 获取资产位置名称

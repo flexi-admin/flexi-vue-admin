@@ -28,8 +28,8 @@ public class AssetController {
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) Long typeId) {
-        return R.success(assetService.listWithDetails(page, size, name, status, typeId));
+            @RequestParam(required = false) String typeCode) {
+        return R.success(assetService.listWithDetails(page, size, name, status, typeCode));
     }
 
     @RequirePermission("asset:my:list")

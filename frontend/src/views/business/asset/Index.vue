@@ -107,7 +107,7 @@
           <el-col :span="8">
             <el-form-item label="资产类型">
               <el-cascader
-                v-model="form.typeId"
+                v-model="form.typeCode"
                 :options="assetTypeTree"
                 :props="assetTypeProps"
                 placeholder="请选择资产类型"
@@ -321,7 +321,7 @@ const assetList = ref([])
 const assetTypes = ref([])
 const assetTypeTree = ref([])
 const assetTypeProps = {
-  value: 'id',
+  value: 'code',
   label: 'name',
   children: 'children',
   checkStrictly: true,
@@ -381,7 +381,7 @@ const form = ref({
   id: '',
   name: '',
   code: '',
-  typeId: null,
+  typeCode: null,
   locationId: null,
   specification: '',
   model: '',
@@ -641,7 +641,7 @@ const openAddDialog = async () => {
   form.value = {
     id: '',
     name: '',
-    typeId: null,
+    typeCode: null,
     locationId: null,
     specification: '',
     model: '',
@@ -689,7 +689,11 @@ const openEditDialog = async (row) => {
   }
   
   const formData = { ...row }
-  // 直接使用原始的typeId和locationId值，因为emitPath设置为false
+  // 确保formData中包含typeCode而不是typeId
+  if (formData.typeId) {
+    formData.typeCode = formData.typeId
+    delete formData.typeId
+  }
   form.value = formData
   dialogVisible.value = true
 }
@@ -722,9 +726,11 @@ const copyAsset = async (row) => {
   formData.id = ''
   formData.code = ''
   formData.labelCode = ''
-  // 由于el-cascader的emitPath设置为false，直接使用数字值
-  formData.typeId = row.typeId || ''
+  // 由于el-cascader的emitPath设置为false，直接使用值
+  formData.typeCode = row.typeCode || row.typeId || ''
   formData.locationId = row.locationId || ''
+  // 删除可能存在的typeId字段
+  delete formData.typeId
   form.value = formData
   dialogVisible.value = true
 }
@@ -732,15 +738,13 @@ const copyAsset = async (row) => {
 // 提交表单
 const submitForm = async () => {
   try {
-    // 处理表单数据，将typeId和locationId从数组转换为单个值
+    // 处理表单数据，将typeCode和locationId从数组转换为单个值
     const formData = { ...form.value }
-    // 处理typeId：如果是数组且有值，取第一个元素；如果是数字，直接使用；否则设置为null
-    if (Array.isArray(formData.typeId) && formData.typeId.length > 0) {
-      formData.typeId = formData.typeId[0]
-    } else if (typeof formData.typeId === 'number') {
-      // 已经是数字，直接使用
-    } else {
-      formData.typeId = null
+    // 处理typeCode：如果是数组且有值，取第一个元素；否则设置为null
+    if (Array.isArray(formData.typeCode) && formData.typeCode.length > 0) {
+      formData.typeCode = formData.typeCode[0]
+    } else if (!formData.typeCode) {
+      formData.typeCode = null
     }
     // 处理locationId：如果是数组且有值，取第一个元素；如果是数字，直接使用；否则设置为null
     if (Array.isArray(formData.locationId) && formData.locationId.length > 0) {
