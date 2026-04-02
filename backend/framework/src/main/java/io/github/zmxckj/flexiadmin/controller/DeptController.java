@@ -54,6 +54,11 @@ public class DeptController {
     @RequirePermission("dept:add")
     @PostMapping
     public R<?> save(@RequestBody Dept dept) {
+        // 设置租户ID
+        Long tenantId = io.github.zmxckj.flexiadmin.security.SecurityUtils.getCurrentTenantId();
+        if (tenantId != null) {
+            dept.setTenantId(tenantId);
+        }
         deptService.save(dept);
         return R.success();
     }
@@ -64,6 +69,11 @@ public class DeptController {
     @RequirePermission("dept:update")
     @PutMapping
     public R<?> update(@RequestBody Dept dept) {
+        // 设置租户ID
+        Long tenantId = io.github.zmxckj.flexiadmin.security.SecurityUtils.getCurrentTenantId();
+        if (tenantId != null) {
+            dept.setTenantId(tenantId);
+        }
         deptService.updateById(dept);
         return R.success();
     }

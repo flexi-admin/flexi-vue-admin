@@ -23,12 +23,6 @@ public class SecurityUtils {
             if (principal instanceof CustomUserDetails) {
                 // 直接从CustomUserDetails中获取用户ID
                 return ((CustomUserDetails) principal).getId();
-            } else if (principal instanceof String) {
-                // 兼容旧的实现，从数据库中获取
-                String username = (String) principal;
-                if (userService != null) {
-                    return userService.findByUsername(username).getId();
-                }
             }
         }
         return null;
@@ -41,9 +35,18 @@ public class SecurityUtils {
             if (principal instanceof CustomUserDetails) {
                 // 从CustomUserDetails中获取用户名
                 return ((CustomUserDetails) principal).getUsername();
-            } else if (principal instanceof String) {
-                // 兼容旧的实现
-                return (String) principal;
+            }
+        }
+        return null;
+    }
+    
+    public static Long getCurrentTenantId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof CustomUserDetails) {
+                // 从CustomUserDetails中获取租户ID
+                return ((CustomUserDetails) principal).getTenantId();
             }
         }
         return null;

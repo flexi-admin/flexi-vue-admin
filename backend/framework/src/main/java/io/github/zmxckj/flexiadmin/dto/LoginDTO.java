@@ -3,6 +3,7 @@ package io.github.zmxckj.flexiadmin.dto;
 public class LoginDTO {
     private String username;
     private String password;
+    private Long tenantId;
 
     public String getUsername() {
         return username;
@@ -18,5 +19,13 @@ public class LoginDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 }

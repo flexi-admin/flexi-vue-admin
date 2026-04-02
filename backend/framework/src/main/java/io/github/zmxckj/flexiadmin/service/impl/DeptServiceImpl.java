@@ -1,8 +1,11 @@
 package io.github.zmxckj.flexiadmin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.github.zmxckj.flexiadmin.entity.Dept;
 import io.github.zmxckj.flexiadmin.mapper.DeptMapper;
+import io.github.zmxckj.flexiadmin.security.SecurityUtils;
 import io.github.zmxckj.flexiadmin.service.DeptService;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +28,27 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     public String getDeptNameById(Long deptId) {
         Dept dept = getById(deptId);
         return dept != null ? dept.getName() : "";
+    }
+
+    @Override
+    public List<Dept> list() {
+        QueryWrapper<Dept> queryWrapper = new QueryWrapper<>();
+        // 添加租户ID查询条件
+        Long tenantId = SecurityUtils.getCurrentTenantId();
+        if (tenantId != null) {
+            queryWrapper.eq("tenant_id", tenantId);
+        }
+        return super.list(queryWrapper);
+    }
+
+    public Page<Dept> page(Page<Dept> page) {
+        QueryWrapper<Dept> queryWrapper = new QueryWrapper<>();
+        // 添加租户ID查询条件
+        Long tenantId = SecurityUtils.getCurrentTenantId();
+        if (tenantId != null) {
+            queryWrapper.eq("tenant_id", tenantId);
+        }
+        return super.page(page, queryWrapper);
     }
 
     @Override

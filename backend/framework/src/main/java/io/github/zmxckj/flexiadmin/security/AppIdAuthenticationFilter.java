@@ -1,6 +1,7 @@
 package io.github.zmxckj.flexiadmin.security;
 
 import io.github.zmxckj.flexiadmin.entity.Appid;
+import io.github.zmxckj.flexiadmin.security.CustomUserDetails;
 import io.github.zmxckj.flexiadmin.service.AppidService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -46,25 +47,42 @@ public class AppIdAuthenticationFilter extends OncePerRequestFilter {
                 // 验证签名
                 if (validateSignature(appId, signature, timestamp, nonce, request)) {
                     // 构建认证信息
-                    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-                    authorities.add(new SimpleGrantedAuthority("ROLE_APP"));
-                    
-                    // 获取应用权限
-                    Appid appid = appidService.findByAppId(appId);
-                    if (appid != null && appid.getPermissions() != null) {
-                        String[] permissions = appid.getPermissions().split(",");
-                        for (String permission : permissions) {
-                            if (!permission.trim().isEmpty()) {
-                                authorities.add(new SimpleGrantedAuthority(permission.trim()));
-                            }
+                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                List<String> authorityStrings = new ArrayList<>();
+                List<String> roles = new ArrayList<>();
+                
+                // 添加应用角色
+                String appRole = "ROLE_APP";
+                authorities.add(new SimpleGrantedAuthority(appRole));
+                authorityStrings.add(appRole);
+                
+                // 获取应用权限
+                Appid appid = appidService.findByAppId(appId);
+                if (appid != null && appid.getPermissions() != null) {
+                    String[] permissions = appid.getPermissions().split(",");
+                    for (String permission : permissions) {
+                        if (!permission.trim().isEmpty()) {
+                            authorities.add(new SimpleGrantedAuthority(permission.trim()));
+                            authorityStrings.add(permission.trim());
                         }
                     }
-                    
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            appId, null, authorities
-                    );
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+                
+                // 创建 CustomUserDetails
+                CustomUserDetails userDetails = new CustomUserDetails(
+                        0L, // 应用ID，使用0作为默认值
+                        appId, // 使用appId作为username
+                        0L, // 租户ID，使用0作为默认值
+                        authorityStrings,
+                        roles
+                );
+                
+                // 使用 CustomUserDetails 作为 principal 创建认证 token
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, authorities
+                );
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (Exception e) {
                 logger.info("AppId authentication failed: " + e.getMessage());

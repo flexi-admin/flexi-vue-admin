@@ -23,6 +23,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public User findByUsernameAndTenantId(String username, Long tenantId) {
+        return baseMapper.selectOne(new QueryWrapper<User>().eq("username", username).eq("tenant_id", tenantId));
+    }
+
+    @Override
     public boolean save(User user) {
         boolean result = super.save(user);
         if (result) {
@@ -67,6 +72,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         if (keyword != null && !keyword.isEmpty()) {
             queryWrapper.like("username", keyword);
+        }
+        // 添加租户ID查询条件
+        Long tenantId = io.github.zmxckj.flexiadmin.security.SecurityUtils.getCurrentTenantId();
+        if (tenantId != null) {
+            queryWrapper.eq("tenant_id", tenantId);
         }
         return super.page(page, queryWrapper);
     }

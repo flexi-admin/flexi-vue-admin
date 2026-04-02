@@ -1,17 +1,16 @@
 package io.github.zmxckj.flexiadmin.controller;
 
-import io.github.zmxckj.flexiadmin.entity.Menu;
-import io.github.zmxckj.flexiadmin.entity.User;
-import io.github.zmxckj.flexiadmin.entity.LoginLog;
+import io.github.zmxckj.flexiadmin.entity.*;
 import io.github.zmxckj.flexiadmin.common.R;
 import io.github.zmxckj.flexiadmin.dto.LoginDTO;
+import io.github.zmxckj.flexiadmin.dto.UserInfoDTO;
 import io.github.zmxckj.flexiadmin.service.MenuService;
 import io.github.zmxckj.flexiadmin.service.UserService;
 import io.github.zmxckj.flexiadmin.service.LoginLogService;
 import io.github.zmxckj.flexiadmin.service.UserRoleService;
 import io.github.zmxckj.flexiadmin.service.RoleService;
-import io.github.zmxckj.flexiadmin.entity.UserRole;
-import io.github.zmxckj.flexiadmin.entity.Role;
+import io.github.zmxckj.flexiadmin.service.TenantService;
+import io.github.zmxckj.flexiadmin.service.ConfigService;
 import io.github.zmxckj.flexiadmin.utils.JwtUtils;
 import io.github.zmxckj.flexiadmin.utils.RedisUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,11 +40,13 @@ public class AuthController {
     private final RedisUtils redisUtils;
     private final UserRoleService userRoleService;
     private final RoleService roleService;
+    private final TenantService tenantService;
+    private final ConfigService configService;
 
     @Value("${flexi.jwt.expiration}")
     private long expiration;
 
-    public AuthController(UserService userService, MenuService menuService, LoginLogService loginLogService, JwtUtils jwtUtils, PasswordEncoder passwordEncoder, RedisUtils redisUtils, UserRoleService userRoleService, RoleService roleService) {
+    public AuthController(UserService userService, MenuService menuService, LoginLogService loginLogService, JwtUtils jwtUtils, PasswordEncoder passwordEncoder, RedisUtils redisUtils, UserRoleService userRoleService, RoleService roleService, TenantService tenantService, ConfigService configService) {
         this.userService = userService;
         this.menuService = menuService;
         this.loginLogService = loginLogService;
@@ -54,15 +55,39 @@ public class AuthController {
         this.redisUtils = redisUtils;
         this.userRoleService = userRoleService;
         this.roleService = roleService;
+        this.tenantService = tenantService;
+        this.configService = configService;
+    }
+
+    // 获取系统配置值
+    private String getConfigValue(String key, String defaultValue) {
+        try {
+            Config config = configService.getOne(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Config>().eq("config_key", key));
+            return config != null ? config.getValue() : defaultValue;
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     @PostMapping("/login")
     public R<Map<String, Object>> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
         String username = loginDTO.getUsername();
         String password = loginDTO.getPassword();
+        Long tenantId = loginDTO.getTenantId();
         String ip = getClientIp(request);
 
-        User user = userService.findByUsername(username);
+        // 检查是否启用多租户
+        boolean multiTenantEnabled = Boolean.parseBoolean(getConfigValue("system.multi_tenant_enabled", "false"));
+
+        User user;
+        if (multiTenantEnabled) {
+            // 启用多租户，使用租户ID查询
+            user = userService.findByUsernameAndTenantId(username, tenantId);
+        } else {
+            // 不启用多租户，使用原方法查询
+            user = userService.findByUsername(username);
+        }
+
         if (user == null) {
             // 记录登录失败日志
             recordLoginLog(username, ip, false, "用户名或密码错误");
@@ -78,13 +103,14 @@ public class AuthController {
         String token = jwtUtils.generateToken(username);
         
         // 构建不包含敏感信息的用户信息
-        Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("id", user.getId());
-        userInfo.put("username", user.getUsername());
-        userInfo.put("nickname", user.getNickname());
-        userInfo.put("status", user.getStatus());
-        userInfo.put("createTime", user.getCreateTime());
-        userInfo.put("updateTime", user.getUpdateTime());
+        UserInfoDTO userInfo = new UserInfoDTO();
+        userInfo.setId(user.getId());
+        userInfo.setUsername(user.getUsername());
+        userInfo.setNickname(user.getNickname());
+        userInfo.setTenantId(user.getTenantId());
+        userInfo.setStatus(user.getStatus());
+        userInfo.setCreateTime(user.getCreateTime());
+        userInfo.setUpdateTime(user.getUpdateTime());
         
         // 获取用户操作权限并添加到用户信息中
         List<Menu> operations = menuService.getOperationsByUserId(user.getId());
@@ -94,7 +120,7 @@ public class AuthController {
                 operationCodes.add(operation.getCode());
             }
         }
-        userInfo.put("permissions", operationCodes);
+        userInfo.setPermissions(operationCodes);
         
         // 获取用户角色列表并添加到用户信息中
         List<String> roles = new ArrayList<>();
@@ -105,7 +131,7 @@ public class AuthController {
                 roles.add(role.getName());
             }
         }
-        userInfo.put("roles", roles);
+        userInfo.setRoles(roles);
         
         // 缓存用户信息（包含权限）到 Redis
         redisUtils.cacheUserInfo(username, userInfo, expiration / 1000);
@@ -188,13 +214,14 @@ public class AuthController {
         }
 
         // 构建不包含敏感信息的用户信息
-        Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("id", user.getId());
-        userInfo.put("username", user.getUsername());
-        userInfo.put("nickname", user.getNickname());
-        userInfo.put("status", user.getStatus());
-        userInfo.put("createTime", user.getCreateTime());
-        userInfo.put("updateTime", user.getUpdateTime());
+        UserInfoDTO userInfo = new UserInfoDTO();
+        userInfo.setId(user.getId());
+        userInfo.setUsername(user.getUsername());
+        userInfo.setNickname(user.getNickname());
+        userInfo.setTenantId(user.getTenantId());
+        userInfo.setStatus(user.getStatus());
+        userInfo.setCreateTime(user.getCreateTime());
+        userInfo.setUpdateTime(user.getUpdateTime());
         
         // 获取用户操作权限并添加到用户信息中
         List<Menu> operations = menuService.getOperationsByUserId(user.getId());
@@ -204,7 +231,7 @@ public class AuthController {
                 operationCodes.add(operation.getCode());
             }
         }
-        userInfo.put("permissions", operationCodes);
+        userInfo.setPermissions(operationCodes);
         
         // 获取用户角色列表并添加到用户信息中
         List<String> roles = new ArrayList<>();
@@ -215,10 +242,7 @@ public class AuthController {
                 roles.add(role.getName());
             }
         }
-        userInfo.put("roles", roles);
-
-        // 缓存用户信息到 Redis
-        redisUtils.cacheUserInfo(username, userInfo, expiration / 1000);
+        userInfo.setRoles(roles);
 
         Map<String, Object> response = new HashMap<>();
         response.put("user", userInfo);
@@ -268,5 +292,24 @@ public class AuthController {
         }
     }
     
+    /**
+     * 获取所有租户列表
+     */
+    @GetMapping("/tenants")
+    public R<List<Tenant>> getTenants() {
+        List<Tenant> tenants = tenantService.list();
+        return R.success(tenants);
+    }
+    
+    /**
+     * 获取系统配置
+     */
+    @GetMapping("/config")
+    public R<Map<String, String>> getConfig() {
+        Map<String, String> config = new HashMap<>();
+        // 检查是否启用多租户
+        config.put("multiTenantEnabled", getConfigValue("system.multi_tenant_enabled", "false"));
+        return R.success(config);
+    }
 
 }

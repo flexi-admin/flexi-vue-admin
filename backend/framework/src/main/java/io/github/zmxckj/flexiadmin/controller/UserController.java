@@ -51,6 +51,7 @@ public class UserController {
             userMap.put("id", user.getId());
             userMap.put("username", user.getUsername());
             userMap.put("nickname", user.getNickname());
+            userMap.put("tenantId", user.getTenantId());
             userMap.put("status", user.getStatus());
             userMap.put("createTime", user.getCreateTime());
             userMap.put("updateTime", user.getUpdateTime());

@@ -7,6 +7,16 @@
         </div>
       </template>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
+        <el-form-item v-if="multiTenantEnabled" label="租户" prop="tenantId">
+          <el-select v-model="form.tenantId" placeholder="请选择租户" style="width: 100%">
+            <el-option
+              v-for="tenant in tenants"
+              :key="tenant.id"
+              :label="tenant.name"
+              :value="tenant.id"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="用户名" prop="username">
           <el-input v-model="form.username" placeholder="请输入用户名" />
         </el-form-item>
@@ -22,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { useConfigStore } from '../stores/config'
@@ -33,19 +43,49 @@ const loading = ref(false)
 const router = useRouter()
 const userStore = useUserStore()
 const configStore = useConfigStore()
+const tenants = ref<any[]>([])
+const multiTenantEnabled = ref(false)
 
 const form = reactive({
   username: 'admin',
-  password: '123456'
+  password: '123456',
+  tenantId: localStorage.getItem('tenantId') ? parseInt(localStorage.getItem('tenantId') || '') : null
 })
 
-const rules = {
+const rules = reactive({
+  tenantId: [
+    { required: true, message: '请选择租户', trigger: 'blur' }
+  ],
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' }
   ]
+})
+
+// 获取系统配置
+const getConfig = async () => {
+  try {
+    const response = await api.get('/auth/config')
+    multiTenantEnabled.value = response.multiTenantEnabled === 'true'
+    // 根据是否启用多租户调整验证规则
+    if (!multiTenantEnabled.value) {
+      delete rules.tenantId
+    }
+  } catch (error) {
+    console.error('获取系统配置失败:', error)
+  }
+}
+
+// 获取租户列表
+const getTenants = async () => {
+  try {
+    const response = await api.get('/auth/tenants')
+    tenants.value = response
+  } catch (error) {
+    console.error('获取租户列表失败:', error)
+  }
 }
 
 const handleLogin = async () => {
@@ -57,6 +97,10 @@ const handleLogin = async () => {
         // 1. 调用登录接口获取 token
         const loginData = await api.post('/auth/login', form)
         userStore.setToken(loginData.token)
+        // 存储租户ID到本地存储
+        if (multiTenantEnabled.value && form.tenantId) {
+          localStorage.setItem('tenantId', form.tenantId.toString())
+        }
         
         // 2. 使用 token 获取用户信息
         const userData = await api.get('/auth/user')
@@ -82,6 +126,14 @@ const handleLogin = async () => {
     }
   })
 }
+
+// 页面加载时获取系统配置和租户列表
+onMounted(async () => {
+  await getConfig()
+  if (multiTenantEnabled.value) {
+    await getTenants()
+  }
+})
 </script>
 
 <style scoped>

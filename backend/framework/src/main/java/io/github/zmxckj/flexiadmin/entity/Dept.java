@@ -27,7 +27,7 @@ public class Dept implements Serializable {
     private String name;
 
     private Long parentId;
-
+    private Long tenantId;
     private String leader;
 
     private String phone;
@@ -68,6 +68,14 @@ public class Dept implements Serializable {
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
+    }
+
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
     public String getLeader() {

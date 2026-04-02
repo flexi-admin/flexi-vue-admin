@@ -32,9 +32,6 @@ public class JwtUtils {
                 .withExpiresAt(expireDate)
                 .sign(Algorithm.HMAC256(secret));
 
-        // 缓存用户信息到 Redis，过期时间与 token 一致
-        redisUtils.cacheUserInfo(username, username, expiration / 1000);
-
         return token;
     }
 

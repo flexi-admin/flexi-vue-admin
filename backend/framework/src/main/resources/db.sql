@@ -11,6 +11,7 @@ DROP TABLE IF EXISTS sys_role_menu;
 DROP TABLE IF EXISTS sys_menu;
 DROP TABLE IF EXISTS sys_user;
 DROP TABLE IF EXISTS sys_role;
+DROP TABLE IF EXISTS sys_tenant;
 DROP TABLE IF EXISTS sys_operation_log;
 DROP TABLE IF EXISTS sys_login_log;
 DROP TABLE IF EXISTS sys_config;
@@ -18,12 +19,24 @@ DROP TABLE IF EXISTS sys_dict;
 DROP TABLE IF EXISTS sys_task;
 DROP TABLE IF EXISTS sys_image;
 
+-- 创建租户表
+CREATE TABLE IF NOT EXISTS sys_tenant (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(200),
+    status BOOLEAN DEFAULT TRUE,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- 创建用户表
 CREATE TABLE IF NOT EXISTS sys_user (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(100) NOT NULL,
     nickname VARCHAR(50),
+    tenant_id BIGINT NOT NULL,
     status BOOLEAN DEFAULT TRUE,
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -34,6 +47,7 @@ CREATE TABLE IF NOT EXISTS sys_dept (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     parent_id BIGINT DEFAULT 0,
+    tenant_id BIGINT NOT NULL,
     leader VARCHAR(50),
     phone VARCHAR(20),
     email VARCHAR(100),
@@ -160,13 +174,16 @@ CREATE TABLE IF NOT EXISTS sys_image (
 );
 
 -- 插入初始数据
+-- 插入租户
+INSERT INTO sys_tenant (id, name, code, description, status) VALUES (1, '默认租户', 'default', '系统默认租户', true);
+
 -- 插入角色
 INSERT INTO sys_role (id, name, description) VALUES (1, 'admin', '管理员');
 INSERT INTO sys_role (id, name, description) VALUES (2, 'log_admin', '日志管理员');
 
 -- 插入用户
-INSERT INTO sys_user (id, username, password, nickname, status) VALUES (1, 'admin', '$2a$10$ct6Dw92R4r1aEVQ4oOAmRuv/DNOC7v906EPJ5VCYXq9.JYZo/Eu1O', '管理员', true);
-INSERT INTO sys_user (id, username, password, nickname, status) VALUES (2, 'test_user', '$2a$10$ct6Dw92R4r1aEVQ4oOAmRuv/DNOC7v906EPJ5VCYXq9.JYZo/Eu1O', '测试用户', true);
+INSERT INTO sys_user (id, username, password, nickname, tenant_id, status) VALUES (1, 'admin', '$2a$10$ct6Dw92R4r1aEVQ4oOAmRuv/DNOC7v906EPJ5VCYXq9.JYZo/Eu1O', '管理员', 1, true);
+INSERT INTO sys_user (id, username, password, nickname, tenant_id, status) VALUES (2, 'test_user', '$2a$10$ct6Dw92R4r1aEVQ4oOAmRuv/DNOC7v906EPJ5VCYXq9.JYZo/Eu1O', '测试用户', 1, true);
 
 -- 插入菜单和操作数据
 INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, status, order_num) VALUES
@@ -176,6 +193,7 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 (3, '角色管理', '/system/role', 'role/Index', 1, 'User', NULL, 'menu', true, 3),
 (4, '菜单管理', '/system/menu', 'menu/Index', 1, 'Menu', NULL, 'menu', true, 4),
 (5, '部门管理', '/system/dept', 'dept/Index', 1, 'OfficeBuilding', NULL, 'menu', true, 5),
+(6, '租户管理', '/system/tenant', 'tenant/Index', 1, 'Building', NULL, 'menu', true, 6),
 (8, '系统配置', '/system/config', 'config/Index', 1, 'Setting', NULL, 'menu', true, 8),
 (9, '日志管理', '/log', '', 0, 'Document', NULL, 'menu', true, 9),
 (10, '操作日志', '/log/operation', 'log/OperationLog', 9, 'Document', NULL, 'menu', true, 10),
@@ -200,6 +218,10 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 (28, '部门添加', NULL, NULL, 5, NULL, 'dept:add', 'operation', true, 28),
 (29, '部门更新', NULL, NULL, 5, NULL, 'dept:update', 'operation', true, 29),
 (30, '部门删除', NULL, NULL, 5, NULL, 'dept:delete', 'operation', true, 30),
+(35, '租户列表', NULL, NULL, 6, NULL, 'tenant:list', 'operation', true, 35),
+(36, '租户添加', NULL, NULL, 6, NULL, 'tenant:add', 'operation', true, 36),
+(37, '租户更新', NULL, NULL, 6, NULL, 'tenant:update', 'operation', true, 37),
+(38, '租户删除', NULL, NULL, 6, NULL, 'tenant:delete', 'operation', true, 38),
 (31, '日志列表', NULL, NULL, 9, NULL, 'log:list', 'operation', true, 31),
 (32, '图片列表', NULL, NULL, 14, NULL, 'image:list', 'operation', true, 32),
 (33, '图片上传', NULL, NULL, 14, NULL, 'image:upload', 'operation', true, 33),
@@ -208,8 +230,8 @@ INSERT INTO sys_menu (id, name, path, component, parent_id, icon, code, type, st
 -- 插入角色菜单关联
 -- 为 admin 角色分配所有菜单和操作权限
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES
-(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12), (1, 13), (1, 14),
-(1, 15), (1, 16), (1, 17), (1, 18), (1, 19), (1, 20), (1, 21), (1, 22), (1, 23), (1, 24), (1, 25), (1, 26), (1, 27), (1, 28), (1, 29), (1, 30), (1, 31), (1, 32), (1, 33), (1, 34);
+(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12), (1, 13), (1, 14),
+(1, 15), (1, 16), (1, 17), (1, 18), (1, 19), (1, 20), (1, 21), (1, 22), (1, 23), (1, 24), (1, 25), (1, 26), (1, 27), (1, 28), (1, 29), (1, 30), (1, 31), (1, 32), (1, 33), (1, 34), (1, 35), (1, 36), (1, 37), (1, 38);
 
 -- 为日志管理员角色分配权限
 INSERT INTO sys_role_menu (role_id, menu_id) VALUES
@@ -226,7 +248,9 @@ INSERT INTO sys_config (config_key, value, description) VALUES
 ('system.version', '1.0.0', '系统版本'),
 ('system.enabled_modules', 'user,role,menu,log,config,dict,task,image', '启用的模块'),
 ('system.default_home', '/', '默认首页路径'),
-('system.image_base_url', '/api/images/', '图片基础URL');
+('system.image_base_url', '/api/images/', '图片基础URL'),
+('system.multi_tenant_enabled', 'true', '是否启用多租户');
+
 
 -- 创建appid表
 CREATE TABLE IF NOT EXISTS sys_appid (
