@@ -23,6 +23,7 @@ public class Menu {
     private String code;
     private String type;
     private Boolean status;
+    private Boolean isShow;
     private Integer orderNum;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;

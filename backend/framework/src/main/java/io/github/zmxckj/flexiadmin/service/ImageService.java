@@ -8,4 +8,5 @@ import java.io.IOException;
 
 public interface ImageService extends IService<Image> {
     Image uploadImage(MultipartFile file) throws IOException;
+    Image uploadImageToOss(MultipartFile file) throws IOException;
 }

@@ -8,17 +8,30 @@
       </template>
       
       <!-- 上传组件 -->
-      <el-upload
-        ref="uploadRef"
-        action="/api/image/upload"
-        :headers="{ Authorization: 'Bearer ' + token }"
-        :on-success="handleUploadSuccess"
-        :on-error="handleUploadError"
-        :show-file-list="false"
-        accept="image/*"
-      >
-        <el-button type="primary">点击上传</el-button>
-      </el-upload>
+      <div class="upload-buttons">
+        <el-upload
+          ref="uploadRef"
+          action="/api/image/upload"
+          :headers="{ Authorization: 'Bearer ' + token }"
+          :on-success="handleUploadSuccess"
+          :on-error="handleUploadError"
+          :show-file-list="false"
+          accept="image/*"
+        >
+          <el-button type="primary">上传到本地</el-button>
+        </el-upload>
+        <el-upload
+          ref="uploadOssRef"
+          action="/api/image/upload-oss"
+          :headers="{ Authorization: 'Bearer ' + token }"
+          :on-success="handleUploadSuccess"
+          :on-error="handleUploadError"
+          :show-file-list="false"
+          accept="image/*"
+        >
+          <el-button type="success">上传到阿里云</el-button>
+        </el-upload>
+      </div>
       
       <!-- 图片列表 -->
       <el-table :data="imageList" style="width: 100%">
@@ -26,8 +39,8 @@
         <el-table-column label="图片预览" width="120">
           <template #default="{ row }">
             <el-image
-              :src="imageBaseUrl + row.filename"
-              :preview-src-list="[imageBaseUrl + row.filename]"
+              :src="row.filePath?.startsWith('http') ? row.filePath : imageBaseUrl + row.filename"
+              :preview-src-list="[row.filePath?.startsWith('http') ? row.filePath : imageBaseUrl + row.filename]"
               fit="cover"
               style="width: 60px; height: 60px"
             />
@@ -79,6 +92,7 @@ const token = computed(() => userStore.token);
 const imageBaseUrl = computed(() => configStore.imageBaseUrl);
 
 const uploadRef = ref(null);
+const uploadOssRef = ref(null);
 const imageList = ref([]);
 const total = ref(0);
 const page = ref(1);
@@ -159,6 +173,12 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.upload-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .pagination-container {

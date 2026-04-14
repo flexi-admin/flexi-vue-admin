@@ -164,18 +164,20 @@ const menuOptions = ref<MenuItem[]>([])
 
 // 递归处理菜单数据
 const processMenuItems = (items: any[]): MenuItem[] => {
-  return items.map((item: any): MenuItem => {
-    let path = item.path
-    console.log('Processing menu item:', item.name, 'path:', path)
-    return {
-      label: item.name,
-      key: item.id.toString(),
-      path: path,
-      icon: item.icon,
-      component: item.component,
-      children: item.children ? processMenuItems(item.children) : []
-    }
-  })
+  return items
+    .filter((item: any) => item.isShow !== false) // 过滤掉isShow为false的菜单
+    .map((item: any): MenuItem => {
+      let path = item.path
+      console.log('Processing menu item:', item.name, 'path:', path, 'isShow:', item.isShow)
+      return {
+        label: item.name,
+        key: item.id.toString(),
+        path: path,
+        icon: item.icon,
+        component: item.component,
+        children: item.children ? processMenuItems(item.children) : []
+      }
+    })
 }
 
 // 从configStore获取菜单数据

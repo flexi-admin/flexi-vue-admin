@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.github.zmxckj.flexiadmin.entity.User;
 import io.github.zmxckj.flexiadmin.mapper.UserMapper;
+import io.github.zmxckj.flexiadmin.security.SecurityUtils;
 import io.github.zmxckj.flexiadmin.service.UserService;
 import io.github.zmxckj.flexiadmin.utils.RedisUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             queryWrapper.like("username", keyword);
         }
         // 添加租户ID查询条件
-        Long tenantId = io.github.zmxckj.flexiadmin.security.SecurityUtils.getCurrentTenantId();
+        Long tenantId = SecurityUtils.getCurrentTenantId();
         if (tenantId != null) {
             queryWrapper.eq("tenant_id", tenantId);
         }

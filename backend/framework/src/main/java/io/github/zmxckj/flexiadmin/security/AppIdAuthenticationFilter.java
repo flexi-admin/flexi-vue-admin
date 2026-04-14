@@ -41,11 +41,12 @@ public class AppIdAuthenticationFilter extends OncePerRequestFilter {
         String signature = request.getHeader("X-Signature");
         String timestamp = request.getHeader("X-Timestamp");
         String nonce = request.getHeader("X-Nonce");
+        String signMethod = request.getHeader("X-Sign-Method");
 
         if (appId != null && signature != null && timestamp != null && nonce != null) {
             try {
                 // 验证签名
-                if (validateSignature(appId, signature, timestamp, nonce, request)) {
+                if (validateSignature(appId, signature, timestamp, nonce, signMethod, request)) {
                     // 构建认证信息
                 List<SimpleGrantedAuthority> authorities = new ArrayList<>();
                 List<String> authorityStrings = new ArrayList<>();
@@ -93,7 +94,7 @@ public class AppIdAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private boolean validateSignature(String appId, String signature, String timestamp, String nonce, HttpServletRequest request) throws Exception {
+    private boolean validateSignature(String appId, String signature, String timestamp, String nonce, String signMethod, HttpServletRequest request) throws Exception {
         // 从服务中获取appid信息
         Appid appid = appidService.findByAppId(appId);
         if (appid == null || !appid.getStatus()) {
@@ -107,11 +108,82 @@ public class AppIdAuthenticationFilter extends OncePerRequestFilter {
             return false;
         }
 
+        // 根据签名方法选择不同的验证方式
+        if ("WX".equals(signMethod)) {
+            // 微信小程序简化版本的签名验证
+            return validateWXSignature(appId, signature, timestamp, nonce, appid.getSecret(), request);
+        } else {
+            // 标准HMAC-SHA256签名验证
+            return validateStandardSignature(appId, signature, timestamp, nonce, appid.getSecret(), request);
+        }
+    }
+
+    // 微信小程序简化版本的签名验证
+    private boolean validateWXSignature(String appId, String signature, String timestamp, String nonce, String secret, HttpServletRequest request) throws Exception {
+        // 验证时间戳，防止请求被重放
+        long currentTimestamp = System.currentTimeMillis() / 1000;
+        long requestTimestamp = Long.parseLong(timestamp);
+        long timestampDiff = Math.abs(currentTimestamp - requestTimestamp);
+        // 时间戳差异阈值：60s
+        if (timestampDiff > 60) {
+            return false;
+        }
+        
+        // 构建签名内容：appId + timestamp + nonce + method + url + data
+        StringBuilder content = new StringBuilder();
+        // 使用request.getRequestURI()获取URL路径，不包含上下文路径
+        String requestUri = request.getRequestURI();
+        content.append(appId).append(timestamp).append(nonce).append(request.getMethod()).append(requestUri);
+        
+        // 如果有请求体数据，添加到签名内容中
+        if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
+            InputStream inputStream = request.getInputStream();
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = inputStream.read(buffer)) != -1) {
+                content.append(new String(buffer, 0, len));
+            }
+        } else if ("GET".equals(request.getMethod()) || "DELETE".equals(request.getMethod())) {
+            // 对于GET和DELETE请求，使用查询参数作为签名内容
+            String queryString = request.getQueryString();
+            if (queryString != null && !queryString.isEmpty()) {
+                // 对查询参数进行排序，确保与前端一致
+                String[] params = queryString.split("&");
+                java.util.Arrays.sort(params);
+                StringBuilder sortedQueryString = new StringBuilder();
+                for (int i = 0; i < params.length; i++) {
+                    if (i > 0) {
+                        sortedQueryString.append("&");
+                    }
+                    sortedQueryString.append(params[i]);
+                }
+                content.append(sortedQueryString.toString());
+            } else {
+                content.append("");
+            }
+        }
+        
+        // 使用简单的哈希算法生成签名
+        String expectedContent = content.toString() + secret;
+        // 使用简单的哈希算法
+        int hash = 0;
+        for (char c : expectedContent.toCharArray()) {
+            hash = 31 * hash + c;
+        }
+        // 将哈希结果转换为十六进制字符串
+        String expectedSignature = Integer.toHexString(hash);
+
+        // 比较生成的签名与请求中的签名
+        return expectedSignature.equals(signature);
+    }
+
+    // 标准HMAC-SHA256签名验证
+    private boolean validateStandardSignature(String appId, String signature, String timestamp, String nonce, String secret, HttpServletRequest request) throws Exception {
         // 构建签名内容
         String content = appId + timestamp + nonce + getRequestContent(request);
         
         // 使用HMAC-SHA256生成签名
-        String expectedSignature = generateHMACSHA256(content, appid.getSecret());
+        String expectedSignature = generateHMACSHA256(content, secret);
 
         // 比较生成的签名与请求中的签名
         return expectedSignature.equals(signature);
@@ -129,7 +201,22 @@ public class AppIdAuthenticationFilter extends OncePerRequestFilter {
             }
         } else if ("GET".equals(request.getMethod()) || "DELETE".equals(request.getMethod())) {
             // 对于GET和DELETE请求，使用查询参数作为签名内容
-            content.append(request.getQueryString() != null ? request.getQueryString() : "");
+            String queryString = request.getQueryString();
+            if (queryString != null && !queryString.isEmpty()) {
+                // 对查询参数进行排序，确保与前端一致
+                String[] params = queryString.split("&");
+                java.util.Arrays.sort(params);
+                StringBuilder sortedQueryString = new StringBuilder();
+                for (int i = 0; i < params.length; i++) {
+                    if (i > 0) {
+                        sortedQueryString.append("&");
+                    }
+                    sortedQueryString.append(params[i]);
+                }
+                content.append(sortedQueryString.toString());
+            } else {
+                content.append("");
+            }
         }
         return content.toString();
     }

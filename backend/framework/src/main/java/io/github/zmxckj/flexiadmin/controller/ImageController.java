@@ -2,6 +2,7 @@ package io.github.zmxckj.flexiadmin.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.github.zmxckj.flexiadmin.config.OssConfig;
 import io.github.zmxckj.flexiadmin.entity.Config;
 import io.github.zmxckj.flexiadmin.entity.Image;
 import io.github.zmxckj.flexiadmin.common.R;
@@ -28,6 +29,9 @@ public class ImageController {
     
     @Autowired
     private ConfigService configService;
+    
+    @Autowired
+    private OssConfig ossConfig;
 
     private boolean isImageModuleEnabled() {
         Config config = configService.getOne(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Config>()
@@ -53,21 +57,55 @@ public class ImageController {
         }
     }
 
+    @PostMapping("/upload-oss")
+    @RequirePermission("image:upload")
+    public R<Image> uploadImageToOss(@RequestParam("file") MultipartFile file) {
+        if (!isImageModuleEnabled()) {
+            return R.error(503, "图片模块未启用");
+        }
+        if (!ossConfig.isOssConfigured()) {
+            return R.error(503, "阿里云OSS未配置");
+        }
+        try {
+            Image image = imageService.uploadImageToOss(file);
+            return R.success(image);
+        } catch (IOException e) {
+            return R.error(500, "上传失败");
+        }
+    }
+
     @GetMapping("/list")
     @RequirePermission("image:list")
     public R<IPage<Image>> getImageList(
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, defaultValue = "id") String sortField,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder) {
         if (!isImageModuleEnabled()) {
             return R.error(503, "图片模块未启用");
         }
         Page<Image> pageInfo = new Page<>(page, size);
-        IPage<Image> result = imageService.page(pageInfo);
-        // 处理图片路径，转换为可访问的URL
-        result.getRecords().forEach(image -> {
-            // 这里需要根据实际部署情况修改，这里假设图片访问路径为 /api/image/view/{id}
-            image.setFilePath("/api/image/view/" + image.getId());
-        });
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Image> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        
+        // 关键词搜索
+        if (keyword != null && !keyword.isEmpty()) {
+            wrapper.like("original_filename", keyword);
+        }
+        
+        // 排序
+        if (sortField != null && !sortField.isEmpty()) {
+            if ("asc".equalsIgnoreCase(sortOrder)) {
+                wrapper.orderByAsc(sortField);
+            } else {
+                wrapper.orderByDesc(sortField);
+            }
+        } else {
+            // 默认按id倒序
+            wrapper.orderByDesc("id");
+        }
+        
+        IPage<Image> result = imageService.page(pageInfo, wrapper);
         return R.success(result);
     }
     

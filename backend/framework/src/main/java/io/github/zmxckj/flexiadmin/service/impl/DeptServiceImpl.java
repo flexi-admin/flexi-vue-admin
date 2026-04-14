@@ -60,6 +60,19 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         return buildTree(depts, 0L);
     }
 
+    @Override
+    public List<Dept> tree(Long tenantId) {
+        // 根据租户ID获取部门列表
+        QueryWrapper<Dept> queryWrapper = new QueryWrapper<>();
+        if (tenantId != null) {
+            queryWrapper.eq("tenant_id", tenantId);
+        }
+        List<Dept> depts = super.list(queryWrapper);
+        
+        // 构建树形结构
+        return buildTree(depts, 0L);
+    }
+
     private List<Dept> buildTree(List<Dept> depts, Long parentId) {
         List<Dept> treeDepts = new ArrayList<>();
         

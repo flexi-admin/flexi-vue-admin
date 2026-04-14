@@ -119,9 +119,24 @@ public class RedisUtils {
         if (cachedValue == null) {
             return null;
         }
-        
+
         try {
             return objectMapper.readValue(cachedValue, Object.class);
+        } catch (Exception e) {
+            logger.error("Failed to parse value: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    // 通用获取缓存（带类型）
+    public <T> T get(String key, Class<T> clazz) {
+        String cachedValue = redisTemplate.opsForValue().get(key);
+        if (cachedValue == null) {
+            return null;
+        }
+
+        try {
+            return objectMapper.readValue(cachedValue, clazz);
         } catch (Exception e) {
             logger.error("Failed to parse value: {}", e.getMessage(), e);
             return null;

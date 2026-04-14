@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS sys_menu (
     code VARCHAR(50) COMMENT '权限编码',
     type VARCHAR(20) DEFAULT 'menu' COMMENT '类型：menu(菜单)、operation(操作)',
     status BOOLEAN DEFAULT TRUE COMMENT '状态：true(正常)、false(禁用)',
+    is_show BOOLEAN DEFAULT TRUE COMMENT '是否展示在菜单：true(展示)、false(不展示)',
     order_num INT DEFAULT 0,
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

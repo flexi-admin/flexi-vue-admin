@@ -16,4 +16,5 @@ import java.util.List;
 public interface DeptService extends IService<Dept> {
     String getDeptNameById(Long deptId);
     List<Dept> tree();
+    List<Dept> tree(Long tenantId);
 }

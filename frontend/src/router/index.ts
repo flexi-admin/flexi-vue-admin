@@ -43,35 +43,40 @@ const addDynamicRoutes = (menus: any[]) => {
     
     items.forEach(item => {
       console.log('Processing menu item:', item)
-      if (item && item.path && item.component) {
-        // 使用数据库中配置的component字段构建组件路径
-        const componentPath = `../views/${item.component}.vue`
-        
-        // 添加路由，作为Home组件的子路由
-        if (item.label) {
-          // 检查路由是否已存在
-          const existingRoute = router.getRoutes().find(route => route.path === item.path)
-          if (!existingRoute) {
-            // 将路由添加为Home组件的子路由
-            router.addRoute('Home', {
-              path: item.path.replace(/^\//, ''), // 移除路径开头的斜杠
-              name: item.label.replace(/\s/g, ''),
-              component: modules[componentPath] || (() => import('../views/404.vue')),
-              meta: { title: item.label, requiresAuth: true }
-            })
-            console.log('Added route:', item.path, '->', componentPath, 'as child of Home')
-          } else {
-            console.log('Route already exists:', item.path)
+      // 处理所有菜单，无论是否显示
+      if (item) {
+        if (item.path && item.component) {
+          // 使用数据库中配置的component字段构建组件路径
+          const componentPath = `../views/${item.component}.vue`
+          
+          // 添加路由，作为Home组件的子路由
+          if (item.label) {
+            // 检查路由是否已存在
+            const existingRoute = router.getRoutes().find(route => route.path === item.path)
+            if (!existingRoute) {
+              // 将路由添加为Home组件的子路由
+              router.addRoute('Home', {
+                path: item.path.replace(/^\//, ''), // 移除路径开头的斜杠
+                name: item.label.replace(/\s/g, ''),
+                component: modules[componentPath] || (() => import('../views/404.vue')),
+                meta: { title: item.label, requiresAuth: true }
+              })
+              console.log('Added route:', item.path, '->', componentPath, 'as child of Home')
+            } else {
+              console.log('Route already exists:', item.path)
+            }
           }
+        } else {
+          console.log('Skipping menu item:', item)
+        }
+        
+        // 递归处理子菜单
+        if (item.children && item.children.length > 0) {
+          console.log('Processing children:', item.children)
+          addRoutes(item.children)
         }
       } else {
-        console.log('Skipping menu item:', item)
-      }
-      
-      // 递归处理子菜单
-      if (item && item.children && item.children.length > 0) {
-        console.log('Processing children:', item.children)
-        addRoutes(item.children)
+        console.log('Skipping null menu item:', item)
       }
     })
   }

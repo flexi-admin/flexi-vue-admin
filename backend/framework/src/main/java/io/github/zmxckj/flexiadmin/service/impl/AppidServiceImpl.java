@@ -22,7 +22,7 @@ public class AppidServiceImpl implements AppidService {
     public Appid findByAppId(String appId) {
         // 先从Redis缓存中获取
         String key = "appid:" + appId;
-        Appid appid = (Appid) redisUtils.get(key);
+        Appid appid = redisUtils.get(key, Appid.class);
         if (appid != null) {
             return appid;
         }

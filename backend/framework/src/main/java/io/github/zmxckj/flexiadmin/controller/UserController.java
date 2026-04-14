@@ -8,6 +8,7 @@ import io.github.zmxckj.flexiadmin.dto.AssignRoleDTO;
 import io.github.zmxckj.flexiadmin.dto.AssignDeptDTO;
 import io.github.zmxckj.flexiadmin.common.R;
 import io.github.zmxckj.flexiadmin.security.RequirePermission;
+import io.github.zmxckj.flexiadmin.security.SecurityUtils;
 import io.github.zmxckj.flexiadmin.service.UserService;
 import io.github.zmxckj.flexiadmin.service.UserRoleService;
 import io.github.zmxckj.flexiadmin.service.UserDeptService;
@@ -78,14 +79,34 @@ public class UserController {
     @RequirePermission("user:add")
     @PostMapping
     public R<User> add(@RequestBody User user) {
+        // 以当前登录用户的租户ID填充
+        Long tenantId = SecurityUtils.getCurrentTenantId();
+        if (tenantId != null) {
+            user.setTenantId(tenantId);
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userService.save(user);
         return R.success(user);
     }
 
+    // 检查用户是否属于当前租户
+    private boolean checkUserTenant(Long userId) {
+        Long currentTenantId = SecurityUtils.getCurrentTenantId();
+        if (currentTenantId == null) {
+            return false;
+        }
+        User user = userService.getById(userId);
+        return user != null && currentTenantId.equals(user.getTenantId());
+    }
+
     @RequirePermission("user:update")
     @PutMapping
     public R<?> update(@RequestBody User user) {
+        // 检查用户是否属于当前租户
+        if (!checkUserTenant(user.getId())) {
+            return R.error(403, "无权操作其他租户的用户");
+        }
+        
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
@@ -96,12 +117,22 @@ public class UserController {
     @RequirePermission("user:delete")
     @DeleteMapping("/{id}")
     public R<?> delete(@PathVariable Long id) {
+        // 检查用户是否属于当前租户
+        if (!checkUserTenant(id)) {
+            return R.error(403, "无权操作其他租户的用户");
+        }
+        
         userService.removeById(id);
         return R.success();
     }
 
     @GetMapping("/{id}")
     public R<User> getById(@PathVariable Long id) {
+        // 检查用户是否属于当前租户
+        if (!checkUserTenant(id)) {
+            return R.error(403, "无权查看其他租户的用户");
+        }
+        
         User user = userService.getById(id);
         return R.success(user);
     }
@@ -112,6 +143,11 @@ public class UserController {
     @PostMapping("/assignRole")
     public R<?> assignRole(@RequestBody AssignRoleDTO assignRoleDTO) {
         Long userId = assignRoleDTO.getUserId();
+        // 检查用户是否属于当前租户
+        if (!checkUserTenant(userId)) {
+            return R.error(403, "无权操作其他租户的用户");
+        }
+        
         List<Long> roleIds = assignRoleDTO.getRoleIds();
         // 先删除用户之前的角色关联
         userRoleService.remove(new QueryWrapper<UserRole>().eq("user_id", userId));
@@ -130,6 +166,11 @@ public class UserController {
      */
     @GetMapping("/roles/{userId}")
     public R<List<Long>> getUserRoles(@PathVariable Long userId) {
+        // 检查用户是否属于当前租户
+        if (!checkUserTenant(userId)) {
+            return R.error(403, "无权查看其他租户的用户");
+        }
+        
         List<UserRole> userRoles = userRoleService.list(new QueryWrapper<UserRole>().eq("user_id", userId));
         List<Long> roleIds = userRoles.stream().map(UserRole::getRoleId).collect(java.util.stream.Collectors.toList());
         return R.success(roleIds);
@@ -141,6 +182,11 @@ public class UserController {
     @PostMapping("/assignDept")
     public R<?> assignDept(@RequestBody AssignDeptDTO assignDeptDTO) {
         Long userId = assignDeptDTO.getUserId();
+        // 检查用户是否属于当前租户
+        if (!checkUserTenant(userId)) {
+            return R.error(403, "无权操作其他租户的用户");
+        }
+        
         List<Long> deptIds = assignDeptDTO.getDeptIds();
         // 先删除用户之前的部门关联
         userDeptService.remove(new QueryWrapper<UserDept>().eq("user_id", userId));
@@ -159,6 +205,11 @@ public class UserController {
      */
     @GetMapping("/depts/{userId}")
     public R<List<Long>> getUserDepts(@PathVariable Long userId) {
+        // 检查用户是否属于当前租户
+        if (!checkUserTenant(userId)) {
+            return R.error(403, "无权查看其他租户的用户");
+        }
+        
         List<UserDept> userDepts = userDeptService.list(new QueryWrapper<UserDept>().eq("user_id", userId));
         List<Long> deptIds = userDepts.stream().map(UserDept::getDeptId).collect(java.util.stream.Collectors.toList());
         return R.success(deptIds);

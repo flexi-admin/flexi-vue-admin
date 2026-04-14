@@ -46,7 +46,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     public List<Menu> getMenuTree() {
-        // 获取所有状态为正常的菜单和操作，并按order_num排序
+        // 获取所有状态为正常且显示在菜单的菜单和操作，并按order_num排序
         List<Menu> allMenus = baseMapper.selectList(new QueryWrapper<Menu>()
                 .eq("status", true)
                 .orderByAsc("order_num"));
@@ -88,7 +88,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             return new ArrayList<>();
         }
         
-        // 获取用户有权限的菜单类型且状态为正常的菜单，并按order_num排序
+        // 获取用户有权限的菜单类型且状态为正常且显示在菜单的菜单，并按order_num排序
         List<Menu> userMenus = baseMapper.selectList(new QueryWrapper<Menu>()
                 .in("id", menuIds)
                 .eq("type", "menu")
