@@ -40,9 +40,9 @@
           <template #default="{ row }">
             <el-image
               :src="row.filePath?.startsWith('http') ? row.filePath : imageBaseUrl + row.filename"
-              :preview-src-list="[row.filePath?.startsWith('http') ? row.filePath : imageBaseUrl + row.filename]"
               fit="cover"
-              style="width: 60px; height: 60px"
+              style="width: 60px; height: 60px; cursor: pointer"
+              @click="handleImagePreview(row)"
             />
           </template>
         </el-table-column>
@@ -76,6 +76,22 @@
         />
       </div>
     </el-card>
+    
+    <!-- 图片预览弹窗 -->
+    <el-dialog
+      v-model="previewDialogVisible"
+      title="图片预览"
+      width="80%"
+      center
+    >
+      <div class="preview-container">
+        <el-image
+          :src="previewImageUrl"
+          fit="contain"
+          style="width: 100%; height: 100%"
+        />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -97,6 +113,14 @@ const imageList = ref([]);
 const total = ref(0);
 const page = ref(1);
 const size = ref(10);
+const previewDialogVisible = ref(false);
+const previewImageUrl = ref('');
+
+// 处理图片预览
+const handleImagePreview = (row) => {
+  previewImageUrl.value = row.filePath?.startsWith('http') ? row.filePath : imageBaseUrl.value + row.filename;
+  previewDialogVisible.value = true;
+};
 
 // 上传成功处理
 const handleUploadSuccess = (response) => {
@@ -185,5 +209,19 @@ onMounted(async () => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.preview-container {
+  width: 100%;
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f7fa;
+}
+
+.preview-container img {
+  max-width: 100%;
+  max-height: 100%;
 }
 </style>

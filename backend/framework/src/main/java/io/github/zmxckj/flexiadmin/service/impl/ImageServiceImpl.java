@@ -30,7 +30,7 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
     @Autowired
     private OssConfig ossConfig;
 
-    @Autowired
+    @Autowired(required = false)
     private OSS ossClient;
 
     @Override
