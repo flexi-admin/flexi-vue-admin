@@ -35,7 +35,7 @@
           <el-input v-model="form.name" placeholder="请输入菜单名称" />
         </el-form-item>
         <el-form-item label="父菜单" prop="parentId">
-          <el-select v-model="form.parentId" placeholder="请选择父菜单">
+          <el-select v-model="form.parentId" placeholder="请选择父菜单" filterable>
             <el-option
               v-for="option in parentMenuOptions"
               :key="option.value"
@@ -82,12 +82,14 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import api from '@/api'
+import { getParentOptions } from '@/utils/treeUtils'
 
 const dialogVisible = ref(false)
 const dialogTitle = ref('添加菜单')
 const formRef = ref()
 const menuTree = ref([])
 const allMenus = ref([])
+const currentEditingId = ref('')
 
 const menuTreeProps = {
   children: 'children',
@@ -114,13 +116,7 @@ const rules = {
 }
 
 const parentMenuOptions = computed(() => {
-  return [
-    { label: '顶级菜单', value: 0 },
-    ...allMenus.value.map((menu: any) => ({
-      label: menu.name,
-      value: menu.id
-    }))
-  ]
+  return getParentOptions(menuTree.value, currentEditingId.value)
 })
 
 const getParentName = (parentId: number) => {
@@ -190,11 +186,15 @@ const handleAdd = () => {
     orderNum: 0,
     status: true
   })
+  // 重置当前编辑ID
+  currentEditingId.value = ''
   dialogVisible.value = true
 }
 
 const handleEdit = (row: any) => {
   dialogTitle.value = '编辑菜单'
+  // 保存当前编辑的ID
+  currentEditingId.value = row.id
   Object.assign(form, row)
   dialogVisible.value = true
 }

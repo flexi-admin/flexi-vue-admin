@@ -37,12 +37,12 @@
       :title="dialogTitle"
       width="500px"
     >
-      <el-form :model="form" label-width="80px">
+      <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
         <el-form-item label="部门名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入部门名称" />
         </el-form-item>
         <el-form-item label="父部门" prop="parentId">
-          <el-select v-model="form.parentId" placeholder="请选择父部门">
+          <el-select v-model="form.parentId" placeholder="请选择父部门" filterable>
             <el-option
               v-for="option in parentDeptOptions"
               :key="option.value"
@@ -81,7 +81,9 @@
 import { ref, onMounted, computed } from 'vue'
 import { Plus, Edit, Delete } from '@element-plus/icons-vue'
 import api from '@/api'
+import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
+import { getParentOptions } from '@/utils/treeUtils'
 
 // 对话框
 const dialogVisible = ref(false)
@@ -91,6 +93,7 @@ const formRef = ref()
 // 部门数据
 const deptTree = ref<any[]>([])
 const allDepts = ref<any[]>([])
+const currentEditingId = ref('')
 
 // 树形配置
 const deptTreeProps = {
@@ -110,15 +113,16 @@ const form = ref({
   orderNum: 0
 })
 
+// 表单验证规则
+const rules = {
+  name: [
+    { required: true, message: '请输入部门名称', trigger: 'blur' }
+  ]
+}
+
 // 父部门选项
 const parentDeptOptions = computed(() => {
-  return [
-    { label: '顶级部门', value: 0 },
-    ...allDepts.value.map((dept: any) => ({
-      label: dept.name,
-      value: dept.id
-    }))
-  ]
+  return getParentOptions(deptTree.value, currentEditingId.value)
 })
 
 // 构建部门树
@@ -173,13 +177,25 @@ const handleAdd = () => {
     status: true,
     orderNum: 0
   }
+  // 重置当前编辑ID
+  currentEditingId.value = ''
   dialogVisible.value = true
 }
 
 // 编辑部门
-const handleEdit = (row: any) => {
+const handleEdit = async (row: any) => {
   dialogTitle.value = '编辑部门'
-  form.value = { ...row }
+  // 确保deptTree已经加载
+  if (deptTree.value.length === 0) {
+    await loadDeptList()
+  }
+  // 保存当前编辑的ID
+  currentEditingId.value = row.id
+  // 确保parentId是数字类型
+  form.value = {
+    ...row,
+    parentId: Number(row.parentId)
+  }
   dialogVisible.value = true
 }
 
@@ -196,17 +212,27 @@ const handleDelete = async (id: number) => {
 // 提交表单
 const handleSubmit = async () => {
   try {
+    // 表单验证
+    if (formRef.value) {
+      await formRef.value.validate()
+    }
+    
     if (form.value.id) {
       // 编辑
       await api.put('/dept', form.value)
+      ElMessage.success('编辑成功')
     } else {
       // 新增
       await api.post('/dept', form.value)
+      ElMessage.success('新增成功')
     }
     dialogVisible.value = false
     await loadDeptList()
   } catch (error) {
-    console.error('保存部门失败:', error)
+    if (error !== 'Error: Submit Failed') {
+      ElMessage.error('操作失败')
+      console.error('保存部门失败:', error)
+    }
   }
 }
 

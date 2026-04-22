@@ -14,6 +14,7 @@
         :data="treeData"
         :props="defaultProps"
         node-key="id"
+        :default-expand-all="true"
         @node-click="handleNodeClick"
         @node-contextmenu="handleContextMenu"
       >
@@ -39,18 +40,17 @@
       :title="dialogTitle"
       width="500px"
     >
-      <el-form :model="form" label-width="80px">
-        <el-form-item label="名称">
+      <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
+        <el-form-item label="名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入资产类型名称" />
         </el-form-item>
         <el-form-item label="父类型">
-          <el-select v-model="form.parentId" placeholder="请选择父类型">
-            <el-option label="根节点" value="0" />
+          <el-select v-model="form.parentId" placeholder="请选择父类型" filterable>
             <el-option
-              v-for="item in treeData"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
+              v-for="option in parentOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
             />
           </el-select>
         </el-form-item>
@@ -73,20 +73,36 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/api'
+import { getParentOptions } from '@/utils/treeUtils'
+
+// 计算所有可选的父类型选项
+const parentOptions = computed(() => {
+  return getParentOptions(treeData.value, currentEditingId.value)
+})
 
 const treeData = ref([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增资产类型')
+const formRef = ref(null)
+
+const rules = {
+  name: [
+    { required: true, message: '请输入资产类型名称', trigger: 'blur' }
+  ]
+}
+
 const form = ref({
   id: '',
   name: '',
   parentId: 0,
   remark: ''
 })
+
+const currentEditingId = ref('')
 
 const defaultProps = {
   children: 'children',
@@ -113,19 +129,34 @@ const openAddDialog = () => {
     parentId: 0,
     remark: ''
   }
+  // 重置当前编辑ID
+  currentEditingId.value = ''
   dialogVisible.value = true
 }
 
 // 打开编辑对话框
-const openEditDialog = (data) => {
+const openEditDialog = async (data) => {
   dialogTitle.value = '编辑资产类型'
-  form.value = { ...data }
+  // 确保treeData已经加载
+  if (treeData.value.length === 0) {
+    await loadTreeData()
+  }
+  // 保存当前编辑的ID
+  currentEditingId.value = data.id
+  // 确保parentId是数字类型
+  form.value = {
+    ...data,
+    parentId: Number(data.parentId)
+  }
   dialogVisible.value = true
 }
 
 // 提交表单
 const submitForm = async () => {
   try {
+    // 表单验证
+    await formRef.value.validate()
+    
     if (form.value.id) {
       // 编辑
       await api.put('/asset-type', form.value)
@@ -138,8 +169,10 @@ const submitForm = async () => {
     dialogVisible.value = false
     loadTreeData()
   } catch (error) {
-    ElMessage.error('操作失败')
-    console.error('操作失败:', error)
+    if (error !== 'Error: Submit Failed') {
+      ElMessage.error('操作失败')
+      console.error('操作失败:', error)
+    }
   }
 }
 

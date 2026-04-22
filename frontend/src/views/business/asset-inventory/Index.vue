@@ -76,10 +76,10 @@
       :title="dialogTitle"
       width="50%"
     >
-      <el-form :model="form" label-width="100px">
+      <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-form-item label="盘点名称">
+            <el-form-item label="盘点名称" prop="inventoryName">
               <el-input v-model="form.inventoryName" placeholder="请输入盘点名称" />
             </el-form-item>
           </el-col>
@@ -127,7 +127,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="开始时间">
+            <el-form-item label="开始时间" prop="startTime">
               <el-date-picker
                 v-model="form.startTime"
                 type="datetime"
@@ -344,6 +344,17 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
+const formRef = ref(null)
+
+const rules = {
+  inventoryName: [
+    { required: true, message: '请输入盘点名称', trigger: 'blur' }
+  ],
+  startTime: [
+    { required: true, message: '请选择开始时间', trigger: 'change' }
+  ]
+}
+
 const form = ref({
   id: '',
   inventoryCode: '',
@@ -503,6 +514,9 @@ const openEditDialog = async (row) => {
 // 提交表单
 const submitForm = async () => {
   try {
+    // 表单验证
+    await formRef.value.validate()
+    
     const formData = { ...form.value }
     // 转换时间为时间戳
     if (formData.startTime) {
@@ -538,8 +552,10 @@ const submitForm = async () => {
     dialogVisible.value = false
     loadInventoryList()
   } catch (error) {
-    ElMessage.error('操作失败')
-    console.error('操作失败:', error)
+    if (error !== 'Error: Submit Failed') {
+      ElMessage.error('操作失败')
+      console.error('操作失败:', error)
+    }
   }
 }
 
