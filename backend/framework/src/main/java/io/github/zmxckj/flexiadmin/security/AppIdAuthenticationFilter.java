@@ -43,10 +43,20 @@ public class AppIdAuthenticationFilter extends OncePerRequestFilter {
         String nonce = request.getHeader("X-Nonce");
         String signMethod = request.getHeader("X-Sign-Method");
 
+        HttpServletRequest requestToUse = request;
+
         if (appId != null && signature != null && timestamp != null && nonce != null) {
             try {
+                // 检查是否需要读取body
+                boolean needToReadBody = "POST".equals(request.getMethod()) || "PUT".equals(request.getMethod());
+                
+                // 只有在需要读取body时才创建缓存请求
+                if (needToReadBody) {
+                    requestToUse = new CachedBodyHttpServletRequest(request);
+                }
+                
                 // 验证签名
-                if (validateSignature(appId, signature, timestamp, nonce, signMethod, request)) {
+                if (validateSignature(appId, signature, timestamp, nonce, signMethod, requestToUse)) {
                     // 构建认证信息
                 List<SimpleGrantedAuthority> authorities = new ArrayList<>();
                 List<String> authorityStrings = new ArrayList<>();
@@ -82,7 +92,7 @@ public class AppIdAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, authorities
                 );
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(requestToUse));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (Exception e) {
@@ -91,7 +101,7 @@ public class AppIdAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        chain.doFilter(request, response);
+        chain.doFilter(requestToUse, response);
     }
 
     private boolean validateSignature(String appId, String signature, String timestamp, String nonce, String signMethod, HttpServletRequest request) throws Exception {
@@ -137,12 +147,8 @@ public class AppIdAuthenticationFilter extends OncePerRequestFilter {
         
         // 如果有请求体数据，添加到签名内容中
         if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
-            InputStream inputStream = request.getInputStream();
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = inputStream.read(buffer)) != -1) {
-                content.append(new String(buffer, 0, len));
-            }
+            // 使用缓存的请求体
+            content.append(((CachedBodyHttpServletRequest) request).getCachedBody());
         } else if ("GET".equals(request.getMethod()) || "DELETE".equals(request.getMethod())) {
             // 对于GET和DELETE请求，使用查询参数作为签名内容
             String queryString = request.getQueryString();
@@ -184,6 +190,8 @@ public class AppIdAuthenticationFilter extends OncePerRequestFilter {
         
         // 使用HMAC-SHA256生成签名
         String expectedSignature = generateHMACSHA256(content, secret);
+        System.out.println(signature);
+        System.out.println(expectedSignature);
 
         // 比较生成的签名与请求中的签名
         return expectedSignature.equals(signature);
@@ -193,12 +201,8 @@ public class AppIdAuthenticationFilter extends OncePerRequestFilter {
         // 获取请求体内容
         StringBuilder content = new StringBuilder();
         if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
-            InputStream inputStream = request.getInputStream();
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = inputStream.read(buffer)) != -1) {
-                content.append(new String(buffer, 0, len));
-            }
+            // 使用缓存的请求体
+            content.append(((CachedBodyHttpServletRequest) request).getCachedBody());
         } else if ("GET".equals(request.getMethod()) || "DELETE".equals(request.getMethod())) {
             // 对于GET和DELETE请求，使用查询参数作为签名内容
             String queryString = request.getQueryString();
