@@ -30,8 +30,9 @@ onMounted(() => {
       // 地图容器, domElement
       container: mapContainer.value,
       viewMode: '2d',
-      zoomLevel: 20,
+      zoomLevel: 22,
       viewAngle: 0,
+      viewCenter: [0, 0],
       // 地图容器, domElement
       container: mapContainer.value,
       // 在ooomap编辑器中生成，或由官方提供

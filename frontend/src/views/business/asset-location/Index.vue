@@ -54,6 +54,27 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="信标mac">
+          <el-input v-model="form.beaconMac" placeholder="请输入信标mac" />
+        </el-form-item>
+        <el-form-item label="信标2mac">
+          <el-input v-model="form.beacon2Mac" placeholder="请输入信标2mac" />
+        </el-form-item>
+        <el-form-item label="园图url">
+          <el-input v-model="form.ooomapUrl" placeholder="请输入园图url" />
+        </el-form-item>
+        <el-form-item label="园图appid">
+          <el-input v-model="form.ooomapAppid" placeholder="请输入园图appid" />
+        </el-form-item>
+        <el-form-item label="x坐标">
+          <el-input v-model.number="form.x" type="number" placeholder="请输入x坐标" />
+        </el-form-item>
+        <el-form-item label="y坐标">
+          <el-input v-model.number="form.y" type="number" placeholder="请输入y坐标" />
+        </el-form-item>
+        <el-form-item label="z坐标">
+          <el-input v-model.number="form.z" type="number" placeholder="请输入z坐标" />
+        </el-form-item>
         <el-form-item label="备注">
           <el-input
             v-model="form.remark"
@@ -99,6 +120,13 @@ const form = ref({
   id: '',
   name: '',
   parentId: 0,
+  beaconMac: '',
+  beacon2Mac: '',
+  ooomapUrl: '',
+  ooomapAppid: '',
+  x: null,
+  y: null,
+  z: null,
   remark: ''
 })
 
@@ -127,6 +155,13 @@ const openAddDialog = () => {
     id: '',
     name: '',
     parentId: 0,
+    beaconMac: '',
+    beacon2Mac: '',
+    ooomapUrl: '',
+    ooomapAppid: '',
+    x: null,
+    y: null,
+    z: null,
     remark: ''
   }
   // 重置当前编辑ID
@@ -146,7 +181,14 @@ const openEditDialog = async (data) => {
   // 确保parentId是数字类型
   form.value = {
     ...data,
-    parentId: Number(data.parentId)
+    parentId: Number(data.parentId),
+    beaconMac: data.beaconMac || '',
+    beacon2Mac: data.beacon2Mac || '',
+    ooomapUrl: data.ooomapUrl || '',
+    ooomapAppid: data.ooomapAppid || '',
+    x: data.x !== undefined ? data.x : null,
+    y: data.y !== undefined ? data.y : null,
+    z: data.z !== undefined ? data.z : null
   }
   dialogVisible.value = true
 }

@@ -7,6 +7,8 @@ public class AssetDTO {
     private Long id;
     private String name;
     private String code;
+    private String typeCode;
+    private String customTypeCode; // 自定义类型编码
     private Long typeId;
     private String typeName; // 资产类型名称
     private Long locationId;
@@ -17,13 +19,15 @@ public class AssetDTO {
     private Long supplierId;
     private String supplierName; // 供应商名称
     private String purchaseDate;
+    private String warehouseDate; // 入库日期
+    private String enableDate; // 启用日期
     private Double price;
     private String status;
     private String statusName; // 资产状态名称
     private String remark;
     private Integer isDeleted;
-    private Long createTime;
-    private Long updateTime;
+    private String createTime;
+    private String updateTime;
     private String image;
     private String labelType;
     private String labelCode;
@@ -37,6 +41,7 @@ public class AssetDTO {
     private String source;
     private String sourceName; // 资产来源名称
     private Double currentValue;
+    private Double accumulatedDepreciationValue; // 已计提折旧价值
     private String unit;
     private String unitName; // 计量单位名称
     private Long creatorId;

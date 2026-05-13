@@ -8,6 +8,9 @@
             <el-button type="primary" @click="openAddDialog">
               <el-icon><Plus /></el-icon> 新增
             </el-button>
+            <el-button type="success" @click="handleImport">
+              <el-icon><Upload /></el-icon> 导入
+            </el-button>
             <el-button type="info" @click="syncRfidTags">
               <el-icon><Refresh /></el-icon> 同步RFID标签
             </el-button>
@@ -92,10 +95,10 @@
       :title="dialogTitle"
       width="70%"
     >
-      <el-form :model="form" label-width="100px">
+      <el-form ref="assetForm" :model="form" label-width="100px" :rules="rules">
         <el-row :gutter="20">
           <el-col :span="8">
-            <el-form-item label="资产名称">
+            <el-form-item label="资产名称" prop="name">
               <el-input v-model="form.name" placeholder="请输入资产名称" />
             </el-form-item>
           </el-col>
@@ -105,7 +108,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="资产类型">
+            <el-form-item label="资产类型" prop="typeCode">
               <el-cascader
                 v-model="form.typeCode"
                 :options="assetTypeTree"
@@ -116,7 +119,12 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="资产位置">
+            <el-form-item label="自定义类型编码">
+              <el-input v-model="form.customTypeCode" placeholder="请输入自定义类型编码" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="资产位置" prop="locationId">
               <el-cascader
                 v-model="form.locationId"
                 :options="assetLocationTree"
@@ -124,6 +132,38 @@
                 placeholder="请选择资产位置"
                 clearable
               />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="状态" prop="status">
+              <el-select v-model="form.status" placeholder="请选择状态">
+                <el-option 
+                  v-for="option in assetStatusOptions" 
+                  :key="option.value" 
+                  :label="option.label" 
+                  :value="option.value" 
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="标签类型" prop="labelType">
+              <el-select v-model="form.labelType" placeholder="请选择标签类型">
+                <el-option label="普通标签" value="普通标签" />
+                <el-option label="RFID标签" value="RFID标签" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="资产来源" prop="source">
+              <el-select v-model="form.source" placeholder="请选择资产来源">
+                <el-option 
+                  v-for="option in assetSourceOptions" 
+                  :key="option.value" 
+                  :label="option.label" 
+                  :value="option.value" 
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -173,6 +213,28 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
+            <el-form-item label="入库日期">
+              <el-date-picker
+                v-model="form.warehouseDate"
+                type="date"
+                placeholder="请选择入库日期"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="启用日期">
+              <el-date-picker
+                v-model="form.enableDate"
+                type="date"
+                placeholder="请选择启用日期"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="价格">
               <el-input v-model="form.price" type="number" placeholder="请输入价格" />
             </el-form-item>
@@ -183,28 +245,13 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="状态">
-              <el-select v-model="form.status" placeholder="请选择状态">
-                <el-option 
-                  v-for="option in assetStatusOptions" 
-                  :key="option.value" 
-                  :label="option.label" 
-                  :value="option.value" 
-                />
-              </el-select>
+            <el-form-item label="已计提折旧价值">
+              <el-input v-model="form.accumulatedDepreciationValue" type="number" placeholder="请输入已计提折旧价值" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="图片">
               <ImageSelector v-model="form.image" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="标签类型">
-              <el-select v-model="form.labelType" placeholder="请选择标签类型">
-                <el-option label="普通标签" value="普通标签" />
-                <el-option label="RFID标签" value="RFID标签" />
-              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -263,18 +310,6 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="资产来源">
-              <el-select v-model="form.source" placeholder="请选择资产来源">
-                <el-option 
-                  v-for="option in assetSourceOptions" 
-                  :key="option.value" 
-                  :label="option.label" 
-                  :value="option.value" 
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="计量单位">
               <el-select v-model="form.unit" placeholder="请选择计量单位">
                 <el-option 
@@ -311,7 +346,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { Plus, Refresh, Printer } from '@element-plus/icons-vue'
+import { Plus, Refresh, Printer, Upload } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/api'
 import { useConfigStore } from '@/stores/config'
@@ -377,17 +412,43 @@ const total = ref(0)
 const configStore = useConfigStore()
 // 图片基础路径
 const imageBaseUrl = computed(() => configStore.imageBaseUrl)
+const assetForm = ref(null)
+
+const rules = {
+  name: [
+    { required: true, message: '请输入资产名称', trigger: 'blur' }
+  ],
+  typeCode: [
+    { required: true, message: '请选择资产类型', trigger: 'change' }
+  ],
+  locationId: [
+    { required: true, message: '请选择资产位置', trigger: 'change' }
+  ],
+  status: [
+    { required: true, message: '请选择状态', trigger: 'change' }
+  ],
+  labelType: [
+    { required: true, message: '请选择标签类型', trigger: 'change' }
+  ],
+  source: [
+    { required: true, message: '请选择资产来源', trigger: 'change' }
+  ]
+}
+
 const form = ref({
   id: '',
   name: '',
   code: '',
   typeCode: null,
-  locationId: null,
-  specification: '',
+    customTypeCode: '',
+    locationId: null,
+    specification: '',
   model: '',
   manufacturer: '',
   supplierId: '',
   purchaseDate: '',
+  warehouseDate: '',
+  enableDate: '',
   price: '',
   status: '',
   remark: '',
@@ -400,7 +461,8 @@ const form = ref({
   sn: '',
   source: '',
   currentValue: '',
-  unit: ''
+    accumulatedDepreciationValue: '',
+    unit: ''
 })
 
 // 加载资产列表
@@ -642,24 +704,28 @@ const openAddDialog = async () => {
     id: '',
     name: '',
     typeCode: null,
+    customTypeCode: '',
     locationId: null,
     specification: '',
     model: '',
     manufacturer: '',
     supplierId: '',
     purchaseDate: '',
+    warehouseDate: '',
+    enableDate: '',
     price: '',
-    status: '',
+    status: 'in_use',
     remark: '',
     image: '',
-    labelType: '',
+    labelType: 'RFID标签',
     labelCode: '',
     adminUserId: '',
     userId: '',
     deptId: '',
     sn: '',
-    source: '',
+    source: 'purchased',
     currentValue: '',
+    accumulatedDepreciationValue: '',
     unit: ''
   }
   dialogVisible.value = true
@@ -691,7 +757,6 @@ const openEditDialog = async (row) => {
   const formData = { ...row }
   // 确保formData中包含typeCode而不是typeId
   if (formData.typeId) {
-    formData.typeCode = formData.typeId
     delete formData.typeId
   }
   form.value = formData
@@ -738,6 +803,9 @@ const copyAsset = async (row) => {
 // 提交表单
 const submitForm = async () => {
   try {
+    // 验证表单
+    await assetForm.value.validate()
+    
     // 处理表单数据，将typeCode和locationId从数组转换为单个值
     const formData = { ...form.value }
     // 处理typeCode：如果是数组且有值，取第一个元素；否则设置为null
@@ -791,8 +859,11 @@ const submitForm = async () => {
     dialogVisible.value = false
     loadAssetList()
   } catch (error) {
-    ElMessage.error('操作失败')
-    console.error('操作失败:', error)
+    // 表单验证失败，错误信息已由Element Plus自动显示
+    if (error.name !== 'Error') {
+      ElMessage.error('操作失败')
+      console.error('操作失败:', error)
+    }
   }
 }
 
@@ -997,6 +1068,40 @@ onMounted(async () => {
   // 加载资产列表
   loadAssetList()
 })
+
+const handleImport = () => {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.xlsx,.xls'
+  input.onchange = async (e) => {
+    const file = e.target.files[0]
+    if (!file) {
+      return
+    }
+    
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    try {
+      const response = await api.post('/asset/import', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      
+      if (response.code === 200) {
+        ElMessage.success(`导入成功，共解析 ${response.data} 条数据`)
+        console.log('导入数据:', response)
+      } else {
+        ElMessage.error(response.msg || '导入失败')
+      }
+    } catch (error) {
+      ElMessage.error('导入失败: ' + (error.message || '未知错误'))
+      console.error('导入失败:', error)
+    }
+  }
+  input.click()
+}
 </script>
 
 <style scoped>

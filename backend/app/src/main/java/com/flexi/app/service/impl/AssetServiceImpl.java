@@ -21,6 +21,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -147,7 +148,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             if (asset != null) {
                 // 更新label_code
                 asset.setLabelCode(labelCode);
-                asset.setUpdateTime(System.currentTimeMillis());
+                asset.setUpdateTime(LocalDateTime.now());
                 // 保存更新
                 baseMapper.updateById(asset);
             }

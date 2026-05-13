@@ -12,7 +12,13 @@ spring:
     port: 6379
     password:
     database: 0
-
+  rabbitmq:
+    host: 192.168.1.91
+    username: rabbitmq
+    password: rabbitmq
+    listener:
+      simple:
+        acknowledge-mode: manual
 
 mybatis-plus:
   type-aliases-package: com.flexi.app.entity
@@ -25,9 +31,21 @@ server:
 flexi:
   jwt:
     secret: flexi_admin_secret_key
-    expiration: 3600000
+    expiration: 36000000
   upload:
     dir: /Users/renjianzhi/appdata/flexi-upload/images
     max-size: 10485760
   security:
     permit-paths: /asset/inventory/save-details
+  multi-tenancy:
+    enabled: true
+    tenant-id-column: tenant_id
+    ignore-tables:
+      - sys_tenant
+      - sys_config
+mqtt:
+  broker-url: tcp://192.168.1.91:1883
+  username: kangcloud-anxingbao
+  password: nutanix/4u
+  client-id: my-springboot-client
+  subscribe-topic: '#'

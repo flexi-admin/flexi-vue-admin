@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import java.util.List;
 
 @Component
 public class SecurityUtils {
@@ -50,5 +51,17 @@ public class SecurityUtils {
             }
         }
         return null;
+    }
+
+    public static boolean hasAuthority(String authority) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof CustomUserDetails) {
+                List<String> authorities = ((CustomUserDetails) principal).getAuthorityStrings();
+                return authorities != null && authorities.contains(authority);
+            }
+        }
+        return false;
     }
 }

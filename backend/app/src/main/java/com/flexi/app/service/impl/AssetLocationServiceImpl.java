@@ -35,6 +35,13 @@ public class AssetLocationServiceImpl extends ServiceImpl<AssetLocationMapper, A
         tree.setLevel(location.getLevel());
         tree.setRemark(location.getRemark());
         tree.setStatus(location.getStatus());
+        tree.setBeaconMac(location.getBeaconMac());
+        tree.setBeacon2Mac(location.getBeacon2Mac());
+        tree.setOoomapUrl(location.getOoomapUrl());
+        tree.setOoomapAppid(location.getOoomapAppid());
+        tree.setX(location.getX());
+        tree.setY(location.getY());
+        tree.setZ(location.getZ());
         tree.setCreateTime(location.getCreateTime());
         tree.setUpdateTime(location.getUpdateTime());
         return tree;

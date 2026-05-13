@@ -16,6 +16,14 @@ public class AssetLocation {
     private Integer level;
     private String remark;
     private Integer status;
+    private String beaconMac;
+    private String beacon2Mac;
+    private String ooomapUrl;
+    private String ooomapAppid;
+    private Double x;
+    private Double y;
+    private Double z;
+    private Long tenantId;
     private Long createTime;
     private Long updateTime;
 }
